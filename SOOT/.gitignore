@@ -1,0 +1,6 @@
+src/class_names.h
+.*.swp
+.*.swo
+*~
+*.bak
+*.o
