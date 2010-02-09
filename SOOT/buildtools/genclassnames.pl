@@ -13,8 +13,8 @@ print $h_oh <<HERE;
 #define __soot_classnames_h_
 
 namespace SOOT {
-  extern unsigned int gNClassNames;
-  extern char* gClassNames[$nClassNames];
+  extern const unsigned int gNClassNames;
+  extern const char* gClassNames[$nClassNames];
 } // end namespace SOOT
 #endif
 HERE
@@ -23,8 +23,8 @@ print $cc_oh <<HERE;
 #include "SOOTClassnames.h"
 
 namespace SOOT {
-  unsigned int gNClassNames = $nClassNames;
-  char* gClassNames[$nClassNames] = {
+  const unsigned int gNClassNames = $nClassNames;
+  const char* gClassNames[$nClassNames] = {
 HERE
 
 print $cc_oh qq{    "$_",\n} for qw(TObject TH1 TH1D);

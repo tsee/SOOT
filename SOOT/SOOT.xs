@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 
-#include "SOOTClassnames.h"
+#include "ClassGenerator.h"
 #include <iostream>
 #include <string>
 
