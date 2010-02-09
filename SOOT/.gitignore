@@ -1,4 +1,4 @@
-src/class_names.h
+src/soot_classnames.h
 .*.swp
 .*.swo
 *~

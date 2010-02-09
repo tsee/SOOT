@@ -1,9 +1,13 @@
 use 5.010000;
 use ExtUtils::MakeMaker;
+use File::Spec;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
 my $CC = 'g++';
+
+# todo move to later build stage
+system($^X, File::Spec->catfile('buildtools', 'genclassnames.pl')) and die $!;
 
 WriteMakefile(
     NAME              => 'SOOT',
@@ -23,7 +27,7 @@ WriteMakefile(
     'LD'                => '$(CC)',
     META_MERGE => { no_index => { directory => 'buildtools', }, },
     clean => {
-      FILES => "src/class_names.h",
+      FILES => "src/soot_classnames.h",
     },
 );
 
