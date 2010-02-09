@@ -12,7 +12,7 @@ print $oh <<HERE;
 
 namespace SOOT {
   const unsigned int gNClassNames = $nClassNames;
-  char* gClassNames[gNClassNames] = {
+  const char* gClassNames[gNClassNames] = {
 HERE
 
 print $oh qq{    "$_",\n} for qw(TObject TH1 TH1D);
