@@ -14,10 +14,16 @@ extern "C" {
 
 
 #include "soot_classnames.h"
+#include <iostream>
+#include <string>
 
 using namespace SOOT;
+using namespace std;
 
 MODULE = SOOT		PACKAGE = SOOT
 
+INCLUDE: XS/SOOTBOOT.xs
+
 INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp SOOT.xsp
+
 
