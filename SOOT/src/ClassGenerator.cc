@@ -1,11 +1,13 @@
 
 #include "ClassGenerator.h"
-#include "soot_classnames.h"
+#include "SOOTClassnames.h"
 
 using namespace SOOT;
 
 ClassGenerator::ClassGenerator()
-  : fOwnsClassNames(false), fClassNames(gClassNames),
-    fNClassNames(gNClassNames)
+  : fOwnsClassNames(false),
+    fNClassNames(SOOT::gNClassNames)
 {
+  fClassNames = (char**) SOOT::gClassNames;
 }
+

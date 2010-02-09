@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 
-#include "soot_classnames.h"
+#include "SOOTClassnames.h"
 #include <iostream>
 #include <string>
 
