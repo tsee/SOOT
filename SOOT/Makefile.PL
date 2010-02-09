@@ -22,6 +22,8 @@ WriteMakefile(
     'CC'                => $CC,
     'LD'                => '$(CC)',
     META_MERGE => { no_index => { directory => 'buildtools', }, },
-
+    clean => {
+      FILES => "src/class_names.h",
+    },
 );
 
