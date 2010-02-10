@@ -62,9 +62,16 @@ MODULE = SOOT		PACKAGE = SOOT
 
 void
 CallMethod(className, methodName, argv)
-    SV* className
-    SV* methodName
+    const char* className
+    const char* methodName
     SV* argv
+  INIT:
+    STRLEN len;
+    AV* arguments;
   CODE:
+    /* not a reference to an array of arguments? */
+    if (!SvROK(argv) || SvTYPE(SvRV(argv)) != SVt_PVAV)
+      croak("Need array reference as third argument");
+    arguments = (AV*)SvRV(argv);
     XSRETURN_UNDEF;
 
