@@ -6,6 +6,12 @@ use ExtUtils::MakeMaker;
 
 # simply a container for multiple Makefile.PL's configuration
 
+sub striprun {
+  my $inc = `@_`;
+  chomp $inc;
+  return $inc;
+}
+
 our $CC = 'g++';
 
 our @Libs = qw(
@@ -18,6 +24,7 @@ our @Typemaps = qw(
 
 sub GetMMArgs {
   my $subdir = shift;
+
   my @typemaps;
   my @inc;
   if ($subdir eq '.') {
@@ -28,8 +35,18 @@ sub GetMMArgs {
     @inc = qw(. ..);
     @typemaps = map {File::Spec->catdir(File::Spec->updir, $_)} @Typemaps;
   }
+  if (defined $ENV{ROOTSYS}) {
+    push @inc, File::Spec->catdir($ENV{ROOTSYS}, 'include'),
+               File::Spec->catdir($ENV{ROOTSYS}, 'include', 'root');
+  }
+  
+  my @libs = @Libs;
+  push @libs, striprun('root-config --libs');
+
+  use Config;
   my @mmargs = (
-      LIBS              => \@Libs, # e.g., '-lm'
+      LDDLFLAGS => $Config::Config{lddlflags} . ' ' . striprun('root-config --ldflags'),
+      LIBS              => join(' ', @libs), # e.g., '-lm'
       DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
       #INC               => '-I. -Isrc', # e.g., '-I. -I/usr/include/other'
       OBJECT            => '$(O_FILES)', # link all the C files too
@@ -37,7 +54,7 @@ sub GetMMArgs {
       'TYPEMAPS'          => \@typemaps,
       'CC'                => $CC,
       'LD'                => '$(CC)',
-      'INC' => join(' ', map {"-I$_"} @inc),
+      'INC' => striprun('root-config --cflags') . ' ' . join(' ', map {"-I$_"} @inc),
   );
   return @mmargs;
 }
