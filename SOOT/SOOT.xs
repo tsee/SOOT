@@ -1,4 +1,13 @@
 
+/* must load ROOT crap veeery early due to pollution */
+#undef Copy
+
+#include <TROOT.h>
+#include <Reflex/Scope.h>
+
+#include "ClassGenerator.h"
+#include "ROOTResolver.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,14 +21,14 @@ extern "C" {
 }
 #endif
 
-
-#include "ClassGenerator.h"
 #include <iostream>
 #include <string>
 #include <cstring>
 
 using namespace SOOT;
 using namespace std;
+
+SOOT::ROOTResolver gResolver;
 
 /*
 void
@@ -49,6 +58,7 @@ AUTOLOAD(...)
     sv_2mortal(method_name);
     XSRETURN_UNDEF;
 */
+
 
 MODULE = SOOT		PACKAGE = SOOT
 

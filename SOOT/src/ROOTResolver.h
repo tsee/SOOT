@@ -1,6 +1,9 @@
 
-#ifndef __MethodResolver_h_
-#define __MethodResolver_h_
+#ifndef __ROOTResolver_h_
+#define __ROOTResolver_h_
+
+#include <TROOT.h>
+#include <Reflex/Scope.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,20 +14,15 @@ extern "C" {
 #include "ppport.h"
 #undef do_open
 #undef do_close
-#undef Copy
-#undef Size_t
-#undef Stat_t
-#undef Atof
-#undef STATIC
 #ifdef __cplusplus
 }
 #endif
 
 namespace SOOT {
-  class MethodResolver {
+  class ROOTResolver {
     public:
-      MethodResolver() {};
-      ~MethodResolver() {};
+      ROOTResolver() {};
+      ~ROOTResolver() {};
       
       void FindMethod(pTHX_ char* className, char* methName, AV* args) const;
   };
