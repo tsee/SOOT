@@ -65,7 +65,9 @@ AUTOLOAD(...)
 
 
 
-/* lifted from autobox */
+/* Lifted from autobox. My eternal gratitude goes to the
+ * ever impressive Chocolateboy!
+ */
 
 #define SOOT_TYPE_RETURN(type) STMT_START { *len = (sizeof(type) - 1); return type; } STMT_END
 
