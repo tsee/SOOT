@@ -3,6 +3,7 @@
 #undef Copy
 
 #include <TROOT.h>
+#include <TClass.h>
 #include <Reflex/Scope.h>
 
 #include "ClassGenerator.h"
@@ -72,8 +73,8 @@ MODULE = SOOT		PACKAGE = SOOT
 
 void
 CallMethod(className, methodName, argv)
-    const char* className
-    const char* methodName
+    char* className
+    char* methodName
     SV* argv
   INIT:
     STRLEN len;
@@ -83,5 +84,6 @@ CallMethod(className, methodName, argv)
     if (!SvROK(argv) || SvTYPE(SvRV(argv)) != SVt_PVAV)
       croak("Need array reference as third argument");
     arguments = (AV*)SvRV(argv);
+    gResolver.FindMethod(aTHX_ className, methodName, arguments);
     XSRETURN_UNDEF;
 
