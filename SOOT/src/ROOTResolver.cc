@@ -61,10 +61,11 @@ namespace SOOT {
         if (SvVOK(sv))
           return eINVALID; // VSTRING
 #endif
-        if (SvROK(sv))
+        if (SvROK(sv)) {
           return eREF;
-        else
+        } else {
           return eSTRING;
+        }
       case SVt_PVLV:
         if (SvROK(sv))
           return eREF;
@@ -75,18 +76,20 @@ namespace SOOT {
             return eFLOAT;
           else
             return eSTRING;
-        } else
+        } else {
+          cout << "lval"<<endl;
           return eINVALID; // LVALUE
+        }
       case SVt_PVAV:
-        return eARRAY;
       case SVt_PVHV:
-        return eHASH;
       case SVt_PVCV:
-        return eCODE;
+        //return eARRAY;
+        //return eHASH;
+        //return eCODE;
+        return eINVALID;
       case SVt_PVGV: // GLOB
       case SVt_PVFM: // FORMAT
       case SVt_PVIO: // IO
-        return eINVALID;
 #ifdef SVt_BIND
       case SVt_BIND:
         return eINVALID; // BIND
@@ -96,7 +99,20 @@ namespace SOOT {
         return eINVALID; // REGEXP
 #endif
       default:
-        return eINVALID; // UNKNOWN
+        if (SvROK(sv)) {
+          switch (SvTYPE(SvRV(sv))) {
+            case SVt_PVAV:
+              return eARRAY;
+            case SVt_PVHV:
+              return eHASH;
+            case SVt_PVCV:
+              return eCODE;
+            default:
+              return eREF;
+          }
+        } else {
+          return eINVALID; // UNKNOWN
+        }
     }
   }
 
@@ -116,7 +132,7 @@ ROOTResolver::FindMethod(pTHX_ const char* className, const char* methName, AV* 
   }
   /*
    * Strategy:
-   * - Is it a class or method call?
+   * - Is it a class or object method call?
    *   => type of first argument is REF and 
    */
 }

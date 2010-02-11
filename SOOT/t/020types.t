@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 16;
 use SOOT;
 pass();
 
@@ -29,4 +29,7 @@ $foo = (.2*3.3)."";
 is(SOOT::type($foo), "STRING");
 is(SOOT::type($foo*$foo), "FLOAT");
 
-
+is(SOOT::type([]), 'ARRAY');
+is(SOOT::type({}), 'HASH');
+is(SOOT::type(sub {}), 'CODE');
+is(SOOT::type(\1), 'REF');
