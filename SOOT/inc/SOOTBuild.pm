@@ -14,8 +14,7 @@ sub striprun {
 
 our $CC = 'g++';
 
-our @Libs = qw(
-);
+our @Libs = qw();
 
 our @Typemaps = qw(
   perlobject.map
@@ -41,7 +40,7 @@ sub GetMMArgs {
   }
   
   my @libs = @Libs;
-  push @libs, striprun('root-config --libs');
+  push @libs, striprun('root-config --libs'), '-lReflex -lReflexDict';
 
   use Config;
   my @mmargs = (
