@@ -40,7 +40,7 @@ sub GetMMArgs {
   }
   
   my @libs = @Libs;
-  push @libs, striprun('root-config --libs'), '-lReflex -lReflexDict';
+  push @libs, striprun('root-config --libs');
 
   use Config;
   my @mmargs = (

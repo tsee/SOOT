@@ -8,7 +8,6 @@
 
 using namespace SOOT;
 using namespace std;
-using namespace ROOT::Reflex;
 
 namespace SOOT {
   const char* gBasicTypeStrings[9] = {
@@ -26,6 +25,9 @@ namespace SOOT {
     5,7,5,6,3,5,4,4,7
   };
 
+  /* Lifted from autobox. My eternal gratitude goes to the
+   * ever impressive Chocolateboy!
+   */
   SOOT::BasicType
   GuessType(pTHX_ SV* const sv) {
     switch (SvTYPE(sv)) {
@@ -100,22 +102,10 @@ namespace SOOT {
 
 } // end namespace SOOT
 
-/* Lifted from autobox. My eternal gratitude goes to the
- * ever impressive Chocolateboy!
- */
-
-
 void
 ROOTResolver::FindMethod(pTHX_ const char* className, const char* methName, AV* args)
   const
 {
-  Scope scope = ROOT::Reflex::Scope::ByName(className);
-  if (scope.IsClass()) {
-    cout << className << " is a class" << endl;
-  }
-  else {
-    cout << className << " is not a class" << endl;
-  }
   TClass *c = TClass::GetClass(className);
   if (c) {
     cout << className << " available as TClass" << endl;
