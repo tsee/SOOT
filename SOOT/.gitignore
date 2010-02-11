@@ -10,3 +10,4 @@ Makefile.bak
 pm_to_blib
 SOOT.bs
 SOOT.c
+*.bs
