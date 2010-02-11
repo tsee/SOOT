@@ -3,6 +3,7 @@
 #define __ROOTResolver_h_
 
 #include <TROOT.h>
+#include <TClass.h>
 #include <Reflex/Scope.h>
 
 #ifdef __cplusplus
@@ -24,7 +25,7 @@ namespace SOOT {
       ROOTResolver() {};
       ~ROOTResolver() {};
       
-      void FindMethod(pTHX_ char* className, char* methName, AV* args) const;
+      void FindMethod(pTHX_ const char* className, const char* methName, AV* args) const;
   };
 } // end namespace SOOT
 
