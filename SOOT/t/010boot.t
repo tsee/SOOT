@@ -6,5 +6,7 @@ pass();
 is_deeply(\@TObject::ISA, ["SOOT::Base"]);
 
 TObject->Foo();
+TH1D->Foo();
+TAdvancedGraphicsDialog->DoesntExist();
 pass("alive");
 
