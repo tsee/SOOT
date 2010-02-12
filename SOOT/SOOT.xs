@@ -71,7 +71,7 @@ INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp SOOT.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 
-void
+SV*
 CallMethod(className, methodName, argv)
     char* className
     char* methodName
@@ -100,12 +100,8 @@ CallMethod(className, methodName, argv)
     if (!SvROK(argv) || SvTYPE(SvRV(argv)) != SVt_PVAV)
       croak("Need array reference as third argument");
     arguments = (AV*)SvRV(argv);
-    gResolver.FindMethod(aTHX_ className, methodName, arguments);
-    /*const unsigned int lastArg = av_len(arguments);
-    for (unsigned int iArg = 0; iArg <= lastArg; ++iArg) {
-      const char* cproto = SOOT::CProtoFromType();
-    }*/
-    XSRETURN_UNDEF;
+    RETVAL = gResolver.CallMethod(aTHX_ className, methodName, arguments);
+  OUTPUT: RETVAL
 
 SV*
 type(sv)

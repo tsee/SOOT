@@ -210,18 +210,20 @@ namespace SOOT {
 
 
 
-void
-ROOTResolver::FindMethod(pTHX_ const char* className, const char* methName, AV* args)
+SV*
+ROOTResolver::CallMethod(pTHX_ const char* className, const char* methName, AV* args)
   const
 {
-  TClass *c = TClass::GetClass(className);
-  if (c) {
+  TClass* c = TClass::GetClass(className);
+  if (c == NULL)
+    croak("Can't locate object method \"%s\" via package \"%s\"",
+          methName, className);
+  else {
     cout << className << " available as TClass" << endl;
     cout << "TClass has name " << c->GetName() << endl;
   }
-  else {
-    cout << className << " not available as TClass" << endl;
-  }
+
+  return &PL_sv_undef;
 }
 
 
@@ -233,4 +235,10 @@ ROOTResolver::EncapsulateObject(pTHX_ TObject* theROOTObject, const char* classN
   sv_setref_pv(ref, className, (void*)theROOTObject );
   return ref;
 }
+
+
+    /*const unsigned int lastArg = av_len(arguments);
+    for (unsigned int iArg = 0; iArg <= lastArg; ++iArg) {
+      const char* cproto = SOOT::CProtoFromType();
+    }*/
 
