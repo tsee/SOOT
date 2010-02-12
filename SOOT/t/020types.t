@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 26;
+use Test::More tests => 27;
 use SOOT;
 pass();
 
@@ -58,3 +58,7 @@ $obj = bless({} => 'TObject');
 is(SOOT::type($obj), 'TOBJECT');
 $obj = bless({} => 'TH1D');
 is(SOOT::type($obj), 'TOBJECT');
+
+$obj = bless({} => 'Something::Else');
+is(SOOT::type($obj), 'HASH');
+
