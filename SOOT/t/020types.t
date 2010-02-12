@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 16;
+use Test::More tests => 26;
 use SOOT;
 pass();
 
@@ -33,3 +33,28 @@ is(SOOT::type([]), 'ARRAY');
 is(SOOT::type({}), 'HASH');
 is(SOOT::type(sub {}), 'CODE');
 is(SOOT::type(\1), 'REF');
+is(SOOT::type(\$foo), 'REF');
+
+my $scalar;
+my $obj;
+$obj = bless(\$scalar => 'SOOT::Base');
+is(SOOT::type($obj), 'TOBJECT');
+$obj = bless(\$scalar => 'TObject');
+is(SOOT::type($obj), 'TOBJECT');
+$obj = bless(\$scalar => 'TH1D');
+is(SOOT::type($obj), 'TOBJECT');
+
+$obj = bless([] => 'SOOT::Base');
+is(SOOT::type($obj), 'TOBJECT');
+$obj = bless([] => 'TObject');
+is(SOOT::type($obj), 'TOBJECT');
+$obj = bless([] => 'TH1D');
+is(SOOT::type($obj), 'TOBJECT');
+
+
+$obj = bless({} => 'SOOT::Base');
+is(SOOT::type($obj), 'TOBJECT');
+$obj = bless({} => 'TObject');
+is(SOOT::type($obj), 'TOBJECT');
+$obj = bless({} => 'TH1D');
+is(SOOT::type($obj), 'TOBJECT');

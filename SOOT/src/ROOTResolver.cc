@@ -10,15 +10,16 @@ using namespace SOOT;
 using namespace std;
 
 namespace SOOT {
-  const char* gBasicTypeStrings[9] = {
+  const char* gBasicTypeStrings[10] = {
     "UNDEF",
     "INTEGER",
     "FLOAT",
     "STRING",
-    "REF",
     "ARRAY",
     "HASH",
     "CODE",
+    "REF",
+    "TOBJECT",
     "INVALID",
   };
   const char* gCompositeTypeStrings[4] = {
@@ -27,6 +28,8 @@ namespace SOOT {
     "STRING_ARRAY",
     "INVALID_ARRAY",
   };
+
+#define IS_TOBJECT(sv) (sv_derived_from((sv), "SOOT::Base"))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -59,7 +62,6 @@ namespace SOOT {
       case SVt_RV:
 #endif
       case SVt_PV:
-      case SVt_PVMG:
 #ifdef SvVOK
         if (SvVOK(sv))
           return eINVALID; // VSTRING
@@ -69,9 +71,19 @@ namespace SOOT {
         } else {
           return eSTRING;
         }
+      case SVt_PVMG:
+#ifdef SvVOK
+        if (SvVOK(sv))
+          return eINVALID; // VSTRING
+#endif
+        if (SvROK(sv)) {
+          return IS_TOBJECT(sv) ? eTOBJECT : eREF;
+        } else {
+          return eSTRING;
+        }
       case SVt_PVLV:
         if (SvROK(sv))
-          return eREF;
+          return IS_TOBJECT(sv) ? eTOBJECT : eREF;
         else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
           if (SvIOK(sv))
             return eINTEGER;
@@ -103,6 +115,8 @@ namespace SOOT {
 #endif
       default:
         if (SvROK(sv)) {
+          if (IS_TOBJECT(sv))
+            return eTOBJECT;
           switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
               return eARRAY;
