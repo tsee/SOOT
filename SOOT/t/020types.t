@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 24;
+use Test::More tests => 29;
 use SOOT;
 pass();
 
@@ -29,7 +29,7 @@ $foo = (.2*3.3)."";
 is(SOOT::type($foo), "STRING");
 is(SOOT::type($foo*$foo), "FLOAT");
 
-is(SOOT::type([]), 'ARRAY');
+is(SOOT::type([]), 'INVALID_ARRAY');
 is(SOOT::type({}), 'HASH');
 is(SOOT::type(sub {}), 'CODE');
 is(SOOT::type(\1), 'REF');
@@ -56,3 +56,10 @@ is(SOOT::type($obj), 'TOBJECT');
 $obj = bless({} => 'Something::Else');
 is(SOOT::type($obj), 'HASH');
 
+is(SOOT::type(['a', 12]), 'STRING_ARRAY');
+is(SOOT::type([123, 1.3, ""]), 'INTEGER_ARRAY');
+is(SOOT::type([123.2, 1.3, ""]), 'FLOAT_ARRAY');
+
+is(SOOT::type(bless ['a', 12] => 'TH1D'), 'TOBJECT');
+
+pass("REACHED END");
