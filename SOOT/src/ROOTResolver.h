@@ -31,8 +31,14 @@ namespace SOOT {
     eCODE,
     eINVALID,
   };
-  extern const STRLEN gBasicTypeStringsLen[9];
+  enum CompositeType {
+    eA_INTEGER = 0,
+    eA_FLOAT,
+    eA_STRING,
+    eA_INVALID,
+  };
   extern const char* gBasicTypeStrings[9];
+  extern const char* gCompositeTypeStrings[4];
 
   BasicType GuessType(pTHX_ SV* const sv);
   

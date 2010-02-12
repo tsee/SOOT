@@ -95,5 +95,6 @@ type(sv)
   PPCODE:
     dXSTARG;
     type = GuessType(aTHX_ sv);
-    XPUSHp(SOOT::gBasicTypeStrings[type], SOOT::gBasicTypeStringsLen[type]);
+    const char* type_str = SOOT::gBasicTypeStrings[type];
+    XPUSHp(type_str, strlen(type_str));
 

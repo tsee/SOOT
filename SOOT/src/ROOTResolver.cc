@@ -21,8 +21,11 @@ namespace SOOT {
     "CODE",
     "INVALID",
   };
-  const STRLEN gBasicTypeStringsLen[9] = {
-    5,7,5,6,3,5,4,4,7
+  const char* gCompositeTypeStrings[4] = {
+    "INTERGER_ARRAY",
+    "FLOAT_ARRAY",
+    "STRING_ARRAY",
+    "INVALID_ARRAY",
   };
 
   /* Lifted from autobox. My eternal gratitude goes to the
