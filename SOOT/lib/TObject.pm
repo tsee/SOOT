@@ -9,6 +9,7 @@ sub AUTOLOAD {
   SOOT::CallMethod($AUTOLOAD, $method, \@_);
 }
 
+sub DESTROY () {}
 
 1;
 
