@@ -279,16 +279,8 @@ ROOTResolver::CallMethod(pTHX_ const char* className, const char* methName, AV* 
   if (theMethod == NULL)
     croak("Can't locate object method \"%s\" via package \"%s\"",
           methName, className);
-  cout << "still here"<<endl;
-  cout << theMethod->GetReturnTypeName() << endl;
-  cout << "still here"<<endl;
-  cout << theMethod->GetName() << "(";
-  cout << "still here"<<endl;
-  cout << theMethod->GetPrototype();
-  cout << "still here"<<endl;
-  cout << ")" << endl;
-  cout << "still here"<<endl;
-
+  const char* retType = theMethod->GetReturnTypeName();
+  cout << theMethod->GetPrototype() << endl;
   return &PL_sv_undef;
 }
 
