@@ -61,7 +61,11 @@ namespace SOOT {
       ~ROOTResolver() {};
       
       void FindMethod(pTHX_ const char* className, const char* methName, AV* args) const;
-    
+
+      /** Creates a new Perl object which is a reference to a scalar blessed into
+       *  the class. The scalar itself holds a pointer to the ROOT object.
+       */
+      SV* EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className) const;
   };
 } // end namespace SOOT
 

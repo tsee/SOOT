@@ -224,3 +224,13 @@ ROOTResolver::FindMethod(pTHX_ const char* className, const char* methName, AV* 
   }
 }
 
+
+SV*
+ROOTResolver::EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className)
+  const
+{
+  SV* ref = newSV(0);
+  sv_setref_pv(ref, className, (void*)theROOTObject );
+  return ref;
+}
+
