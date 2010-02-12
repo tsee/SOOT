@@ -138,8 +138,27 @@ namespace SOOT {
   SOOT::CompositeType
   GuessCompositeType(pTHX_ SV* const sv)
   {
-    // TODO implement
-    return eA_INVALID;
+    // sv is known to be an RV to an AV
+    // We'll base the array type on the FIRST element of the
+    // array only. After all we can (potentially with warnings) convert
+    // any of the basic types to any other.
+    AV* av = (AV*)SvRV(sv);
+    const int lastElem = av_len(av);
+    if (lastElem < 0) // empty
+      return eA_INVALID;
+    SV** elem = av_fetch(av, 0, 0);
+    if (elem == NULL)
+      return eA_INVALID;
+    switch (GuessType(aTHX_ *elem)) {
+      case eINTEGER:
+        return eA_INTEGER;
+      case eFLOAT:
+        return eA_FLOAT;
+      case eSTRING:
+        return eA_STRING;
+      default:
+        return eA_INVALID;
+    }
   }
 
   const char*
@@ -158,27 +177,26 @@ namespace SOOT {
         tmp = std::string(sv_reftype(SvRV(sv), TRUE)) + std::string("*");
         len = tmp.length();
         return tmp.c_str();
-        break;
       case eINTEGER:
         len = 3;
         return "int";
-        break;
       case eFLOAT:
         len = 6;
         return "double";
-        break;
       case eSTRING:
         len = 5;
         return "char*";
-        break;
       case eARRAY:
-        // FIXME: infer array type
         switch (GuessCompositeType(aTHX_ sv)) {
           case eA_INTEGER:
+            len = 4;
+            return "int*";
           case eA_FLOAT:
+            len = 7;
+            return "double*";
           case eA_STRING:
-          default:
-            break;
+            len = 6;
+            return "char**";
         }
         len = 0;
         return NULL;
