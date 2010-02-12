@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 24;
+use Test::More tests => 29;
 use SOOT;
 pass();
 
@@ -56,3 +56,10 @@ is(SOOT::cproto($obj), 'TH1D*');
 $obj = bless({} => 'Something::Else');
 is(SOOT::cproto($obj), undef);
 
+is(SOOT::cproto(['a', 12]), 'char**');
+is(SOOT::cproto([123, 1.3, ""]), 'int*');
+is(SOOT::cproto([123.2, 1.3, ""]), 'double*');
+
+is(SOOT::cproto(bless ['a', 12] => 'TH1D'), 'TH1D*');
+
+pass("REACHED END");
