@@ -35,7 +35,8 @@ namespace SOOT {
    * ever impressive Chocolateboy!
    */
   SOOT::BasicType
-  GuessType(pTHX_ SV* const sv) {
+  GuessType(pTHX_ SV* const sv)
+  {
     switch (SvTYPE(sv)) {
       case SVt_NULL:
         return eUNDEF;
@@ -133,7 +134,62 @@ namespace SOOT {
     }
   }
 
+
+  SOOT::CompositeType
+  GuessCompositeType(pTHX_ SV* const sv)
+  {
+    // TODO implement
+    return eA_INVALID;
+  }
+
+  const char*
+  CProtoFromType(pTHX_ SV* const sv, STRLEN& len)
+  {
+    return CProtoFromType(aTHX_ sv, len, GuessType(aTHX_ sv));
+  }
+
+  const char*
+  CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type)
+  {
+    // TODO figure out references vs. pointers
+    switch (type) {
+      case eTOBJECT:
+        // TODO fetch C++ class name from blessed SV
+        len = 0;
+        return NULL;
+        break;
+      case eINTEGER:
+        len = 3;
+        return "int";
+        break;
+      case eFLOAT:
+        len = 6;
+        return "double";
+        break;
+      case eSTRING:
+        len = 5;
+        return "char*";
+        break;
+      case eARRAY:
+        // FIXME: infer array type
+        switch (GuessCompositeType(aTHX_ sv)) {
+          case eA_INTEGER:
+          case eA_FLOAT:
+          case eA_STRING:
+          default:
+            break;
+        }
+        len = 0;
+        return NULL;
+        break;
+      default:
+        len = 0;
+        return NULL;
+    }
+  }
 } // end namespace SOOT
+
+
 
 void
 ROOTResolver::FindMethod(pTHX_ const char* className, const char* methName, AV* args)
@@ -147,10 +203,5 @@ ROOTResolver::FindMethod(pTHX_ const char* className, const char* methName, AV* 
   else {
     cout << className << " not available as TClass" << endl;
   }
-  /*
-   * Strategy:
-   * - Is it a class or object method call?
-   *   => type of first argument is REF and 
-   */
 }
 

@@ -80,6 +80,22 @@ CallMethod(className, methodName, argv)
     STRLEN len;
     AV* arguments;
   CODE:
+  /*
+   * Strategy:
+   * - Is it a class or object method call?
+   *   => if first argument is an eSTRING, it's a class method call
+   *   => otherwise, object method (double check with eTOBJECT)
+   * - If it's a class method, check for constructor
+   * - convert parameters to cproto
+   * - resolve method via CINT
+   * - resolve return type via CINT
+   * - caching?
+   * - convert arguments to state suitebable for CINT
+   * - call method
+   * - convert return type to SV*
+   * - return
+   * 
+   */
     /* not a reference to an array of arguments? */
     if (!SvROK(argv) || SvTYPE(SvRV(argv)) != SVt_PVAV)
       croak("Need array reference as third argument");

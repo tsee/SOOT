@@ -42,6 +42,10 @@ namespace SOOT {
   extern const char* gCompositeTypeStrings[4];
 
   BasicType GuessType(pTHX_ SV* const sv);
+  CompositeType GuessCompositeType(pTHX_ SV* const sv);
+
+  const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type);
+  const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len);
   
   class ROOTResolver {
     public:
