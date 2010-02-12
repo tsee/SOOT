@@ -23,7 +23,7 @@ namespace SOOT {
     "INVALID",
   };
   const char* gCompositeTypeStrings[4] = {
-    "INTERGER_ARRAY",
+    "INTEGER_ARRAY",
     "FLOAT_ARRAY",
     "STRING_ARRAY",
     "INVALID_ARRAY",
