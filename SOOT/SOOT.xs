@@ -101,6 +101,10 @@ CallMethod(className, methodName, argv)
       croak("Need array reference as third argument");
     arguments = (AV*)SvRV(argv);
     gResolver.FindMethod(aTHX_ className, methodName, arguments);
+    /*const unsigned int lastArg = av_len(arguments);
+    for (unsigned int iArg = 0; iArg <= lastArg; ++iArg) {
+      const char* cproto = SOOT::CProtoFromType();
+    }*/
     XSRETURN_UNDEF;
 
 SV*
@@ -113,4 +117,16 @@ type(sv)
     type = GuessType(aTHX_ sv);
     const char* type_str = SOOT::gBasicTypeStrings[type];
     XPUSHp(type_str, strlen(type_str));
+
+SV*
+cproto(sv)
+    SV* sv
+  INIT:
+    SOOT::BasicType type;
+  PPCODE:
+    dXSTARG;
+    type = GuessType(aTHX_ sv);
+    STRLEN len;
+    const char* cproto = CProtoFromType(aTHX_ sv, len, type);
+    XPUSHp(cproto, len);
 

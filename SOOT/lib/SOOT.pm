@@ -6,7 +6,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
-require SOOT::Base;
+require TObject;
 
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);

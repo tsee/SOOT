@@ -22,10 +22,12 @@ ClassGenerator::Generate(pTHX)
 
 void
 ClassGenerator::MakeClass(pTHX_ const char* className) {
-  ostringstream str;
-  str << className << "::ISA";
-  AV* isa = get_av(str.str().c_str(), 1);
-  av_clear(isa);
-  av_push(isa, newSVpvs("SOOT::Base"));
+  if (strNE(className, "TObject")) {
+    ostringstream str;
+    str << className << "::ISA";
+    AV* isa = get_av(str.str().c_str(), 1);
+    av_clear(isa);
+    av_push(isa, newSVpvs("TObject"));
+  }
 }
 

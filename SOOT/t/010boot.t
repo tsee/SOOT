@@ -3,7 +3,7 @@ use warnings;
 use Test::More tests => 3;
 use SOOT;
 pass();
-is_deeply(\@TObject::ISA, ["SOOT::Base"]);
+is_deeply(\@TH1D::ISA, ["TObject"]);
 
 TObject->Foo();
 TH1D->Foo();

@@ -29,7 +29,7 @@ namespace SOOT {
     "INVALID_ARRAY",
   };
 
-#define IS_TOBJECT(sv) (sv_derived_from((sv), "SOOT::Base"))
+#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject"))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -151,12 +151,13 @@ namespace SOOT {
   const char*
   CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type)
   {
+    std::string tmp;
     // TODO figure out references vs. pointers
     switch (type) {
       case eTOBJECT:
-        // TODO fetch C++ class name from blessed SV
-        len = 0;
-        return NULL;
+        tmp = std::string(sv_reftype(SvRV(sv), TRUE)) + std::string("*");
+        len = tmp.length();
+        return tmp.c_str();
         break;
       case eINTEGER:
         len = 3;

@@ -1,4 +1,4 @@
-package SOOT::Base;
+package TObject;
 use strict;
 use warnings;
 use vars qw/$AUTOLOAD/;
