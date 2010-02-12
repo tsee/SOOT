@@ -35,6 +35,7 @@ namespace SOOT {
     eTOBJECT,
     eINVALID,
   };
+  extern const char* gBasicTypeStrings[10];
   /** "Second level" nested types.
    */
   enum CompositeType {
@@ -43,7 +44,6 @@ namespace SOOT {
     eA_STRING,
     eA_INVALID,
   };
-  extern const char* gBasicTypeStrings[10];
   extern const char* gCompositeTypeStrings[4];
 
   /// Determine and return the BasicType of the given parameter
