@@ -20,6 +20,9 @@ extern "C" {
 #endif
 
 namespace SOOT {
+  /** The various types of variables that matter to the ROOT
+   * prototype guessing.
+   */
   enum BasicType {
     eUNDEF = 0,
     eINTEGER,
@@ -32,6 +35,8 @@ namespace SOOT {
     eTOBJECT,
     eINVALID,
   };
+  /** "Second level" nested types.
+   */
   enum CompositeType {
     eA_INTEGER = 0,
     eA_FLOAT,
@@ -41,9 +46,12 @@ namespace SOOT {
   extern const char* gBasicTypeStrings[10];
   extern const char* gCompositeTypeStrings[4];
 
+  /// Determine and return the BasicType of the given parameter
   BasicType GuessType(pTHX_ SV* const sv);
+  /// GuessCompositeType assumes it's known to be an eARRAY (BasicType)!
   CompositeType GuessCompositeType(pTHX_ SV* const sv);
 
+  /// Converts the given SV or basic type to the corresponding C (proto)type
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type);
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len);
   
