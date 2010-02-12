@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <cstring>
+#include <cstdlib>
 
 using namespace SOOT;
 using namespace std;
@@ -206,6 +208,48 @@ namespace SOOT {
         return NULL;
     }
   }
+
+
+  char*
+  CProtoFromAV(pTHX_ AV* av, const unsigned int nSkip = 1)
+  {
+    vector<const char*> protos;
+    vector<STRLEN> lengths;
+    SV** elem;
+    STRLEN len;
+    unsigned int totalLen = 0;
+
+    // convert the elements into C prototype strings
+    const unsigned int nElem = (unsigned int)(av_len(av)+1);
+    if (nSkip >= nElem)
+      return NULL;
+    for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
+      elem = av_fetch(av, iElem, 0);
+      if (elem == NULL)
+        croak("av_fetch failed. Severe error.");
+      const char* thisCProto = CProtoFromType(aTHX_ *elem, len);
+      //cout << thisCProto<<endl;
+      protos.push_back(thisCProto);
+      lengths.push_back(len);
+      totalLen += len+1;
+      //cout << len << endl;
+    }
+    
+    char* cproto = (char*)malloc(totalLen);
+    // doesn't work: ?
+    //Newx((void*)cproto, totalLen, char);
+    unsigned int pos = 0;
+    for (unsigned int iElem = 0; iElem < protos.size(); ++iElem) {
+      len = lengths[iElem];
+      strncpy((char*)(cproto+pos), protos[iElem], len);
+      pos += len;
+      cproto[pos] = ',';
+      ++pos;
+    }
+    cproto[pos-1] = '\0';
+    return cproto;
+  }
+
 } // end namespace SOOT
 
 
@@ -218,10 +262,32 @@ ROOTResolver::CallMethod(pTHX_ const char* className, const char* methName, AV* 
   if (c == NULL)
     croak("Can't locate object method \"%s\" via package \"%s\"",
           methName, className);
+
+  cout << className << " available as TClass" << endl;
+  cout << "TClass has name " << c->GetName() << endl;
+
+  char* cproto = CProtoFromAV(aTHX_ args, 1); // 1 => skip first arg (the TObject)
+  // cproto is NULL if no arguments
+  TMethod* theMethod;
+  if (cproto == NULL)
+    theMethod = c->GetMethodWithPrototype(methName, "");
   else {
-    cout << className << " available as TClass" << endl;
-    cout << "TClass has name " << c->GetName() << endl;
+    theMethod = c->GetMethodWithPrototype(methName, cproto);
+    free(cproto);
   }
+
+  if (theMethod == NULL)
+    croak("Can't locate object method \"%s\" via package \"%s\"",
+          methName, className);
+  cout << "still here"<<endl;
+  cout << theMethod->GetReturnTypeName() << endl;
+  cout << "still here"<<endl;
+  cout << theMethod->GetName() << "(";
+  cout << "still here"<<endl;
+  cout << theMethod->GetPrototype();
+  cout << "still here"<<endl;
+  cout << ")" << endl;
+  cout << "still here"<<endl;
 
   return &PL_sv_undef;
 }

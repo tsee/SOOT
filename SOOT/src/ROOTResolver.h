@@ -4,7 +4,7 @@
 
 #include <TROOT.h>
 #include <TClass.h>
-#include <Reflex/Scope.h>
+#include <TMethod.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,6 +54,7 @@ namespace SOOT {
   /// Converts the given SV or basic type to the corresponding C (proto)type
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type);
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len);
+  char* CProtoFromAV(pTHX_ AV* av, const unsigned int nSkip);
   
   class ROOTResolver {
     public:

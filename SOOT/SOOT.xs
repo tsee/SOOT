@@ -4,6 +4,7 @@
 
 #include <TROOT.h>
 #include <TClass.h>
+#include <TMethod.h>
 #include <Reflex/Scope.h>
 
 #include "ClassGenerator.h"
