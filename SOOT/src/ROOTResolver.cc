@@ -315,6 +315,6 @@ ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
   const
 {
   className = (char*)sv_reftype(SvRV(thePerlObject), TRUE);
-  return (TObject*) SvIV((SV*)SvRV( thePerlObject ));
+  return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
 }
 
