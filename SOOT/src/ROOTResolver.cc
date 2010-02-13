@@ -310,8 +310,11 @@ ROOTResolver::EncapsulateObject(pTHX_ TObject* theROOTObject, const char* classN
 }
 
 
-    /*const unsigned int lastArg = av_len(arguments);
-    for (unsigned int iArg = 0; iArg <= lastArg; ++iArg) {
-      const char* cproto = SOOT::CProtoFromType();
-    }*/
+TObject*
+ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
+  const
+{
+  className = (char*)sv_reftype(SvRV(thePerlObject), TRUE);
+  return (TObject*) SvIV((SV*)SvRV( thePerlObject ));
+}
 

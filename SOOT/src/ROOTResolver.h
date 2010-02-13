@@ -63,6 +63,11 @@ namespace SOOT {
        *  the class. The scalar itself holds a pointer to the ROOT object.
        */
       SV* EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className) const;
+
+      /** Given a Perl object (SV*) that's known to be one of our mock TObject like
+       *  creatures, fetch the class name and the ROOT object.
+       */
+      TObject* LobotomizeObject(pTHX_ SV* thePerlObject, char*& className) const;
   };
 } // end namespace SOOT
 
