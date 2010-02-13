@@ -112,14 +112,8 @@ type(sv)
   PPCODE:
     dXSTARG;
     type = GuessType(aTHX_ sv);
-    if (type == eARRAY) {
-      const char* type_str = SOOT::gCompositeTypeStrings[GuessCompositeType(aTHX_ sv)];
-      XPUSHp(type_str, strlen(type_str));
-    }
-    else {
-      const char* type_str = SOOT::gBasicTypeStrings[type];
-      XPUSHp(type_str, strlen(type_str));
-    }
+    const char* type_str = SOOT::gBasicTypeStrings[type];
+    XPUSHp(type_str, strlen(type_str));
 
 SV*
 cproto(sv)

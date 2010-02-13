@@ -28,28 +28,24 @@ namespace SOOT {
     eINTEGER,
     eFLOAT,
     eSTRING,
-    eARRAY,
+    eA_INTEGER,
+    eA_FLOAT,
+    eA_STRING,
+    eA_INVALID,
     eHASH,
     eCODE,
     eREF,
     eTOBJECT,
     eINVALID,
   };
-  extern const char* gBasicTypeStrings[10];
+  extern const char* gBasicTypeStrings[13];
   /** "Second level" nested types.
    */
-  enum CompositeType {
-    eA_INTEGER = 0,
-    eA_FLOAT,
-    eA_STRING,
-    eA_INVALID,
-  };
-  extern const char* gCompositeTypeStrings[4];
 
   /// Determine and return the BasicType of the given parameter
   BasicType GuessType(pTHX_ SV* const sv);
-  /// GuessCompositeType assumes it's known to be an eARRAY (BasicType)!
-  CompositeType GuessCompositeType(pTHX_ SV* const sv);
+  /// GuessCompositeType assumes it's known to be an RV-to-AV (this is called by GuessType)
+  BasicType GuessCompositeType(pTHX_ SV* const sv);
 
   /// Converts the given SV or basic type to the corresponding C (proto)type
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type);
@@ -61,7 +57,7 @@ namespace SOOT {
       ROOTResolver() {};
       ~ROOTResolver() {};
       
-      SV* CallMethod(pTHX_ const char* className, const char* methName, AV* args) const;
+      SV* CallMethod(pTHX_ const char* className, char* methName, AV* args) const;
 
       /** Creates a new Perl object which is a reference to a scalar blessed into
        *  the class. The scalar itself holds a pointer to the ROOT object.

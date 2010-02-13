@@ -12,23 +12,20 @@ using namespace SOOT;
 using namespace std;
 
 namespace SOOT {
-  const char* gBasicTypeStrings[10] = {
+  const char* gBasicTypeStrings[13] = {
     "UNDEF",
     "INTEGER",
     "FLOAT",
     "STRING",
-    "ARRAY",
+    "INTEGER_ARRAY",
+    "FLOAT_ARRAY",
+    "STRING_ARRAY",
+    "INVALID_ARRAY",
     "HASH",
     "CODE",
     "REF",
     "TOBJECT",
     "INVALID",
-  };
-  const char* gCompositeTypeStrings[4] = {
-    "INTEGER_ARRAY",
-    "FLOAT_ARRAY",
-    "STRING_ARRAY",
-    "INVALID_ARRAY",
   };
 
 #define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject"))
@@ -122,7 +119,7 @@ namespace SOOT {
             return eTOBJECT;
           switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
-              return eARRAY;
+              return GuessCompositeType(aTHX_ sv);
             case SVt_PVHV:
               return eHASH;
             case SVt_PVCV:
@@ -137,7 +134,7 @@ namespace SOOT {
   }
 
 
-  SOOT::CompositeType
+  SOOT::BasicType
   GuessCompositeType(pTHX_ SV* const sv)
   {
     // sv is known to be an RV to an AV
@@ -188,21 +185,15 @@ namespace SOOT {
       case eSTRING:
         len = 5;
         return "char*";
-      case eARRAY:
-        switch (GuessCompositeType(aTHX_ sv)) {
-          case eA_INTEGER:
-            len = 4;
-            return "int*";
-          case eA_FLOAT:
-            len = 7;
-            return "double*";
-          case eA_STRING:
-            len = 6;
-            return "char**";
-        }
-        len = 0;
-        return NULL;
-        break;
+      case eA_INTEGER:
+        len = 4;
+        return "int*";
+      case eA_FLOAT:
+        len = 7;
+        return "double*";
+      case eA_STRING:
+        len = 6;
+        return "char**";
       default:
         len = 0;
         return NULL;
@@ -255,16 +246,39 @@ namespace SOOT {
 
 
 SV*
-ROOTResolver::CallMethod(pTHX_ const char* className, const char* methName, AV* args)
+ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
   const
 {
+  // Determine the class...
   TClass* c = TClass::GetClass(className);
   if (c == NULL)
     croak("Can't locate object method \"%s\" via package \"%s\"",
           methName, className);
 
-  cout << className << " available as TClass" << endl;
-  cout << "TClass has name " << c->GetName() << endl;
+  // Fetch the callReceiver (object or class name)
+  SV** elem = av_fetch(args, 0, 0);
+  if (elem == 0)
+    croak("CallMethod requires at least an object or class-name");
+  SV* callReceiver = *elem;
+  BasicType receiverType = GuessType(aTHX_ callReceiver);
+  if (receiverType != eTOBJECT && receiverType != eSTRING) {
+    croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
+          methName, gBasicTypeStrings[receiverType]);
+  }
+
+  if (receiverType == eSTRING) {
+    // class method
+    if (strEQ(methName, "new")) {
+      // constructor
+      methName = (char*)className;
+    }
+    else
+      croak("Class methods to be implemented");
+  }
+  else {
+    // object method
+    croak("Object methods to be implemented");
+  }
 
   char* cproto = CProtoFromAV(aTHX_ args, 1); // 1 => skip first arg (the TObject)
   // cproto is NULL if no arguments
@@ -275,12 +289,13 @@ ROOTResolver::CallMethod(pTHX_ const char* className, const char* methName, AV* 
     theMethod = c->GetMethodWithPrototype(methName, cproto);
     free(cproto);
   }
-
   if (theMethod == NULL)
     croak("Can't locate object method \"%s\" via package \"%s\"",
           methName, className);
   const char* retType = theMethod->GetReturnTypeName();
   cout << theMethod->GetPrototype() << endl;
+  void* meth =theMethod->InterfaceMethod();
+
   return &PL_sv_undef;
 }
 
