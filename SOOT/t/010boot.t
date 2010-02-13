@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use SOOT;
 pass();
 is_deeply(\@TH1D::ISA, ["TObject"]);
