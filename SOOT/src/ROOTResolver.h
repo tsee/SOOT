@@ -28,10 +28,10 @@ namespace SOOT {
     eINTEGER,
     eFLOAT,
     eSTRING,
-    eA_INTEGER,
-    eA_FLOAT,
-    eA_STRING,
-    eA_INVALID,
+    eARRAY_INTEGER,
+    eARRAY_FLOAT,
+    eARRAY_STRING,
+    eARRAY_INVALID,
     eHASH,
     eCODE,
     eREF,
@@ -39,18 +39,21 @@ namespace SOOT {
     eINVALID,
   };
   extern const char* gBasicTypeStrings[13];
-  /** "Second level" nested types.
-   */
 
   /// Determine and return the BasicType of the given parameter
   BasicType GuessType(pTHX_ SV* const sv);
   /// GuessCompositeType assumes it's known to be an RV-to-AV (this is called by GuessType)
   BasicType GuessCompositeType(pTHX_ SV* const sv);
 
+  /// Determine and return the BasicType-s of all arguments
+  std::vector<BasicType> GuessTypes(pTHX_ AV* av);
+
   /// Converts the given SV or basic type to the corresponding C (proto)type
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type);
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len);
   char* CProtoFromAV(pTHX_ AV* av, const unsigned int nSkip);
+  /// Also fills avtypes
+  char* CProtoFromAVWithTypes(pTHX_ AV* av, std::vector<BasicType>& avtypes, const unsigned int nSkip);
   
   class ROOTResolver {
     public:

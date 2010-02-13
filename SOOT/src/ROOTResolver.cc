@@ -144,19 +144,19 @@ namespace SOOT {
     AV* av = (AV*)SvRV(sv);
     const int lastElem = av_len(av);
     if (lastElem < 0) // empty
-      return eA_INVALID;
+      return eARRAY_INVALID;
     SV** elem = av_fetch(av, 0, 0);
     if (elem == NULL)
-      return eA_INVALID;
+      return eARRAY_INVALID;
     switch (GuessType(aTHX_ *elem)) {
       case eINTEGER:
-        return eA_INTEGER;
+        return eARRAY_INTEGER;
       case eFLOAT:
-        return eA_FLOAT;
+        return eARRAY_FLOAT;
       case eSTRING:
-        return eA_STRING;
+        return eARRAY_STRING;
       default:
-        return eA_INVALID;
+        return eARRAY_INVALID;
     }
   }
 
@@ -185,19 +185,33 @@ namespace SOOT {
       case eSTRING:
         len = 5;
         return "char*";
-      case eA_INTEGER:
+      case eARRAY_INTEGER:
         len = 4;
         return "int*";
-      case eA_FLOAT:
+      case eARRAY_FLOAT:
         len = 7;
         return "double*";
-      case eA_STRING:
+      case eARRAY_STRING:
         len = 6;
         return "char**";
       default:
         len = 0;
         return NULL;
     }
+  }
+
+  std::vector<BasicType>
+  GuessTypes(pTHX_ AV* av)
+  {
+    vector<BasicType> types;
+    const unsigned int nElem = (unsigned int)(av_len(av)+1);
+    for (unsigned int iElem = 0; iElem < nElem; ++iElem) {
+      SV* const* elem = av_fetch(av, iElem, 0);
+      if (elem == NULL)
+        croak("av_fetch failed. Severe error.");
+      types.push_back(GuessType(aTHX_ *elem));
+    }
+    return types;
   }
 
 
@@ -241,6 +255,47 @@ namespace SOOT {
     return cproto;
   }
 
+  char*
+  CProtoFromAVWithTypes(pTHX_ AV* av, std::vector<BasicType>& avtypes, const unsigned int nSkip = 1)
+  {
+    vector<const char*> protos;
+    vector<STRLEN> lengths;
+    SV** elem;
+    STRLEN len;
+    unsigned int totalLen = 0;
+
+    // convert the elements into C prototype strings
+    const unsigned int nElem = (unsigned int)(av_len(av)+1);
+    if (nSkip >= nElem)
+      return NULL;
+    for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
+      elem = av_fetch(av, iElem, 0);
+      if (elem == NULL)
+        croak("av_fetch failed. Severe error.");
+      BasicType type = GuessType(aTHX_ *elem);
+      avtypes.push_back(type);
+      const char* thisCProto = CProtoFromType(aTHX_ *elem, len, type);
+      //cout << thisCProto<<endl;
+      protos.push_back(thisCProto);
+      lengths.push_back(len);
+      totalLen += len+1;
+      //cout << len << endl;
+    }
+    
+    char* cproto = (char*)malloc(totalLen);
+    // doesn't work: ?
+    //Newx((void*)cproto, totalLen, char);
+    unsigned int pos = 0;
+    for (unsigned int iElem = 0; iElem < protos.size(); ++iElem) {
+      len = lengths[iElem];
+      strncpy((char*)(cproto+pos), protos[iElem], len);
+      pos += len;
+      cproto[pos] = ',';
+      ++pos;
+    }
+    cproto[pos-1] = '\0';
+    return cproto;
+  }
 } // end namespace SOOT
 
 
