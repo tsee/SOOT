@@ -338,6 +338,8 @@ namespace SOOT {
       type = eUNDEF; // FIXME check validity
     else if (!strncmp(ptr-4, "bool", 4))
       type = eINTEGER; // FIXME Do we need a eBOOL type?
+    else if (ptr_level)
+      type = eTOBJECT; // FIXME, umm, really?
     else
       type = eINVALID;
 
@@ -380,6 +382,50 @@ namespace SOOT {
   }
 
 
+  SV*
+  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr)
+  {
+    char* typeStrWithoutPtr;
+    char* ptr;
+    unsigned int ptr_level;
+    SV* retval;
+    switch (retType) {
+      case eINTEGER:
+        return newSViv(addr);
+      case eFLOAT:
+        return newSVnv(addrD);
+      case eSTRING:
+        return newSVpv((char*)addr, strlen((char*)addr));
+      case eARRAY_INTEGER:
+      case eARRAY_FLOAT:
+      case eARRAY_STRING:
+        // allocate C-array here and convert the AV
+        croak("FIXME Array return values to be implemented");
+        break;
+      case eTOBJECT:
+        // FIXME this is so hideous it's not even funny
+        typeStrWithoutPtr = strdup(retTypeStr);
+        ptr = typeStrWithoutPtr;
+        ptr_level = 0;
+        while (*(ptr++)) {
+          if (*ptr == '*')
+            ++ptr_level;
+        }
+        --ptr;
+        // FIXME I think this can break on stuff like
+        //       char* const* where the *'s aren't all at the end
+        if (ptr_level > 0)
+          *(ptr - ptr_level) = '\0';
+        cout << "type without ptr: "<< typeStrWithoutPtr << endl;
+        retval = EncapsulateObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
+        if (ptr_level > 0)
+          *(ptr - ptr_level) = ' ';
+        free(typeStrWithoutPtr);
+        return retval;
+      default:
+        croak("Unhandled return type '%s'", retTypeStr);
+    } // end switch ret type
+  }
 
   SV*
   CallMethod(pTHX_ const char* className, char* methName, AV* args)
@@ -387,7 +433,7 @@ namespace SOOT {
     // Determine the class...
     TClass* c = TClass::GetClass(className);
     if (c == NULL)
-      croak("Can't locate object method \"%s\" via package \"%s\"",
+      croak("Can't locate method \"%s\" via package \"%s\"",
             methName, className);
 
     vector<BasicType> argTypes;
@@ -413,19 +459,19 @@ namespace SOOT {
     G__ClassInfo theClass(className);
     G__MethodInfo mInfo;
     long offset;
-    if (receiverType == eSTRING) {
-      // class method
+    bool constructor = false;
+    if (receiverType == eSTRING) { // class method
       if (strEQ(methName, "new")) {
         // constructor
         methName = (char*)className;
+        constructor = true;
       }
       mInfo = theClass.GetMethod(methName,
                          (cprotoStr == NULL ? "" : cprotoStr),
                          &offset);
       receiver = 0;
     }
-    else {
-      // object method
+    else { // object method
       mInfo = theClass.GetMethod(methName,
                          (cprotoStr == NULL ? "" : cprotoStr),
                          &offset);
@@ -437,7 +483,9 @@ namespace SOOT {
             methName, className);
 
     // Determine return type
-    BasicType retType = GuessTypeFromProto(mInfo.Type()->TrueName());
+    char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
+    // FIXME ... defies description
+    BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
 
     // Prepare CallFunc
     G__CallFunc theFunc;
@@ -454,8 +502,9 @@ namespace SOOT {
     cout << addr << endl;
 
     // FIXME process return types...
-    SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
-    return retPerlObj;
+    //SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
+    cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
+    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);
     return &PL_sv_undef;
   }
 

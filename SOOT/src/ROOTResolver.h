@@ -71,6 +71,8 @@ namespace SOOT {
 
   void SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
                           const std::vector<BasicType>& argTypes, const unsigned int nSkip);
+
+  SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr);
       
   SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
 
