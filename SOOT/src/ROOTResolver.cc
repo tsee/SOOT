@@ -416,14 +416,15 @@ namespace SOOT {
         //       char* const* where the *'s aren't all at the end
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
-        cout << "type without ptr: "<< typeStrWithoutPtr << endl;
         retval = EncapsulateObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';
         free(typeStrWithoutPtr);
         return retval;
+      case eUNDEF:
+        return &PL_sv_undef;
       default:
-        croak("Unhandled return type '%s'", retTypeStr);
+        croak("Unhandled return type '%s' (SOOT type '%s')", retTypeStr, gBasicTypeStrings[retType]);
     } // end switch ret type
   }
 
