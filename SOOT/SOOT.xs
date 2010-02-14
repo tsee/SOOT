@@ -32,8 +32,6 @@ extern "C" {
 using namespace SOOT;
 using namespace std;
 
-SOOT::ROOTResolver gResolver;
-
 /*
 void
 AUTOLOAD(...)
@@ -103,7 +101,7 @@ CallMethod(className, methodName, argv)
     if (!SvROK(argv) || SvTYPE(SvRV(argv)) != SVt_PVAV)
       croak("Need array reference as third argument");
     arguments = (AV*)SvRV(argv);
-    RETVAL = gResolver.CallMethod(aTHX_ className, methodName, arguments);
+    RETVAL = SOOT::CallMethod(aTHX_ className, methodName, arguments);
   OUTPUT: RETVAL
 
 SV*
@@ -136,5 +134,5 @@ void
 DESTROY(self)
     SV* self
   PPCODE:
-    gResolver.ClearObject(aTHX_ self);
+    SOOT::ClearObject(aTHX_ self);
 
