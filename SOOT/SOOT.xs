@@ -6,6 +6,8 @@
 #include <TClass.h>
 #include <TMethod.h>
 #include <Reflex/Scope.h>
+#include <CallFunc.h>
+#include <Class.h>
 
 #include "ClassGenerator.h"
 #include "ROOTResolver.h"
