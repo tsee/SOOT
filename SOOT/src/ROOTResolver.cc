@@ -368,65 +368,65 @@ ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
 
   char* cprotoStr = JoinCProto(cproto, 1); // 1 => skip first arg (the TObject)
 
-  // Fetch the callReceiver (object or class name)
+  // Fetch the call receiver (object or class name)
   SV** elem = av_fetch(args, 0, 0);
   if (elem == 0)
     croak("CallMethod requires at least an object or class-name");
-  SV* callReceiver = *elem;
+  SV* perlCallReceiver = *elem;
   BasicType receiverType = argTypes[0];
   if (receiverType != eTOBJECT && receiverType != eSTRING) {
     croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
           methName, gBasicTypeStrings[receiverType]);
   }
 
+  TObject* receiver;
+  G__ClassInfo theClass(className);
+  G__MethodInfo mInfo;
+  long offset;
   if (receiverType == eSTRING) {
     // class method
     if (strEQ(methName, "new")) {
       // constructor
       methName = (char*)className;
     }
-    else
-      croak("Class methods to be implemented");
+    mInfo = theClass.GetMethod(methName,
+                       (cprotoStr == NULL ? "" : cprotoStr),
+                       &offset);
+    receiver = 0;
   }
   else {
     // object method
-    croak("Object methods to be implemented");
-  }
-
-  G__ClassInfo theClass(className);
-  long offset;
-  G__MethodInfo mInfo(
-    theClass.GetMethod(methName,
+    mInfo = theClass.GetMethod(methName,
                        (cprotoStr == NULL ? "" : cprotoStr),
-                       &offset)
-  );
+                       &offset);
+    receiver = LobotomizeObject(aTHX_ perlCallReceiver, className);
+  }
 
   if (!mInfo.IsValid() || !mInfo.Name())
-    croak("Can't locate object method \"%s\" via package \"%s\"",
+    croak("Can't locate method \"%s\" via package \"%s\"",
           methName, className);
 
+  // Determine return type
+  BasicType retType = GuessTypeFromProto(minfo.Type()->TrueName());
+
+  // Prepare CallFunc
   G__CallFunc theFunc;
   theFunc.SetFunc(mInfo);
+
+  // FIXME Set arguments here
   theFunc.SetArg((long)12);
-  long addr = theFunc.ExecInt((void*)(offset));
+
+  long addr;
+  double addrD;
+  if (retType == eFLOAT)
+    addrD = theFunc.ExecInt((void*)((long)receiver + offset));
+  else
+    addr = theFunc.ExecDouble((void*)((long)receiver + offset));
   cout << addr << endl;
+
+  // FIXME process return types...
   SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
   return retPerlObj;
-  // cproto is NULL if no arguments
-  /*TMethod* theMethod;
-  if (cprotoStr == NULL)
-    theMethod = c->GetMethodWithPrototype(methName, "");
-  else {
-    theMethod = c->GetMethodWithPrototype(methName, cprotoStr);
-    free(cprotoStr);
-  }
-  if (theMethod == NULL)
-    croak("Can't locate object method \"%s\" via package \"%s\"",
-          methName, className);
-  const char* retProto = theMethod->GetReturnTypeName();
-  BasicType retType = GuessTypeFromProto(retProto);
-  cout << theMethod->GetPrototype() << endl;
-  */
   return &PL_sv_undef;
 }
 
@@ -448,6 +448,15 @@ ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
   className = (char*)sv_reftype(SvRV(thePerlObject), TRUE);
   return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
 }
+
+
+TObject*
+ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject)
+  const
+{
+  return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
+}
+
 
 void
 ROOTResolver::ClearObject(pTHX_ SV* thePerlObject)

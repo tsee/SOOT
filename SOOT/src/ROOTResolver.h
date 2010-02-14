@@ -85,6 +85,7 @@ namespace SOOT {
        *  creatures, fetch the class name and the ROOT object.
        */
       TObject* LobotomizeObject(pTHX_ SV* thePerlObject, char*& className) const;
+      TObject* LobotomizeObject(pTHX_ SV* thePerlObject) const;
       void ClearObject(pTHX_ SV* thePerlObject) const;
   };
 } // end namespace SOOT
