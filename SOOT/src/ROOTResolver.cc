@@ -119,7 +119,7 @@ namespace SOOT {
             return eTOBJECT;
           switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
-              return GuessCompositeType(aTHX_ sv);
+              return _GuessCompositeType(aTHX_ sv);
             case SVt_PVHV:
               return eHASH;
             case SVt_PVCV:
@@ -135,7 +135,7 @@ namespace SOOT {
 
 
   SOOT::BasicType
-  GuessCompositeType(pTHX_ SV* const sv)
+  _GuessCompositeType(pTHX_ SV* const sv)
   {
     // sv is known to be an RV to an AV
     // We'll base the array type on the FIRST element of the
@@ -255,47 +255,97 @@ namespace SOOT {
     return cproto;
   }
 
-  char*
-  CProtoFromAVWithTypes(pTHX_ AV* av, std::vector<BasicType>& avtypes, const unsigned int nSkip = 1)
+  void
+  CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
+                       std::vector<std::string>& cproto, const unsigned int nSkip = 0)
   {
-    vector<const char*> protos;
-    vector<STRLEN> lengths;
     SV** elem;
     STRLEN len;
-    unsigned int totalLen = 0;
 
     // convert the elements into C prototype strings
     const unsigned int nElem = (unsigned int)(av_len(av)+1);
     if (nSkip >= nElem)
-      return NULL;
+      return;
     for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
       elem = av_fetch(av, iElem, 0);
       if (elem == NULL)
         croak("av_fetch failed. Severe error.");
       BasicType type = GuessType(aTHX_ *elem);
       avtypes.push_back(type);
-      const char* thisCProto = CProtoFromType(aTHX_ *elem, len, type);
-      //cout << thisCProto<<endl;
-      protos.push_back(thisCProto);
-      lengths.push_back(len);
-      totalLen += len+1;
-      //cout << len << endl;
+      cproto.push_back(CProtoFromType(aTHX_ *elem, len, type));
     }
-    
-    char* cproto = (char*)malloc(totalLen);
-    // doesn't work: ?
-    //Newx((void*)cproto, totalLen, char);
-    unsigned int pos = 0;
-    for (unsigned int iElem = 0; iElem < protos.size(); ++iElem) {
-      len = lengths[iElem];
-      strncpy((char*)(cproto+pos), protos[iElem], len);
-      pos += len;
-      cproto[pos] = ',';
-      ++pos;
-    }
-    cproto[pos-1] = '\0';
-    return cproto;
   }
+
+  char*
+  JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip = 1)
+  {
+    const unsigned int n = cproto.size();
+    if (nSkip >= n)
+      return NULL;
+    ostringstream str;
+    for (unsigned int i = nSkip; i < n; i++) {
+      str << cproto[i];
+      if (i != n-1)
+         str << ",";
+    }
+    return strdup(str.str().c_str());
+  }
+
+  /* Heavily inspired by RubyROOT! */
+  BasicType
+  GuessTypeFromProto(const char* proto)
+  {
+    char* typestr = strdup(proto);
+    char* ptr = typestr;
+    int ptr_level = 0;
+    BasicType type;
+
+    while (*(ptr++)) {
+      if (*ptr == '*')
+        ptr_level++;
+    }
+
+    ptr--;
+
+    // FIXME I think this can break on stuff like
+    //       char* const* where the *'s aren't all at the end
+    if (ptr_level > 0)
+        *(ptr - ptr_level) = '\0';
+
+    if (!strncmp(ptr-3, "int", 3) ||
+        !strncmp(ptr-4, "long", 4)) {
+      if (ptr_level)
+        type = eARRAY_INTEGER;
+      else
+        type = eINTEGER;
+    }
+    else if (!strncmp(ptr-6, "double", 6) ||
+             !strncmp(ptr-5, "float", 5)) {
+      if (ptr_level)
+        type = eARRAY_FLOAT;
+      else
+        type = eFLOAT;
+    }
+    else if (!strncmp(ptr-5, "char", 4)) {
+      if (ptr_level == 1)
+        type = eSTRING;
+      else if (ptr_level == 2)
+        type = eARRAY_STRING;
+      else
+        type = eINTEGER;
+    }
+    else if (!strncmp(ptr-4, "void", 4))
+      type = eUNDEF; // FIXME check validity
+    else if (!strncmp(ptr-4, "bool", 4))
+      type = eINTEGER; // FIXME Do we need a eBOOL type?
+    else
+      type = eINVALID;
+
+    free(typestr);
+
+    return type;
+  }
+
 } // end namespace SOOT
 
 
@@ -310,12 +360,20 @@ ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
     croak("Can't locate object method \"%s\" via package \"%s\"",
           methName, className);
 
+  vector<BasicType> argTypes;
+  vector<string> cproto;
+  CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
+  if (argTypes.size() == 0)
+    croak("Bad invocation");
+
+  char* cprotoStr = JoinCProto(cproto, 1); // 1 => skip first arg (the TObject)
+
   // Fetch the callReceiver (object or class name)
   SV** elem = av_fetch(args, 0, 0);
   if (elem == 0)
     croak("CallMethod requires at least an object or class-name");
   SV* callReceiver = *elem;
-  BasicType receiverType = GuessType(aTHX_ callReceiver);
+  BasicType receiverType = argTypes[0];
   if (receiverType != eTOBJECT && receiverType != eSTRING) {
     croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
           methName, gBasicTypeStrings[receiverType]);
@@ -335,21 +393,21 @@ ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
     croak("Object methods to be implemented");
   }
 
-  char* cproto = CProtoFromAV(aTHX_ args, 1); // 1 => skip first arg (the TObject)
   // cproto is NULL if no arguments
   TMethod* theMethod;
-  if (cproto == NULL)
+  if (cprotoStr == NULL)
     theMethod = c->GetMethodWithPrototype(methName, "");
   else {
-    theMethod = c->GetMethodWithPrototype(methName, cproto);
-    free(cproto);
+    theMethod = c->GetMethodWithPrototype(methName, cprotoStr);
+    free(cprotoStr);
   }
   if (theMethod == NULL)
     croak("Can't locate object method \"%s\" via package \"%s\"",
           methName, className);
-  const char* retType = theMethod->GetReturnTypeName();
+  const char* retProto = theMethod->GetReturnTypeName();
+  BasicType retType = GuessTypeFromProto(retProto);
   cout << theMethod->GetPrototype() << endl;
-  void* meth =theMethod->InterfaceMethod();
+  void* meth = theMethod->InterfaceMethod();
 
   return &PL_sv_undef;
 }
