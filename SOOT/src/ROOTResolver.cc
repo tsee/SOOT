@@ -393,8 +393,27 @@ ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
     croak("Object methods to be implemented");
   }
 
+  G__ClassInfo theClass(className);
+  long offset;
+  G__MethodInfo mInfo(
+    theClass.GetMethod(methName,
+                       (cprotoStr == NULL ? "" : cprotoStr),
+                       &offset)
+  );
+
+  if (!mInfo.IsValid() || !mInfo.Name())
+    croak("Can't locate object method \"%s\" via package \"%s\"",
+          methName, className);
+
+  G__CallFunc theFunc;
+  theFunc.SetFunc(mInfo);
+  theFunc.SetArg((long)12);
+  long addr = theFunc.ExecInt((void*)(offset));
+  cout << addr << endl;
+  SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
+  return retPerlObj;
   // cproto is NULL if no arguments
-  TMethod* theMethod;
+  /*TMethod* theMethod;
   if (cprotoStr == NULL)
     theMethod = c->GetMethodWithPrototype(methName, "");
   else {
@@ -407,8 +426,7 @@ ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
   const char* retProto = theMethod->GetReturnTypeName();
   BasicType retType = GuessTypeFromProto(retProto);
   cout << theMethod->GetPrototype() << endl;
-  void* meth = theMethod->InterfaceMethod();
-
+  */
   return &PL_sv_undef;
 }
 

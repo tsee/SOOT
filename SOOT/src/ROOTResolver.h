@@ -4,7 +4,12 @@
 
 #include <TROOT.h>
 #include <TClass.h>
+#include <TCint.h>
 #include <TMethod.h>
+
+#include <CallFunc.h>
+#include <Class.h>
+
 #include <vector>
 #include <string>
 
