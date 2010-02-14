@@ -500,11 +500,8 @@ namespace SOOT {
       addrD = theFunc.ExecInt((void*)((long)receiver + offset));
     else
       addr = theFunc.ExecDouble((void*)((long)receiver + offset));
-    cout << addr << endl;
 
-    // FIXME process return types...
-    //SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
-    cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
+    //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);
     return &PL_sv_undef;
   }
