@@ -346,123 +346,152 @@ namespace SOOT {
     return type;
   }
 
-} // end namespace SOOT
-
-
-
-SV*
-ROOTResolver::CallMethod(pTHX_ const char* className, char* methName, AV* args)
-  const
-{
-  // Determine the class...
-  TClass* c = TClass::GetClass(className);
-  if (c == NULL)
-    croak("Can't locate object method \"%s\" via package \"%s\"",
-          methName, className);
-
-  vector<BasicType> argTypes;
-  vector<string> cproto;
-  CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
-  if (argTypes.size() == 0)
-    croak("Bad invocation");
-
-  char* cprotoStr = JoinCProto(cproto, 1); // 1 => skip first arg (the TObject)
-
-  // Fetch the call receiver (object or class name)
-  SV** elem = av_fetch(args, 0, 0);
-  if (elem == 0)
-    croak("CallMethod requires at least an object or class-name");
-  SV* perlCallReceiver = *elem;
-  BasicType receiverType = argTypes[0];
-  if (receiverType != eTOBJECT && receiverType != eSTRING) {
-    croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
-          methName, gBasicTypeStrings[receiverType]);
-  }
-
-  TObject* receiver;
-  G__ClassInfo theClass(className);
-  G__MethodInfo mInfo;
-  long offset;
-  if (receiverType == eSTRING) {
-    // class method
-    if (strEQ(methName, "new")) {
-      // constructor
-      methName = (char*)className;
+  void
+  SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
+                     const vector<BasicType>& argTypes, const unsigned int nSkip = 1)
+  {
+    const unsigned int nElem = (unsigned int)(av_len(args)+1);
+    for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
+      SV* const* elem = av_fetch(args, iElem, 0);
+      if (elem == NULL)
+        croak("av_fetch failed. Severe error.");
+      switch (argTypes[iElem]) {
+        case eINTEGER:
+          theFunc.SetArg((long)SvIV(*elem));
+          break;
+        case eFLOAT:
+          theFunc.SetArg((double)SvNV(*elem));
+          break;
+        case eSTRING:
+          theFunc.SetArg((long)SvPV_nolen(*elem));
+          break;
+        case eARRAY_INTEGER:
+        case eARRAY_FLOAT:
+        case eARRAY_STRING:
+          // allocate C-array here and convert the AV
+          croak("FIXME Array arguments to be implemented");
+          break;
+        case eTOBJECT:
+          theFunc.SetArg((long)LobotomizeObject(aTHX_ *elem));
+          break;
+      }
     }
-    mInfo = theClass.GetMethod(methName,
-                       (cprotoStr == NULL ? "" : cprotoStr),
-                       &offset);
-    receiver = 0;
-  }
-  else {
-    // object method
-    mInfo = theClass.GetMethod(methName,
-                       (cprotoStr == NULL ? "" : cprotoStr),
-                       &offset);
-    receiver = LobotomizeObject(aTHX_ perlCallReceiver, className);
+    return;
   }
 
-  if (!mInfo.IsValid() || !mInfo.Name())
-    croak("Can't locate method \"%s\" via package \"%s\"",
-          methName, className);
-
-  // Determine return type
-  BasicType retType = GuessTypeFromProto(minfo.Type()->TrueName());
-
-  // Prepare CallFunc
-  G__CallFunc theFunc;
-  theFunc.SetFunc(mInfo);
-
-  // FIXME Set arguments here
-  theFunc.SetArg((long)12);
-
-  long addr;
-  double addrD;
-  if (retType == eFLOAT)
-    addrD = theFunc.ExecInt((void*)((long)receiver + offset));
-  else
-    addr = theFunc.ExecDouble((void*)((long)receiver + offset));
-  cout << addr << endl;
-
-  // FIXME process return types...
-  SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
-  return retPerlObj;
-  return &PL_sv_undef;
-}
 
 
-SV*
-ROOTResolver::EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className)
-  const
-{
-  SV* ref = newSV(0);
-  sv_setref_pv(ref, className, (void*)theROOTObject );
-  return ref;
-}
+  SV*
+  CallMethod(pTHX_ const char* className, char* methName, AV* args)
+  {
+    // Determine the class...
+    TClass* c = TClass::GetClass(className);
+    if (c == NULL)
+      croak("Can't locate object method \"%s\" via package \"%s\"",
+            methName, className);
+
+    vector<BasicType> argTypes;
+    vector<string> cproto;
+    CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
+    if (argTypes.size() == 0)
+      croak("Bad invocation");
+
+    char* cprotoStr = JoinCProto(cproto, 1); // 1 => skip first arg (the TObject)
+
+    // Fetch the call receiver (object or class name)
+    SV** elem = av_fetch(args, 0, 0);
+    if (elem == 0)
+      croak("CallMethod requires at least an object or class-name");
+    SV* perlCallReceiver = *elem;
+    BasicType receiverType = argTypes[0];
+    if (receiverType != eTOBJECT && receiverType != eSTRING) {
+      croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
+            methName, gBasicTypeStrings[receiverType]);
+    }
+
+    TObject* receiver;
+    G__ClassInfo theClass(className);
+    G__MethodInfo mInfo;
+    long offset;
+    if (receiverType == eSTRING) {
+      // class method
+      if (strEQ(methName, "new")) {
+        // constructor
+        methName = (char*)className;
+      }
+      mInfo = theClass.GetMethod(methName,
+                         (cprotoStr == NULL ? "" : cprotoStr),
+                         &offset);
+      receiver = 0;
+    }
+    else {
+      // object method
+      mInfo = theClass.GetMethod(methName,
+                         (cprotoStr == NULL ? "" : cprotoStr),
+                         &offset);
+      receiver = LobotomizeObject(aTHX_ perlCallReceiver);
+    }
+
+    if (!mInfo.IsValid() || !mInfo.Name())
+      croak("Can't locate method \"%s\" via package \"%s\"",
+            methName, className);
+
+    // Determine return type
+    BasicType retType = GuessTypeFromProto(mInfo.Type()->TrueName());
+
+    // Prepare CallFunc
+    G__CallFunc theFunc;
+    theFunc.SetFunc(mInfo);
+
+    // FIXME Set arguments here
+    SetMethodArguments(aTHX_ theFunc, args, argTypes);
+    theFunc.SetArg((long)12);
+
+    long addr;
+    double addrD;
+    if (retType == eFLOAT)
+      addrD = theFunc.ExecInt((void*)((long)receiver + offset));
+    else
+      addr = theFunc.ExecDouble((void*)((long)receiver + offset));
+    cout << addr << endl;
+
+    // FIXME process return types...
+    SV* retPerlObj = EncapsulateObject(aTHX_ (TObject*)addr, className);
+    return retPerlObj;
+    return &PL_sv_undef;
+  }
 
 
-TObject*
-ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
-  const
-{
-  className = (char*)sv_reftype(SvRV(thePerlObject), TRUE);
-  return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
-}
+  SV*
+  EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className)
+  {
+    SV* ref = newSV(0);
+    sv_setref_pv(ref, className, (void*)theROOTObject );
+    return ref;
+  }
 
 
-TObject*
-ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject)
-  const
-{
-  return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
-}
+  TObject*
+  LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
+  {
+    className = (char*)sv_reftype(SvRV(thePerlObject), TRUE);
+    return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
+  }
 
 
-void
-ROOTResolver::ClearObject(pTHX_ SV* thePerlObject)
-  const
-{
-  SV* inner = (SV*)SvRV(thePerlObject);
-  delete INT2PTR(TObject*, SvIV(inner));
-}
+  TObject*
+  LobotomizeObject(pTHX_ SV* thePerlObject)
+  {
+    return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
+  }
+
+
+  void
+  ClearObject(pTHX_ SV* thePerlObject)
+  {
+    SV* inner = (SV*)SvRV(thePerlObject);
+    delete INT2PTR(TObject*, SvIV(inner));
+  }
+
+} // end namespace SOOT
 

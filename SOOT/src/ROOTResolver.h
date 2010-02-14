@@ -69,24 +69,29 @@ namespace SOOT {
                             std::vector<std::string>& cproto, const unsigned int nSkip);
   char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip);
 
+  void SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
+                          const std::vector<BasicType>& argTypes, const unsigned int nSkip);
+      
+  SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
+
+  /** Creates a new Perl object which is a reference to a scalar blessed into
+   *  the class. The scalar itself holds a pointer to the ROOT object.
+   */
+  SV* EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className);
+
+  /** Given a Perl object (SV*) that's known to be one of our mock TObject like
+   *  creatures, fetch the class name and the ROOT object.
+   */
+  TObject* LobotomizeObject(pTHX_ SV* thePerlObject, char*& className);
+  /// Same as the other LobotomizeObject but ignoring the class name
+  TObject* LobotomizeObject(pTHX_ SV* thePerlObject);
+  /// Free the underlying TObject
+  void ClearObject(pTHX_ SV* thePerlObject);
+
   class ROOTResolver {
     public:
       ROOTResolver() {};
       ~ROOTResolver() {};
-      
-      SV* CallMethod(pTHX_ const char* className, char* methName, AV* args) const;
-
-      /** Creates a new Perl object which is a reference to a scalar blessed into
-       *  the class. The scalar itself holds a pointer to the ROOT object.
-       */
-      SV* EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className) const;
-
-      /** Given a Perl object (SV*) that's known to be one of our mock TObject like
-       *  creatures, fetch the class name and the ROOT object.
-       */
-      TObject* LobotomizeObject(pTHX_ SV* thePerlObject, char*& className) const;
-      TObject* LobotomizeObject(pTHX_ SV* thePerlObject) const;
-      void ClearObject(pTHX_ SV* thePerlObject) const;
   };
 } // end namespace SOOT
 
