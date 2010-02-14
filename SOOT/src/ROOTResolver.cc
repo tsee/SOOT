@@ -449,3 +449,11 @@ ROOTResolver::LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
   return INT2PTR(TObject*, SvIV((SV*)SvRV( thePerlObject )));
 }
 
+void
+ROOTResolver::ClearObject(pTHX_ SV* thePerlObject)
+  const
+{
+  SV* inner = (SV*)SvRV(thePerlObject);
+  delete INT2PTR(TObject*, SvIV(inner));
+}
+

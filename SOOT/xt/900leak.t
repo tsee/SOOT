@@ -53,5 +53,12 @@ foreach (1..1e6) {
 
 =cut
 
+
+foreach (1..1e6) {
+  my $obj = TGraph->new(12);
+  undef $obj;
+}
+
+
 warn "after";
 $go = <STDIN>;

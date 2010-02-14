@@ -129,3 +129,12 @@ cproto(sv)
     const char* cproto = CProtoFromType(aTHX_ sv, len, type);
     XPUSHp(cproto, len);
 
+
+MODULE = SOOT		PACKAGE = TObject
+
+void
+DESTROY(self)
+    SV* self
+  PPCODE:
+    gResolver.ClearObject(aTHX_ self);
+
