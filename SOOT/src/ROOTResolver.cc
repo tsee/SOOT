@@ -443,9 +443,7 @@ namespace SOOT {
     G__CallFunc theFunc;
     theFunc.SetFunc(mInfo);
 
-    // FIXME Set arguments here
     SetMethodArguments(aTHX_ theFunc, args, argTypes);
-    theFunc.SetArg((long)12);
 
     long addr;
     double addrD;
