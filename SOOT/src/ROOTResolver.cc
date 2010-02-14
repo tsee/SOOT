@@ -489,8 +489,11 @@ namespace SOOT {
   void
   ClearObject(pTHX_ SV* thePerlObject)
   {
-    SV* inner = (SV*)SvRV(thePerlObject);
-    delete INT2PTR(TObject*, SvIV(inner));
+    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
+      SV* inner = (SV*)SvRV(thePerlObject);
+      delete INT2PTR(TObject*, SvIV(inner));
+      sv_setiv(inner, 0);
+    }
   }
 
 } // end namespace SOOT
