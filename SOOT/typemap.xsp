@@ -1,6 +1,5 @@
 
 %typemap{TGraphFloatArray}{parsed}{%SV*%}{%
-cout << "CALLED" << endl;
   double* cary = $1;
   const int nElems = THIS->GetN();
   AV* av = newAV();
