@@ -12,6 +12,7 @@ require TArray;
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
 
+use vars qw/$gApplication $gSystem $gRandom/;
 our %EXPORT_TAGS = ( 'all' => [ qw(
   $gApplication $gSystem $gRandom
 ) ] );
