@@ -64,7 +64,7 @@ is(type([123.2, 1.3, ""]), 'FLOAT_ARRAY');
 is(type(bless ['a', 12] => 'TH1D'), 'TOBJECT');
 
 # does this do something utterly evil? (SEGV?)
-my $obj = bless([] => 'TH1D');
+$obj = bless([] => 'TH1D');
 isa_ok(bless($obj => 'TH2'), 'TH2');
 
 pass("REACHED END");
