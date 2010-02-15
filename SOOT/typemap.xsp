@@ -1,12 +1,15 @@
 
 %typemap{TGraphFloatArray}{parsed}{%SV*%}{%
   double* cary = $1;
-  const int nElems = THIS->GetN();
-  AV* av = newAV();
-  $$ = newRV_noinc((SV*)av);
-  av_extend(av, nElems-1);
-  for (int i = 0; i < nElems; ++i) {
-    av_store(av, i, newSVnv(cary[i]));
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetN();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
   }
 %};
 
