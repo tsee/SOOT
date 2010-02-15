@@ -16,6 +16,7 @@
 // for which there is a ROOT_XSP/...xsp file
 #include "rootclasses.h"
 
+#include "CPerlTypeConversion.h"
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"

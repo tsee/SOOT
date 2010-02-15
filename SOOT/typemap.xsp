@@ -1,114 +1,34 @@
 
 %typemap{TGraphFloatArray}{parsed}{%SV*%}{%
-  double* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetN();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetN());
 %};
 
 %typemap{TH1FloatArray}{parsed}{%SV*%}{%
-  double* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetNbinsX();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetNbinsX());
 %};
 
 %typemap{TArrayDoubleArray}{parsed}{%SV*%}{%
-  double* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetSize();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetSize());
 %};
 
 %typemap{TArrayFloatArray}{parsed}{%SV*%}{%
-  float* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetSize();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::FloatVecToAV<float>(aTHX_ $1, THIS->GetSize());
 %};
 
 
 %typemap{TArrayLongArray}{parsed}{%SV*%}{%
-  long int* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetSize();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::IntegerVecToAV<long int>(aTHX_ $1, THIS->GetSize());
 %};
 
 %typemap{TArrayIntArray}{parsed}{%SV*%}{%
-  int* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetSize();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::IntegerVecToAV<int>(aTHX_ $1, THIS->GetSize());
 %};
 
 %typemap{TArrayCharArray}{parsed}{%SV*%}{%
-  char* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetSize();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::IntegerVecToAV<char>(aTHX_ $1, THIS->GetSize());
 %};
 
 %typemap{TArrayShortArray}{parsed}{%SV*%}{%
-  short* cary = $1;
-  if (cary == NULL) {
-    $$ = &PL_sv_undef;
-  } else {
-    const int nElems = THIS->GetSize();
-    AV* av = newAV();
-    $$ = newRV_noinc((SV*)av);
-    av_extend(av, nElems-1);
-    for (int i = 0; i < nElems; ++i)
-      av_store(av, i, newSVnv(cary[i]));
-  }
+  $$ = SOOT::IntegerVecToAV<short>(aTHX_ $1, THIS->GetSize());
 %};
 
