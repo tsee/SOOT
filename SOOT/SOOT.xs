@@ -69,6 +69,10 @@ PROTOTYPES: DISABLE
 
 INCLUDE: XS/SOOTBOOT.xs
 
+INCLUDE: XS/SOOTAPI.xs
+
+INCLUDE: XS/TObject.xs
+
 INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp SOOT.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
@@ -104,36 +108,4 @@ CallMethod(className, methodName, argv)
     arguments = (AV*)SvRV(argv);
     RETVAL = SOOT::CallMethod(aTHX_ className, methodName, arguments);
   OUTPUT: RETVAL
-
-SV*
-type(sv)
-    SV* sv
-  INIT:
-    SOOT::BasicType type;
-  PPCODE:
-    dXSTARG;
-    type = GuessType(aTHX_ sv);
-    const char* type_str = SOOT::gBasicTypeStrings[type];
-    XPUSHp(type_str, strlen(type_str));
-
-SV*
-cproto(sv)
-    SV* sv
-  INIT:
-    SOOT::BasicType type;
-  PPCODE:
-    dXSTARG;
-    type = GuessType(aTHX_ sv);
-    STRLEN len;
-    const char* cproto = CProtoFromType(aTHX_ sv, len, type);
-    XPUSHp(cproto, len);
-
-
-MODULE = SOOT		PACKAGE = TObject
-
-void
-DESTROY(self)
-    SV* self
-  PPCODE:
-    SOOT::ClearObject(aTHX_ self);
 

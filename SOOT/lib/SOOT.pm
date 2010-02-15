@@ -1,5 +1,4 @@
 package SOOT;
-
 use 5.010000;
 use strict;
 use warnings;
@@ -13,53 +12,39 @@ XSLoader::load('SOOT', $VERSION);
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
-SOOT - Perl extension for blah blah blah
+SOOT - Use ROOT from Perl
 
 =head1 SYNOPSIS
 
   use SOOT;
-  blah blah blah
+  # more to follow
 
 =head1 DESCRIPTION
 
-Stub documentation for SOOT, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
+SOOT is a Perl extension for using the ROOT library. It is very similar
+to the Ruby-ROOT or PyROOT extensions for their respective languages.
+Specifically, SOOT was implemented after the model of Ruby-ROOT.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
+L<http://root.cern.ch>
 
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+L<SOOT::API>
 
 =head1 AUTHOR
 
-Steffen Mueller, E<lt>tsee@E<gt>
+Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2010 by Steffen Mueller
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.0 or,
-at your option, any later version of Perl 5 you may have available.
-
+SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it and/or modify
+it under the same terms as ROOT itself, that is, the GNU Lesser General Public License.
+A copy of the full license text is available from the distribution as the F<LICENSE> file.
 
 =cut
+
