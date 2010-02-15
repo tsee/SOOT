@@ -40,6 +40,18 @@ all exported functions. You can import all functions with
 
   use SOOT::API ':all';
 
+=head1 FUNCTIONS
+
+=head2 type
+
+Tries to guess the SOOT type of its argument and returns a
+string such as C<"INTEGER">.
+
+=head2 cproto
+
+Tries to guess the SOOT type of its argument and returns a
+string such as C<"int"> or C<"TGraph">.
+
 =head1 SEE ALSO
 
 L<SOOT>
