@@ -81,20 +81,6 @@ namespace SOOT {
    */
   SV* EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className);
 
-  /** Given a Perl object (SV*) that's known to be one of our mock TObject like
-   *  creatures, fetch the class name and the ROOT object.
-   */
-  TObject* LobotomizeObject(pTHX_ SV* thePerlObject, char*& className);
-  /// Same as the other LobotomizeObject but ignoring the class name
-  TObject* LobotomizeObject(pTHX_ SV* thePerlObject);
-  /// Free the underlying TObject
-  void ClearObject(pTHX_ SV* thePerlObject);
-
-  class ROOTResolver {
-    public:
-      ROOTResolver() {};
-      ~ROOTResolver() {};
-  };
 } // end namespace SOOT
 
 #endif

@@ -10,6 +10,7 @@
 #include <Class.h>
 
 #include "ClassGenerator.h"
+#include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
 
 #ifdef __cplusplus
