@@ -6,6 +6,7 @@ use warnings;
 our $VERSION = '0.01';
 
 require TObject;
+require TArray;
 
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
