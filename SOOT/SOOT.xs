@@ -14,6 +14,7 @@
 // manually include headers for classes with explicit wrappers
 #include <TGraph.h>
 #include <TGraphErrors.h>
+#include <TGraphAsymmErrors.h>
 
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
@@ -84,6 +85,8 @@ INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/SOOT.xsp
 INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraph.xsp
 
 INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraphErrors.xsp
+
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraphAsymmErrors.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 
