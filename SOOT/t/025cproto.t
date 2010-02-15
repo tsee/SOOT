@@ -2,64 +2,65 @@ use strict;
 use warnings;
 use Test::More tests => 29;
 use SOOT;
+use SOOT::API qw/:all/;
 pass();
 
-is(SOOT::cproto("foo"), "char*");
-is(SOOT::cproto(9), "int");
-is(SOOT::cproto(9.1), "double");
+is(cproto("foo"), "char*");
+is(cproto(9), "int");
+is(cproto(9.1), "double");
 
 my $int = 2;
 my $float = 3.1;
 my $str = "fooo";
 
-is(SOOT::cproto($str), "char*");
-is(SOOT::cproto($int), "int");
-is(SOOT::cproto($float), "double", "float var has double prototype");
+is(cproto($str), "char*");
+is(cproto($int), "int");
+is(cproto($float), "double", "float var has double prototype");
 
 my $foo = "123";
-is(SOOT::cproto($foo), "char*");
+is(cproto($foo), "char*");
 
 $foo = "123"+2;
-is(SOOT::cproto($foo), "int");
+is(cproto($foo), "int");
 
 $foo = "123.2"+2;
-is(SOOT::cproto($foo), "double");
+is(cproto($foo), "double");
 
 $foo = (.2*3.3)."";
-is(SOOT::cproto($foo), "char*");
-is(SOOT::cproto($foo*$foo), "double");
+is(cproto($foo), "char*");
+is(cproto($foo*$foo), "double");
 
-is(SOOT::cproto([]), undef);
-is(SOOT::cproto({}), undef);
-is(SOOT::cproto(sub {}), undef);
-is(SOOT::cproto(\1), undef);
-is(SOOT::cproto(\$foo), undef, "reference to scalar does not have known prototype");
+is(cproto([]), undef);
+is(cproto({}), undef);
+is(cproto(sub {}), undef);
+is(cproto(\1), undef);
+is(cproto(\$foo), undef, "reference to scalar does not have known prototype");
 
 my $scalar;
 my $obj;
 $obj = bless(\$scalar => 'TObject');
-is(SOOT::cproto($obj), 'TObject*');
+is(cproto($obj), 'TObject*');
 $obj = bless(\$scalar => 'TH1D');
-is(SOOT::cproto($obj), 'TH1D*');
+is(cproto($obj), 'TH1D*');
 
 $obj = bless([] => 'TObject');
-is(SOOT::cproto($obj), 'TObject*');
+is(cproto($obj), 'TObject*');
 $obj = bless([] => 'TH1D');
-is(SOOT::cproto($obj), 'TH1D*');
+is(cproto($obj), 'TH1D*');
 
 
 $obj = bless({} => 'TObject');
-is(SOOT::cproto($obj), 'TObject*');
+is(cproto($obj), 'TObject*');
 $obj = bless({} => 'TH1D');
-is(SOOT::cproto($obj), 'TH1D*');
+is(cproto($obj), 'TH1D*');
 
 $obj = bless({} => 'Something::Else');
-is(SOOT::cproto($obj), undef);
+is(cproto($obj), undef);
 
-is(SOOT::cproto(['a', 12]), 'char**');
-is(SOOT::cproto([123, 1.3, ""]), 'int*');
-is(SOOT::cproto([123.2, 1.3, ""]), 'double*');
+is(cproto(['a', 12]), 'char**');
+is(cproto([123, 1.3, ""]), 'int*');
+is(cproto([123.2, 1.3, ""]), 'double*');
 
-is(SOOT::cproto(bless ['a', 12] => 'TH1D'), 'TH1D*');
+is(cproto(bless ['a', 12] => 'TH1D'), 'TH1D*');
 
 pass("REACHED END");
