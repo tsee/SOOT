@@ -2,6 +2,8 @@
 #include "ROOTResolver.h"
 #include "TObjectEncapsulation.h"
 
+#include "PerlCTypeConversion.h"
+#include "CPerlTypeConversion.h"
 #include "SOOTClassnames.h"
 #include <string>
 #include <iostream>
@@ -358,6 +360,7 @@ namespace SOOT {
       SV* const* elem = av_fetch(args, iElem, 0);
       if (elem == NULL)
         croak("av_fetch failed. Severe error.");
+      size_t len;
       switch (argTypes[iElem]) {
         case eINTEGER:
           theFunc.SetArg((long)SvIV(*elem));
@@ -369,14 +372,27 @@ namespace SOOT {
           theFunc.SetArg((long)SvPV_nolen(*elem));
           break;
         case eARRAY_INTEGER:
-        case eARRAY_FLOAT:
-        case eARRAY_STRING:
+        cout << "INTEGER" << endl;
+          // FIXME memory leak?
           // allocate C-array here and convert the AV
-          croak("FIXME Array arguments to be implemented");
+          theFunc.SetArg((long)SOOT::AVToIntegerVec<int>(aTHX_ (AV*)*elem, len));
+          break;
+        case eARRAY_FLOAT:
+        cout << "FLAOT" << endl;
+          // FIXME memory leak?
+          // allocate C-array here and convert the AV
+          theFunc.SetArg((long)SOOT::AVToFloatVec<double>(aTHX_ (AV*)*elem, len));
+          break;
+        case eARRAY_STRING:
+          // FIXME memory leak?
+          // allocate C-array here and convert the AV
+          theFunc.SetArg((long)SOOT::AVToCStringVec(aTHX_ (AV*)*elem, len));
           break;
         case eTOBJECT:
           theFunc.SetArg((long)LobotomizeObject(aTHX_ *elem));
           break;
+        default:
+          croak("BAD ARGUMENT");
       }
     }
     return;
