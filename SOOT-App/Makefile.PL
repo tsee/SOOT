@@ -13,5 +13,6 @@ WriteMakefile(
     }, # e.g., Module::Name => 1.1
     ABSTRACT_FROM     => 'lib/SOOT/App.pm', # retrieve abstract from module
     AUTHOR            => 'Steffen Mueller <smueller@cpan.org>',
+    EXE_FILES         => [qw(bin/soot)],
 );
 
