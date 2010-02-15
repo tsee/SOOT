@@ -5,6 +5,11 @@
 #include <TBaseClass.h>
 #include <TClass.h>
 #include <TList.h>
+#include <TROOT.h>
+#include <TSystem.h>
+#include <TRandom.h>
+#include <TApplication.h>
+#include <TBenchmark.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +33,9 @@ namespace SOOT {
 
   /// Iterates over all known classes (cf. buildtools/ in SOOT) and calls MakeClassStub
   void GenerateClassStubs(pTHX);
+
+  void InitializeGlobals(pTHX);
+  void SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className);
 } // end namespace SOOT
 
 #endif

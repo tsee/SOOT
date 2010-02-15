@@ -5,11 +5,19 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use base 'Exporter';
 require TObject;
 require TArray;
 
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
+
+our %EXPORT_TAGS = ( 'all' => [ qw(
+  $gApplication $gSystem $gRandom
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT;
 
 1;
 __END__

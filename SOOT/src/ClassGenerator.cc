@@ -2,10 +2,10 @@
 #include "ClassGenerator.h"
 
 #include "SOOTClassnames.h"
+#include "TObjectEncapsulation.h"
 #include <string>
 #include <iostream>
 #include <sstream>
-
 
 using namespace std;
 
@@ -46,5 +46,24 @@ namespace SOOT {
     }
   }
 
+  void
+  InitializeGlobals(pTHX)
+  {
+    if (!gApplication)
+      gApplication = new TApplication("SOOT App", NULL, NULL);
+    SetPerlGlobal(aTHX_ "SOOT::gApplication", gApplication, "TApplication");
+    SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem, gSystem->ClassName());
+    SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom, gRandom->ClassName());
+    //SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT, gROOT->ClassName());
+    //SetPerlGlobal(aTHX_ "SOOT::gBenchmark", gBenchmark, gBenchmark->ClassName());
+    // FIXME more missing...
+  }
+
+  void
+  SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className)
+  {
+    SV* global = get_sv(variable, 1);
+    sv_setsv(global, sv_2mortal(SOOT::EncapsulateObject(aTHX_ cobj, className)));
+  }
 } // end namespace SOOT
 

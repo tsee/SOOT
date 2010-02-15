@@ -1,5 +1,5 @@
 
-/* must load ROOT crap veeery early due to pollution */
+/* must load polluting ROOT stuff veeery early due to pollution */
 #undef Copy
 
 #include <TROOT.h>
@@ -10,6 +10,10 @@
 #include <Class.h>
 #include <TBaseClass.h>
 #include <TList.h>
+#include <TSystem.h>
+#include <TApplication.h>
+#include <TRandom.h>
+#include <TBenchmark.h>
 
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers
