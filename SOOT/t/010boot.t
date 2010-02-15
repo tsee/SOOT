@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 19;
 use SOOT;
 pass();
 is_deeply(\@TH1D::ISA, ["TH1", "TArrayD"]);
@@ -21,7 +21,7 @@ my $tgraph = eval { TGraph->new(12); };
 #my $tgraph = eval { TGraph->new(3, [1.,2,3], [1.,2,3]); };
 ok(!$@, "No error on TGraph->new");
 diag($@) if $@;
-use Data::Dumper; warn Dumper $tgraph;
+
 ok(defined $tgraph);
 isa_ok($tgraph, 'TGraph');
 isa_ok($tgraph, 'TObject');
@@ -29,6 +29,22 @@ isa_ok($tgraph, 'TObject');
 my $n = eval { $tgraph->GetN(); };
 ok(!$@, "No error on TGraph->GetN");
 ok((defined $n) && ($n == 12), "GetN works!");
+undef $tgraph;
+
+$tgraph = eval { TGraph->new(3, [1., 2., 4.], [0.5, 20., 10.]); };
+ok(!$@, "No error on full TGraph->new");
+diag($@) if $@;
+
+ok(defined $tgraph);
+isa_ok($tgraph, 'TGraph');
+isa_ok($tgraph, 'TObject');
+
+$n = eval { $tgraph->GetN(); };
+ok(!$@, "No error on TGraph->GetN");
+is($n, 3, "GetN works!");
+my $ary = $tgraph->GetX();
+is_deeply($ary, [1.,2.,4.]);
+
 undef $tgraph;
 
 pass("alive");
