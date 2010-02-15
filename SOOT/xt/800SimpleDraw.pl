@@ -12,20 +12,5 @@ $g->SetPoint(1, 3., 4.);
 $g->SetPointError(1, 0.5, 0.5);
 $g->SetPoint(2, 5., 6.);
 $g->SetPointError(2, 0.5, 0.5);
-my $t = TCanvas->new("myCanvas");
+my $cv = TCanvas->new("myCanvas");
 $g->Draw("ALP");
-$t->SaveAs("t.eps");
-
-print "X: ";
-$g->GetX()->print;
-
-print "\nEX: ";
-$g->GetEX()->print;
-
-print "\nY: ";
-$g->GetY()->print;
-
-print "\nEY: ";
-$g->GetEY()->print;
-
-print "\n";
