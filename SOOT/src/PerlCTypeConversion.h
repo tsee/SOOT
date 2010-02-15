@@ -21,7 +21,6 @@ extern "C" {
 // This contains various conversion functions for
 // copying a C-level structure to Perl structures and vice versa
 
-
 namespace SOOT {
   template <typename T>
   T*

@@ -372,21 +372,19 @@ namespace SOOT {
           theFunc.SetArg((long)SvPV_nolen(*elem));
           break;
         case eARRAY_INTEGER:
-        cout << "INTEGER" << endl;
           // FIXME memory leak?
           // allocate C-array here and convert the AV
-          theFunc.SetArg((long)SOOT::AVToIntegerVec<int>(aTHX_ (AV*)*elem, len));
+          theFunc.SetArg((long)SOOT::AVToIntegerVec<int>(aTHX_ (AV*)SvRV(*elem), len));
           break;
         case eARRAY_FLOAT:
-        cout << "FLAOT" << endl;
           // FIXME memory leak?
           // allocate C-array here and convert the AV
-          theFunc.SetArg((long)SOOT::AVToFloatVec<double>(aTHX_ (AV*)*elem, len));
+          theFunc.SetArg((long)SOOT::AVToFloatVec<double>(aTHX_ (AV*)SvRV(*elem), len));
           break;
         case eARRAY_STRING:
           // FIXME memory leak?
           // allocate C-array here and convert the AV
-          theFunc.SetArg((long)SOOT::AVToCStringVec(aTHX_ (AV*)*elem, len));
+          theFunc.SetArg((long)SOOT::AVToCStringVec(aTHX_ (AV*)SvRV(*elem), len));
           break;
         case eTOBJECT:
           theFunc.SetArg((long)LobotomizeObject(aTHX_ *elem));
