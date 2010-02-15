@@ -12,9 +12,9 @@
 #include <TList.h>
 
 // manually include headers for classes with explicit wrappers
-#include <TGraph.h>
-#include <TGraphErrors.h>
-#include <TGraphAsymmErrors.h>
+// rootclasses.h was auto-generated to include all ROOT headers
+// for which there is a ROOT_XSP/...xsp file
+#include "rootclasses.h"
 
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
@@ -80,13 +80,7 @@ INCLUDE: XS/SOOTAPI.xs
 
 INCLUDE: XS/TObject.xs
 
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/SOOT.xsp
-
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraph.xsp
-
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraphErrors.xsp
-
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraphAsymmErrors.xsp
+INCLUDE: rootclasses.xsinclude
 
 MODULE = SOOT		PACKAGE = SOOT
 

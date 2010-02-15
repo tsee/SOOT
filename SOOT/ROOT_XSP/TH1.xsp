@@ -1,0 +1,6 @@
+%module{SOOT};
+
+class TH1 {
+  TH1FloatArray GetIntegral();
+};
+

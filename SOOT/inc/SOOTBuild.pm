@@ -19,6 +19,7 @@ our @Libs = qw();
 our @Typemaps = qw(
   perlobject.map
   typemap
+  rootclasses.map
 );
 
 sub GetMMArgs {

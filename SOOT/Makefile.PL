@@ -8,7 +8,8 @@ use inc::SOOTBuild;
 my $CC = 'g++';
 
 # todo move to later build stage
-system($^X, File::Spec->catfile('buildtools', 'genclassnames.pl')) and die $!;
+system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'genclassnames.pl')) and die $!;
+system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_root_xsp_include.pl')) and die $!;
 
 WriteMakefile(
     inc::SOOTBuild::GetMMArgs('.'),
@@ -19,9 +20,9 @@ WriteMakefile(
     }, # e.g., Module::Name => 1.1
     ABSTRACT_FROM     => 'lib/SOOT.pm', # retrieve abstract from module
     AUTHOR            => 'Steffen Mueller <smueller@cpan.org>',
-    META_MERGE => { no_index => { directory => 'buildtools', }, },
+    META_MERGE => { no_index => { directory => [qw(buildtools inc)], }, },
     clean => {
-      FILES => "src/SOOTClassnames.cc",
+      FILES => "src/SOOTClassnames.cc rootclasses.xsinclude rootclasses.h rootclasses.map",
     },
 );
 

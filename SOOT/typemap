@@ -1,7 +1,4 @@
 SOOT*	O_OBJECT
-TGraph* O_OBJECT
-TGraphErrors* O_OBJECT
-TGraphAsymmErrors* O_OBJECT
 std::vector< double >*	T_VECTORDOUBLE
 std::vector< Vec >*		T_VECTORVEC
 std::istream*		T_ISTREAM
