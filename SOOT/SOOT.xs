@@ -17,6 +17,7 @@
 #include "rootclasses.h"
 
 #include "CPerlTypeConversion.h"
+#include "PerlCTypeConversion.h"
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
