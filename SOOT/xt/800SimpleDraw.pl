@@ -1,5 +1,7 @@
 use strict;
 use warnings;
+use Data::Dumper;
+use autobox::Core;
 
 use SOOT;
 
@@ -14,6 +16,16 @@ my $t = TCanvas->new("myCanvas");
 $g->Draw("ALP");
 $t->SaveAs("t.eps");
 
-my $x = $g->GetX();
-use Data::Dumper; warn Dumper $x;
+print "X: ";
+$g->GetX()->print;
 
+print "\nEX: ";
+$g->GetEX()->print;
+
+print "\nY: ";
+$g->GetY()->print;
+
+print "\nEY: ";
+$g->GetEY()->print;
+
+print "\n";
