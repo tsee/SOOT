@@ -44,9 +44,9 @@ namespace SOOT {
 
   template <typename T>
   std::vector<T>
-  AVToFloatVec(pTHX_ AV* av, size_t& len)
+  AVToFloatVec(pTHX_ AV* av)
   {
-    len = av_len(av)+1;
+    size_t len = av_len(av)+1;
     if (len == 0)
       return NULL;
     SV** elem;
@@ -82,9 +82,9 @@ namespace SOOT {
 
   template <typename T>
   std::vector<T>
-  AVToIntegerVec(pTHX_ AV* av, size_t& len)
+  AVToIntegerVec(pTHX_ AV* av)
   {
-    len = av_len(av)+1;
+    size_t len = av_len(av)+1;
     if (len == 0)
       return NULL;
     SV** elem;
@@ -99,9 +99,9 @@ namespace SOOT {
   }
 
 
-  char** AVToCStringCVec(pTHX_ AV* av, size_t& len);
-  std::vector<char*> AVToCStringVec(pTHX_ AV* av, size_t& len);
-  std::vector<std::string> AVToStringVec(pTHX_ AV* av, size_t& len);
+  char** AVToCStringVec(pTHX_ AV* av, size_t& len);
+  std::vector<char*> AVToCStringVec(pTHX_ AV* av);
+  std::vector<std::string> AVToStringVec(pTHX_ AV* av);
 
 
 } // end namespace SOOT

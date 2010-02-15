@@ -7,7 +7,7 @@ using namespace std;
 
 namespace SOOT {
   char**
-  AVToCStringCVec(pTHX_ AV* av, size_t& len)
+  AVToCStringVec(pTHX_ AV* av, size_t& len)
   {
     len = av_len(av)+1;
     if (len == 0)
@@ -25,9 +25,9 @@ namespace SOOT {
 
   
   std::vector<char*>
-  AVToCStringVec(pTHX_ AV* av, size_t& len)
+  AVToCStringVec(pTHX_ AV* av)
   {
-    len = av_len(av)+1;
+    size_t len = av_len(av)+1;
     if (len == 0)
       return vector<char*>();
     SV** elem;
@@ -43,9 +43,9 @@ namespace SOOT {
 
 
   std::vector<std::string>
-  AVToStringVec(pTHX_ AV* av, size_t& len)
+  AVToStringVec(pTHX_ AV* av)
   {
-    len = av_len(av)+1;
+    size_t len = av_len(av)+1;
     if (len == 0)
       return vector<string>(0);
     SV** elem;
