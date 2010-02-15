@@ -1,0 +1,6 @@
+%module{SOOT};
+
+class TArrayI {
+  TArrayIntArray GetArray();
+};
+

@@ -27,3 +27,88 @@
   }
 %};
 
+%typemap{TArrayDoubleArray}{parsed}{%SV*%}{%
+  double* cary = $1;
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetSize();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
+  }
+%};
+
+%typemap{TArrayFloatArray}{parsed}{%SV*%}{%
+  float* cary = $1;
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetSize();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
+  }
+%};
+
+
+%typemap{TArrayLongArray}{parsed}{%SV*%}{%
+  long int* cary = $1;
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetSize();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
+  }
+%};
+
+%typemap{TArrayIntArray}{parsed}{%SV*%}{%
+  int* cary = $1;
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetSize();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
+  }
+%};
+
+%typemap{TArrayCharArray}{parsed}{%SV*%}{%
+  char* cary = $1;
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetSize();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
+  }
+%};
+
+%typemap{TArrayShortArray}{parsed}{%SV*%}{%
+  short* cary = $1;
+  if (cary == NULL) {
+    $$ = &PL_sv_undef;
+  } else {
+    const int nElems = THIS->GetSize();
+    AV* av = newAV();
+    $$ = newRV_noinc((SV*)av);
+    av_extend(av, nElems-1);
+    for (int i = 0; i < nElems; ++i)
+      av_store(av, i, newSVnv(cary[i]));
+  }
+%};
+
