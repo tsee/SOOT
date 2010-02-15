@@ -8,6 +8,11 @@
 #include <Reflex/Scope.h>
 #include <CallFunc.h>
 #include <Class.h>
+#include <TBaseClass.h>
+#include <TList.h>
+
+// manually include headers for classes with explicit wrappers
+#include <TGraph.h>
 
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
@@ -73,7 +78,9 @@ INCLUDE: XS/SOOTAPI.xs
 
 INCLUDE: XS/TObject.xs
 
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp SOOT.xsp
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/SOOT.xsp
+
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/TGraph.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 

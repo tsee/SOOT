@@ -6,6 +6,18 @@ use File::Spec;
 open my $h_oh, '>', File::Spec->catfile('src', 'SOOTClassnames.h') or die $!;
 open my $cc_oh, '>', File::Spec->catfile('src', 'SOOTClassnames.cc') or die $!;
 
+# These don't have dictionaries...
+my %knownBadClasses = map {($_=>1)} qw(
+  TDSet
+  TGLBoundingBox
+  TGLCamera
+  TGLContext
+  TGLFormat
+  TGenCollectionStreamer
+  TTreeFormula
+  TVirtualRefProxy
+);
+
 my %classes;
 open my $fh, '<', File::Spec->catfile('buildtools', 'caps') or die $!;
 while (<$fh>) {
@@ -17,7 +29,9 @@ while (<$fh>) {
       (\S+)
       \s*$
   }x or next;
-  ++$classes{$1};
+  my $className = $1;
+  next if exists $knownBadClasses{$className};
+  ++$classes{$className};
 }
 close $fh;
 my $nClassNames = keys %classes;
