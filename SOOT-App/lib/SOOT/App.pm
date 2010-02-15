@@ -23,6 +23,8 @@ sub run {
       }
     };
   }
+  package main;
+  SOOT->import(':all');
   return $repl->run();
 }
 
