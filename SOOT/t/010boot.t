@@ -13,9 +13,12 @@ eval { TH1D->Foo(); };
 ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
 diag($@) if $@;
 
-eval { TAdvancedGraphicsDialog->DoesntExist(); };
-ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
-diag($@) if $@;
+TODO: {
+  local $TODO = "TAdvancedGraphicsDialog isn't loaded by default => need to figure out dynamic .so loading";
+  eval { TAdvancedGraphicsDialog->DoesntExist(); };
+  ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
+  diag($@) if $@;
+}
 
 my $tgraph = eval { TGraph->new(12); };
 #my $tgraph = eval { TGraph->new(3, [1.,2,3], [1.,2,3]); };
