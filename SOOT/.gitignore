@@ -14,3 +14,6 @@ SOOT.c
 rootclasses.xsinclude
 rootclasses.h
 rootclasses.map
+.root_hist
+blib
+MANIFEST
