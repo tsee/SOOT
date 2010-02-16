@@ -351,6 +351,20 @@ namespace SOOT {
     return type;
   }
 
+  bool
+  CProtoIntegerToFloat(std::vector<std::string>& cproto)
+  {
+    const unsigned int nprotos = cproto.size();
+    bool changed = false;
+    for (unsigned int i = 0; i < nprotos; ++i) {
+      if (cproto[i] == string("int*")) {
+        cproto[i] = string("double*");
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
   void
   SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
                      const vector<BasicType>& argTypes, const unsigned int nSkip = 1)
@@ -485,18 +499,37 @@ namespace SOOT {
       mInfo = theClass.GetMethod(methName,
                          (cprotoStr == NULL ? "" : cprotoStr),
                          &offset);
+      if (!mInfo.IsValid() && cprotoStr != NULL) {
+        if (CProtoIntegerToFloat(cproto)) { // found int* => double*
+          char* newCProtoStr = JoinCProto(cproto);
+          mInfo = theClass.GetMethod(methName,
+                         newCProtoStr,
+                         &offset);
+          free(newCProtoStr);
+        }
+      }
       receiver = 0;
     }
     else { // object method
       mInfo = theClass.GetMethod(methName,
                          (cprotoStr == NULL ? "" : cprotoStr),
                          &offset);
+      if (!mInfo.IsValid() && cprotoStr != NULL) {
+        if (CProtoIntegerToFloat(cproto)) { // found int* => double*
+          char* newCProtoStr = JoinCProto(cproto);
+          mInfo = theClass.GetMethod(methName,
+                         newCProtoStr,
+                         &offset);
+          free(newCProtoStr);
+        }
+      }
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
 
     if (!mInfo.IsValid() || !mInfo.Name())
       croak("Can't locate method \"%s\" via package \"%s\"",
             methName, className);
+    free(cprotoStr);
 
     // Determine return type
     char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();

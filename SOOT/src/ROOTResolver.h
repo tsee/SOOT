@@ -67,7 +67,11 @@ namespace SOOT {
    */
   void CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
                             std::vector<std::string>& cproto, const unsigned int nSkip);
+  /// Given a vector of strings, concatenates them to a single C string. Skips the first one by default.
   char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip);
+
+  /// Map any int* types to float*'s
+  bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
 
   void SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
                           const std::vector<BasicType>& argTypes, const unsigned int nSkip);
