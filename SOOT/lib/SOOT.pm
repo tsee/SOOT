@@ -29,7 +29,7 @@ SOOT - Use ROOT from Perl
 
 =head1 SYNOPSIS
 
-  use SOOT;
+  use SOOT ':all';
   # more to follow
 
 =head1 DESCRIPTION
@@ -52,11 +52,29 @@ and findable via your C<PATH> environment variable. Alternatively, you
 may set the C<ROOTSYS> environment variable. Please refer to the ROOT
 manual for details.
 
+=head2 Exports
+
+By default, using SOOT does not export anything into your namespace.
+You may choose to import the various ROOT-related global variables
+into your namespace either by explicitly listing them as arguments
+to C<use SOOT> or by importing the C<:all> tag:
+
+  use SOOT ':all';
+  # you now have $gApplication, $gSystem etc
+
+  use SOOT qw($gApplication $gSystem);
+  # you now have only $gApplication and $gSystem
+  # you always have $SOOT::gApplication, etc!
+
 =head1 SEE ALSO
 
 L<http://root.cern.ch>
 
-L<SOOT::API>
+L<SOOT::API> exposes some of the underlying SOOT-internals.
+
+L<SOOT::App> implements a F<root.exe>/CInt-like front-end
+using L<Devel::REPL>. It is not part of SOOT and is available
+separately from CPAN.
 
 =head1 AUTHOR
 
