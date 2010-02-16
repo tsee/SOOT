@@ -80,6 +80,7 @@ namespace SOOT {
       
   SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
 
+  void CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto);
 } // end namespace SOOT
 
 #endif

@@ -526,10 +526,9 @@ namespace SOOT {
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
 
-    if (!mInfo.IsValid() || !mInfo.Name())
-      croak("Can't locate method \"%s\" via package \"%s\"",
-            methName, className);
     free(cprotoStr);
+    if (!mInfo.IsValid() || !mInfo.Name())
+      CroakOnInvalidMethod(aTHX_ className, methName, c, cproto);
 
     // Determine return type
     char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
@@ -552,6 +551,13 @@ namespace SOOT {
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);
     return &PL_sv_undef;
+  }
+
+  void
+  CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto)
+  {
+    croak("Can't locate method \"%s\" via package \"%s\"",
+          methName, className);
   }
 
 } // end namespace SOOT
