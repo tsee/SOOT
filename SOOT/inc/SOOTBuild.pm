@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use File::Spec;
 use ExtUtils::MakeMaker;
+use Config;
 
 # simply a container for multiple Makefile.PL's configuration
 
@@ -11,6 +12,23 @@ sub striprun {
   chomp $inc;
   return $inc;
 }
+
+# check if we can run some command (From Module::Install::Can)
+sub can_run {
+  my ($cmd) = @_;
+
+  my $_cmd = $cmd;
+  return $_cmd if (-x $_cmd or $_cmd = MM->maybe_command($_cmd));
+
+  for my $dir ((split /$Config::Config{path_sep}/, $ENV{PATH}), '.') {
+    next if $dir eq '';
+    my $abs = File::Spec->catfile($dir, $_[1]);
+    return $abs if (-x $abs or $abs = MM->maybe_command($abs));
+  }
+
+  return;
+}
+
 
 our $CC = 'g++';
 
@@ -21,6 +39,16 @@ our @Typemaps = qw(
   typemap
   rootclasses.map
 );
+
+our $ROOTConfig = 'root-config';
+if (!can_run($ROOTConfig)) {
+  if (defined $ENV{ROOTSYS}) {
+    $ROOTConfig = File::Spec->catfile($ENV{ROOTSYS}, 'bin', 'root-config');
+  }
+  if (!can_run($ROOTConfig)) {
+    die "Cannot find and run the 'root-config' tool. Do you have ROOT installed and set up correctly?\n";
+  }
+}
 
 sub GetMMArgs {
   my $subdir = shift;
@@ -41,26 +69,27 @@ sub GetMMArgs {
   }
   
   my @libs = @Libs;
-  push @libs, striprun('root-config --libs');
+  push @libs, striprun($ROOTConfig, '--libs');
 
   use Config;
   my @mmargs = (
-      LDDLFLAGS => $Config::Config{lddlflags} . ' ' . striprun('root-config --ldflags'),
-      LIBS              => join(' ', @libs), # e.g., '-lm'
-      DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
-      #INC               => '-I. -Isrc', # e.g., '-I. -I/usr/include/other'
-      OBJECT            => '$(O_FILES)', # link all the C files too
-      'XSOPT'             => '-C++ -hiertype',
-      'TYPEMAPS'          => \@typemaps,
-      'CC'                => $CC,
-      'LD'                => '$(CC)',
-      'INC' => striprun('root-config --cflags') . ' ' . join(' ', map {"-I$_"} @inc),
+      LDDLFLAGS => $Config::Config{lddlflags} . ' ' . striprun($ROOTConfig, '--ldflags'),
+      LIBS          => join(' ', @libs), # e.g., '-lm'
+      DEFINE        => '', # e.g., '-DHAVE_SOMETHING'
+      #INC          => '-I. -Isrc', # e.g., '-I. -I/usr/include/other'
+      OBJECT        => '$(O_FILES)', # link all the C files too
+      'XSOPT'       => '-C++ -hiertype',
+      'TYPEMAPS'    => \@typemaps,
+      'CC'          => $CC,
+      'LD'          => '$(CC)',
+      'INC'         => striprun($ROOTConfig, '--cflags') . ' ' . join(' ', map {"-I$_"} @inc),
   );
   return @mmargs;
 }
 
 package ExtUtils::MM;
 
+# for including the object files from src/ into the linking step
 sub init_dirscan {
   my $self = shift;
   my @ret = $self->SUPER::init_dirscan(@_);
