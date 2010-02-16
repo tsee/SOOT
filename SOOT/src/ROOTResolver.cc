@@ -556,8 +556,31 @@ namespace SOOT {
   void
   CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto)
   {
-    croak("Can't locate method \"%s\" via package \"%s\"",
-          methName, className);
+    ostringstream msg;
+    char* cprotoStr = JoinCProto(cproto);
+    if (cprotoStr == NULL)
+      cprotoStr = strdup("void");
+
+    vector<string> candidates;
+    TIter next(c->GetListOfAllPublicMethods());
+    TMethod* meth;
+    while ((meth = (TMethod*)next())) {
+      if (strEQ(meth->GetName(), methName)) {
+        candidates.push_back(string(meth->GetPrototype()));
+      }
+    }
+
+    msg << "Can't locate method \"" << methName << "\" via package \""
+        << className << "\". From the arguments you supplied, the following C prototype was calculated:\n  "
+        << className << "::" << methName << "(" << cprotoStr << ")";
+    free(cprotoStr);
+    if (!candidates.empty()) {
+      msg << "\nThere were the following methods of the same name, but with a different prototype:";
+      for (unsigned int iCand = 0; iCand < candidates.size(); ++iCand) {
+        msg << "\n  " << candidates[iCand];
+      }
+    }
+    croak(msg.str().c_str());
   }
 
 } // end namespace SOOT
