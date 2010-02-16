@@ -1,4 +1,4 @@
-use 5.010000;
+use 5.008001;
 use ExtUtils::MakeMaker;
 use lib '..';
 use inc::SOOTBuild;
