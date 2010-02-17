@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 2;
 use SOOT;
 pass("alive");
 
@@ -54,11 +54,49 @@ foreach (1..1e6) {
 =cut
 
 
+=pod
+
+# doesn't leak 2010-02-17
+my $obj = TGraph->new(12);
 foreach (1..1e6) {
-  my $obj = TGraph->new(12);
+  $obj->GetN()
+}
+
+=cut
+
+
+=pod
+
+# doesn't leak 2010-02-17
+my $obj = TGraph->new(12);
+my $obj2 = TH1D->new("a","a",2,0.,1.);
+foreach (1..1e6) {
+  $obj->SetHistogram($obj2);
+}
+
+=cut
+
+=pod
+
+# doesn't leak 2010-02-17
+foreach (1..1e6) {
+  my $obj = TH1D->new("hist".$_, "hist".$_, 10, 0., 1.);
   undef $obj;
 }
 
+=cut
+
+=pod
+
+# doesn't leak 2010-02-17
+foreach (1..1e6) {
+  my $obj = TH1D->new("hist".$_, "hist".$_, 10, 0., 1.);
+  $obj->GetXaxis();
+}
+
+=cut
 
 warn "after";
 $go = <STDIN>;
+pass("alive");
+
