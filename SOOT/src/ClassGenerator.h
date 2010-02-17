@@ -10,6 +10,11 @@
 #include <TRandom.h>
 #include <TApplication.h>
 #include <TBenchmark.h>
+#include <TPad.h>
+#include <TStyle.h>
+#include <TDirectory.h>
+#include <TCanvas.h>
+#include <TVirtualPad.h>
 
 #ifdef __cplusplus
 extern "C" {

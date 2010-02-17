@@ -14,6 +14,11 @@
 #include <TApplication.h>
 #include <TRandom.h>
 #include <TBenchmark.h>
+#include <TPad.h>
+#include <TStyle.h>
+#include <TDirectory.h>
+#include <TCanvas.h>
+#include <TVirtualPad.h>
 
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers

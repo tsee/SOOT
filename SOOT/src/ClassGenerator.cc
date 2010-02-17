@@ -55,8 +55,10 @@ namespace SOOT {
     SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem);
     SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom);
     SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
-    //SetPerlGlobal(aTHX_ "SOOT::gBenchmark", gBenchmark, gBenchmark->ClassName());
-    // FIXME more missing...
+    //SetPerlGlobal(aTHX_ "SOOT::gBenchmark", gBenchmark); // FIXME gBenchmark crashes
+    SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
+    SetPerlGlobal(aTHX_ "SOOT::gDirectory", gDirectory);
+    //SetPerlGlobal(aTHX_ "SOOT::gPad", gPad); // gPad NULL at this time...
   }
 
   void
