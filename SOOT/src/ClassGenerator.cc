@@ -51,10 +51,10 @@ namespace SOOT {
   {
     if (!gApplication)
       gApplication = new TApplication("SOOT App", NULL, NULL);
-    SetPerlGlobal(aTHX_ "SOOT::gApplication", gApplication, "TApplication");
-    SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem, gSystem->ClassName());
-    SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom, gRandom->ClassName());
-    //SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT, gROOT->ClassName());
+    SetPerlGlobal(aTHX_ "SOOT::gApplication", gApplication);
+    SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem);
+    SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom);
+    SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
     //SetPerlGlobal(aTHX_ "SOOT::gBenchmark", gBenchmark, gBenchmark->ClassName());
     // FIXME more missing...
   }
@@ -63,7 +63,10 @@ namespace SOOT {
   SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className)
   {
     SV* global = get_sv(variable, 1);
-    sv_setsv(global, sv_2mortal(SOOT::EncapsulateObject(aTHX_ cobj, className)));
+    sv_setsv(global,
+             sv_2mortal(SOOT::EncapsulateObject(aTHX_ cobj,
+                                                (className==NULL ? cobj->ClassName() : className))));
+    SOOT::PreventDestruction(aTHX_ global);
   }
 } // end namespace SOOT
 

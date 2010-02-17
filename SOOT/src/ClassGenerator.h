@@ -35,7 +35,7 @@ namespace SOOT {
   void GenerateClassStubs(pTHX);
 
   void InitializeGlobals(pTHX);
-  void SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className);
+  void SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className = NULL);
 } // end namespace SOOT
 
 #endif

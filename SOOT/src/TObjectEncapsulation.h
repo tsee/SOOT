@@ -19,6 +19,8 @@ extern "C" {
 #endif
 
 namespace SOOT {
+  extern MGVTBL gNullMagicVTable; // used for identification of our magic
+
   /** Creates a new Perl object which is a reference to a scalar blessed into
    *  the class. The scalar itself holds a pointer to the ROOT object.
    */
@@ -32,6 +34,12 @@ namespace SOOT {
   TObject* LobotomizeObject(pTHX_ SV* thePerlObject);
   /// Free the underlying TObject, set pointer to zero
   void ClearObject(pTHX_ SV* thePerlObject);
+  
+  /// Prevents destruction of an object by adding magic that is checked during ClearObject
+  void PreventDestruction(pTHX_ SV* thePerlObject);
+
+  /// Returns whether the given dereferenced Perl object may be destroyed
+  bool IsIndestructible(pTHX_ SV* derefPObj);
 } // end namespace SOOT
 
 #endif
