@@ -17,3 +17,6 @@ rootclasses.map
 .root_hist
 blib
 MANIFEST
+const-c.inc
+const-xs.inc
+lib/SOOT/Constants.pm

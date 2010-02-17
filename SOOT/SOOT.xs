@@ -44,6 +44,8 @@ extern "C" {
 }
 #endif
 
+#include "const-c.inc"
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -84,6 +86,8 @@ AUTOLOAD(...)
 MODULE = SOOT		PACKAGE = SOOT
 
 PROTOTYPES: DISABLE
+
+INCLUDE: const-xs.inc
 
 INCLUDE: XS/SOOTBOOT.xs
 

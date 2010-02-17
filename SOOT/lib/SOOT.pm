@@ -2,23 +2,54 @@ package SOOT;
 use 5.008001;
 use strict;
 use warnings;
+use Carp 'croak';
 
 our $VERSION = '0.01';
 
 use base 'Exporter';
+require SOOT::Constants;
 require TObject;
 require TArray;
+
+our %EXPORT_TAGS = (
+  'globals' => [ qw(
+    $gApplication $gSystem $gRandom $gROOT $gDirectory $gStyle
+  ) ],
+  'constants' => \@SOOT::Constants::Names,
+);
+use vars @{$EXPORT_TAGS{globals}};
+
+our @EXPORT_OK = map {@$_} values %EXPORT_TAGS;
+$EXPORT_TAGS{all} = \@EXPORT_OK;
+
+our @EXPORT;
 
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
 
-use vars qw/$gApplication $gSystem $gRandom/;
-our %EXPORT_TAGS = ( 'all' => [ qw(
-  $gApplication $gSystem $gRandom
-) ] );
+sub AUTOLOAD {
+    # This AUTOLOAD is used to 'autoload' constants from the constant()
+    # XS function.
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-our @EXPORT;
+    my $constname;
+    our $AUTOLOAD;
+    ($constname = $AUTOLOAD) =~ s/.*:://;
+    croak "&SOOT::constant not defined" if $constname eq 'constant';
+    my ($error, $val) = constant($constname);
+    if ($error) { croak $error; }
+    {
+        no strict 'refs';
+        # Fixed between 5.005_53 and 5.005_61
+#XXX    if ($] >= 5.00561) {
+#XXX        *$AUTOLOAD = sub () { $val };
+#XXX    }
+#XXX    else {
+            *$AUTOLOAD = sub { $val };
+#XXX    }
+    }
+    goto &$AUTOLOAD;
+}
+
 
 1;
 __END__
@@ -56,15 +87,21 @@ manual for details.
 
 By default, using SOOT does not export anything into your namespace.
 You may choose to import the various ROOT-related global variables
-into your namespace either by explicitly listing them as arguments
-to C<use SOOT> or by importing the C<:all> tag:
+and/or constants into your namespace either by explicitly listing them
+as arguments to C<use SOOT> or by importing the C<:globals>,
+C<:constants>, or C<:all> tags:
 
   use SOOT ':all';
-  # you now have $gApplication, $gSystem etc
+  # you now have $gApplication, $gSystem, kWhite etc
 
   use SOOT qw($gApplication $gSystem);
   # you now have only $gApplication and $gSystem
   # you always have $SOOT::gApplication, etc!
+
+  use SOOT qw(kRed kDotted);
+  my $graph = TGraph->new(3);
+  $graph->SetLineColor(kRed);
+  $graph->SetLineStyle(kDotted);
 
 =head1 SEE ALSO
 
