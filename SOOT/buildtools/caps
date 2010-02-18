@@ -3784,6 +3784,16 @@ static  const char* clnames[] = {
   "LCGReflex/TZIPFile",
   "LCGReflex/TZIPMember",
 //--End   TZIPFile
+//--Begin TSystem
+//--End   TSystem
+//--Begin TUnixSystem
+//--End   TUnixSystem
+//--Begin TXNetSystem
+//--End   TXNetSystem
+//--Begin TWinNTSystem
+//--End   TWinNTSystem
+//--Begin TAlienSystem
+//--End   TAlienSystem
 //--Final End
 };
 
