@@ -2,4 +2,8 @@
 - Implement method caching
 - Implement can()
 - Fix Color_t lookup and other primitive types
-
+- Implement casting
+- Investigate wrapping all/more enums
+- Investigate array conversion vs. memory
+- Investigate references
+- Implement TTree/Branch (arguments-as-return-values)
