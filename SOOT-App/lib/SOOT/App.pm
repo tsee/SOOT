@@ -25,6 +25,7 @@ sub run {
   }
   package main;
   SOOT->import(':all');
+  $repl->formatted_eval("no strict");
   return $repl->run();
 }
 
