@@ -25,7 +25,9 @@ sub run {
   }
   package main;
   SOOT->import(':all');
+  # FIXME: mst will likely kill me for this
   $repl->formatted_eval("no strict");
+  $repl->formatted_eval("use SOOT qw/:all/");
   return $repl->run();
 }
 
