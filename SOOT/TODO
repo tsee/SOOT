@@ -1,0 +1,5 @@
+- Implement global function wrapping
+- Implement method caching
+- Implement can()
+- Fix Color_t lookup and other primitive types
+
