@@ -10,7 +10,7 @@ my $loadNamespace = 'SOOT::Constants';
 my $realNamespace = 'SOOT';
 
 my @consts = qw(
-  kWhite kBlack kRed kGreen kBlue kYelow
+  kWhite kBlack kRed kGreen kBlue kYellow
   kMagenta kCyan kSolid kDashed kDotted kDashDotted
   kDot kPlus kStar kCircle kMultiply
   kFullDotSmall kFullDotMedium kFullDotLarge
