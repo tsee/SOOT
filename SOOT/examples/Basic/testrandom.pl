@@ -203,21 +203,21 @@ sub testAll {
   my $f2 = TF1->new("f2","landau",-5,15);
   $f2->SetParameters(new array::Array('d',[1,0,1]));
 
-  $gRandom($r1);
+  $gRandom->($r1);
   $sw->Start();
   for (0..N-1) {
      $x = $f2->GetRandom();
   }
   printf("LandauTF1......... %8.3f",$sw->CpuTime()*$cpn);
 
-  $gRandom($r2);
+  $gRandom->($r2);
   $sw->Start();
   for (0..N-1) {
      $x = $f2->GetRandom();
   }
   printf(" %8.3f",$sw->CpuTime()*$cpn);
 
-  $gRandom($r3);
+  $gRandom->($r3);
   $sw->Start();
   for (0..N-1) {
      $x = $f2->GetRandom();
