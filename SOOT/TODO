@@ -9,6 +9,16 @@ Wrapper / guts:
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
 - Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
+- Copy constructors
+  => Specifically, consider "gRandom = new TRandom(...);" in C.
+     There is no equivalent in Perl beacuse "$gRandom = TRandom->new()" will
+     just overwrite the Perl object and the ROOT objects will internally
+     use the C-level gRandom which is no longer referenced by $gRandom.
+  => General solution is a proper cross-language memory
+     management / ownership setup (PyROOT?)
+  => Reasonably simple stop-gap solution would be, for example, to
+     overload CODE dereferencing for TObjects to behave as copy constructors.
+     The above C code could become: "$gRandom->(...)".
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
