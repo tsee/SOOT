@@ -316,7 +316,8 @@ namespace SOOT {
         *(ptr - ptr_level) = '\0';
 
     if (!strncmp(ptr-3, "int", 3) ||
-        !strncmp(ptr-4, "long", 4)) {
+        !strncmp(ptr-4, "long", 4) ||
+        !strncmp(ptr-5, "short", 5)) {
       if (ptr_level)
         type = eARRAY_INTEGER;
       else
