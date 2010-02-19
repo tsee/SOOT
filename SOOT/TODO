@@ -1,3 +1,4 @@
+Wrapper / guts:
 - Implement global function wrapping
 - Implement method caching
 - Implement can()
@@ -7,3 +8,19 @@
 - Investigate array conversion vs. memory
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
+
+Packaging:
+- Investigate ROOT's build system and how SOOT could be integrated
+  without sacrificing CPAN-installation. (Specifically, investigate
+  inlining of dependencies.)
+
+Documentation / UI:
+- Convert a few examples and fix the ensuing madness.
+- ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
+
+Testing:
+- Much, much more testing...
+- Specifically expose more guts via SOOT::API for unit testing.
+=> joincproto and friends
+=> global variable tools
+
