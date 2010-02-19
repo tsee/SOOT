@@ -258,26 +258,31 @@ namespace SOOT {
     return cproto;
   }
 
-  void
+
+  unsigned int
   CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
                        std::vector<std::string>& cproto, const unsigned int nSkip = 0)
   {
     SV** elem;
     STRLEN len;
-
+    unsigned int nTObjects = 0;
     // convert the elements into C prototype strings
     const unsigned int nElem = (unsigned int)(av_len(av)+1);
     if (nSkip >= nElem)
-      return;
+      return 0;
     for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
       elem = av_fetch(av, iElem, 0);
       if (elem == NULL)
         croak("av_fetch failed. Severe error.");
       BasicType type = GuessType(aTHX_ *elem);
+      if (type == eTOBJECT)
+        ++nTObjects;
       avtypes.push_back(type);
       cproto.push_back(CProtoFromType(aTHX_ *elem, len, type));
     }
+    return nTObjects;
   }
+
 
   char*
   JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip = 1)
@@ -358,13 +363,15 @@ namespace SOOT {
     const unsigned int nprotos = cproto.size();
     bool changed = false;
     for (unsigned int i = 0; i < nprotos; ++i) {
-      if (cproto[i] == string("int*")) {
-        cproto[i] = string("double*");
+      // This is ugly because we want to preserve pointers/references
+      if (cproto[i].length() == 4 && strnEQ(cproto[i].data(), "int", 3)) {
+        cproto[i] = string("double").append((const char*)cproto[i].data()+3, 1);
         changed = true;
       }
     }
     return changed;
   }
+
 
   void
   SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
@@ -458,6 +465,7 @@ namespace SOOT {
     } // end switch ret type
   }
 
+
   SV*
   CallMethod(pTHX_ const char* className, char* methName, AV* args)
   {
@@ -469,11 +477,10 @@ namespace SOOT {
 
     vector<BasicType> argTypes;
     vector<string> cproto;
-    CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
+    unsigned int nTObjects = CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
     if (argTypes.size() == 0)
       croak("Bad invocation");
 
-    char* cprotoStr = JoinCProto(cproto, 1); // 1 => skip first arg (the TObject)
 
     // Fetch the call receiver (object or class name)
     SV** elem = av_fetch(args, 0, 0);
@@ -486,59 +493,41 @@ namespace SOOT {
             methName, gBasicTypeStrings[receiverType]);
     }
 
+
     TObject* receiver;
     G__ClassInfo theClass(className);
-    G__MethodInfo mInfo;
+    G__MethodInfo* mInfo = NULL;
     long offset;
     bool constructor = false;
+
     if (receiverType == eSTRING) { // class method
       if (strEQ(methName, "new")) {
         // constructor
-        methName = (char*)className;
+        methName = (char*)className; // no need to free since className is also a const char*
         constructor = true;
-      }
-      mInfo = theClass.GetMethod(methName,
-                         (cprotoStr == NULL ? "" : cprotoStr),
-                         &offset);
-      if (!mInfo.IsValid() && cprotoStr != NULL) {
-        if (CProtoIntegerToFloat(cproto)) { // found int* => double*
-          char* newCProtoStr = JoinCProto(cproto);
-          mInfo = theClass.GetMethod(methName,
-                         newCProtoStr,
-                         &offset);
-          free(newCProtoStr);
-        }
       }
       receiver = 0;
     }
-    else { // object method
-      mInfo = theClass.GetMethod(methName,
-                         (cprotoStr == NULL ? "" : cprotoStr),
-                         &offset);
-      if (!mInfo.IsValid() && cprotoStr != NULL) {
-        if (CProtoIntegerToFloat(cproto)) { // found int* => double*
-          char* newCProtoStr = JoinCProto(cproto);
-          mInfo = theClass.GetMethod(methName,
-                         newCProtoStr,
-                         &offset);
-          free(newCProtoStr);
-        }
-      }
+    else {
+      --nTObjects; // The invocant isn't used int FindMethodPrototype
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
+    FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects);
 
-    free(cprotoStr);
-    if (!mInfo.IsValid() || !mInfo.Name())
-      CroakOnInvalidMethod(aTHX_ className, methName, c, cproto);
+    if (!mInfo->IsValid() || !mInfo->Name()) {
+      delete mInfo;
+      CroakOnInvalidMethod(aTHX_ className, methName, c, cproto); // FIXME cproto may have been mangled by FindMethodPrototype
+    }
 
     // Determine return type
-    char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
+    char* retTypeStr = constructor ? (char*)className : (char*)mInfo->Type()->TrueName();
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
-
+    
+    warn("PROTO=%s", JoinCProto(cproto));
     // Prepare CallFunc
     G__CallFunc theFunc;
-    theFunc.SetFunc(mInfo);
+    theFunc.SetFunc(*mInfo);
 
     SetMethodArguments(aTHX_ theFunc, args, argTypes);
 
@@ -550,9 +539,89 @@ namespace SOOT {
       addr = theFunc.ExecDouble((void*)((long)receiver + offset));
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
+    delete mInfo;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);
-    return &PL_sv_undef;
   }
+
+
+  void
+  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
+                      const char* methName, std::vector<BasicType>& proto,
+                      std::vector<std::string>& cproto, long int& offset,
+                      const unsigned int nTObjects)
+
+  {
+    // This comes practically verbatim from RubyROOT because of the reference map algorithm
+    // Note: First element in proto is the invocant type. We need to skip it.
+    // TODO: Optimize the repeated concatenation (JoinCProto)
+
+    // 2^nobjects == number of combinations of "*" and "&"
+    unsigned int bitmap_end = static_cast<unsigned int>( 0x1 << nTObjects );
+
+    // Check if method methname with prototype cproto is present in the class
+    char* cprotoStr = JoinCProto(cproto, 1);
+    mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+    free(cprotoStr);
+
+    /* Loop if we have to, i.e. there are T_OBJECTS ^= TObjects and the first
+     * combination is not correct.
+     */
+    if( nTObjects > 0 and !(mInfo->InterfaceMethod()) ) {
+      for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
+        TwiddlePointersAndReferences(proto, cproto, reference_map);
+        char* cprotoStr = JoinCProto(cproto, 1);
+        mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+        free(cprotoStr);
+        if (mInfo->InterfaceMethod())
+          break;
+      }
+
+      // Now with int* => double* if necessary
+      if (!(mInfo->InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
+        for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
+          TwiddlePointersAndReferences(proto, cproto, reference_map);
+          char* cprotoStr = JoinCProto(cproto, 1);
+          mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+          free(cprotoStr);
+          if (mInfo->InterfaceMethod())
+            break;
+        }
+      } // end if need to try int* => double*
+    } // end if first guess was bad
+  }
+
+  void
+  TwiddlePointersAndReferences(std::vector<BasicType>& proto, std::vector<std::string>& cproto,
+                               unsigned int reference_map)
+  {
+    const unsigned int nElems = proto.size();
+#define CHECK_BIT(var,pos) ((var)&(1<<(pos)))
+    for (unsigned int i = 1; i < nElems; ++i) {
+      if (proto[i] == eTOBJECT) {
+        std::string& elem = cproto[i];
+        if (CHECK_BIT(reference_map, i))
+          elem[elem.length()-1] = '&';
+        else
+          elem[elem.length()-1] = '*';
+      }
+    }
+#undef CHECK_BIT
+  }
+
+
+  SV*
+  CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model)
+  {
+    AV* argAV = newAV();
+    av_extend(argAV, 1);
+    av_store(argAV, 0, receiver); // FIXME check reference counts?
+    av_store(argAV, 1, model);
+    SV* retval = CallMethod(aTHX_ className, (char*)className, argAV);
+    Safefree(argAV); // FIXME check for memory leaks?
+    return retval;
+    //return receiver;
+  }
+
 
   void
   CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto)
@@ -583,6 +652,5 @@ namespace SOOT {
     }
     croak(msg.str().c_str());
   }
-
 } // end namespace SOOT
 

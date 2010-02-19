@@ -131,3 +131,15 @@ CallMethod(className, methodName, argv)
     RETVAL = SOOT::CallMethod(aTHX_ className, methodName, arguments);
   OUTPUT: RETVAL
 
+SV*
+CallAssignmentOperator(className, receiver, model)
+    char* className
+    SV* receiver
+    SV* model
+  INIT:
+    STRLEN len;
+    AV* arguments;
+  CODE:
+    RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
+  OUTPUT: RETVAL
+

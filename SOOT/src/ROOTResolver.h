@@ -63,15 +63,22 @@ namespace SOOT {
   const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len);
   char* CProtoFromAV(pTHX_ AV* av, const unsigned int nSkip);
   /** Calculate the C-type strings and the BasicTypes for all
-   *  arguments in av and push them into the supplied containers
+   *  arguments in av and push them into the supplied containers.
+   *  Returns the number of TObjects in the array.
    */
-  void CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
+  unsigned int CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
                             std::vector<std::string>& cproto, const unsigned int nSkip);
   /// Given a vector of strings, concatenates them to a single C string. Skips the first one by default.
   char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip);
 
   /// Map any int* types to float*'s
   bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
+  void FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
+                           const char* methName, std::vector<BasicType>& proto,
+                           std::vector<std::string>& cproto, long int& offset,
+                           const unsigned int nTObjects);
+  void TwiddlePointersAndReferences(std::vector<BasicType>& proto, std::vector<std::string>& cproto,
+                                    unsigned int reference_map);
 
   void SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
                           const std::vector<BasicType>& argTypes, const unsigned int nSkip);
@@ -79,6 +86,7 @@ namespace SOOT {
   SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr);
       
   SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
+  SV* CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model);
 
   void CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto);
 } // end namespace SOOT
