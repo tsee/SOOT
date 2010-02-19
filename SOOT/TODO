@@ -1,3 +1,6 @@
+Bugs:
+- GetX leaks like a sieve!
+
 Wrapper / guts:
 - Implement global function wrapping
 - Implement method caching
@@ -9,7 +12,7 @@ Wrapper / guts:
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
 - Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
-- Copy constructors
+- Assignment operators
   => Specifically, consider "gRandom = new TRandom(...);" in C.
      There is no equivalent in Perl beacuse "$gRandom = TRandom->new()" will
      just overwrite the Perl object and the ROOT objects will internally
@@ -17,7 +20,7 @@ Wrapper / guts:
   => General solution is a proper cross-language memory
      management / ownership setup (PyROOT?)
   => Reasonably simple stop-gap solution would be, for example, to
-     overload CODE dereferencing for TObjects to behave as copy constructors.
+     overload CODE dereferencing for TObjects to behave as assignment operators.
      The above C code could become: "$gRandom->(...)".
 
 Packaging:
