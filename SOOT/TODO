@@ -8,6 +8,7 @@ Wrapper / guts:
 - Investigate array conversion vs. memory
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
+- Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
@@ -15,7 +16,8 @@ Packaging:
   inlining of dependencies.)
 
 Documentation / UI:
-- Convert a few examples and fix the ensuing madness.
+- Convert more examples and fix the ensuing madness.
+- Check existing examples/ for FIXME's.
 - ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
 
 Testing:
