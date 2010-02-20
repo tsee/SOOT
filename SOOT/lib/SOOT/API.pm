@@ -52,6 +52,18 @@ string such as C<"INTEGER">.
 Tries to guess the SOOT type of its argument and returns a
 string such as C<"int"> or C<"TGraph">.
 
+=head1 OTHER API CLASSES
+
+=head2 SOOT::API::ClassIterator
+
+C<SOOT::API::ClassIterator> is a very simple iterator class that
+lets you iterate over all wrapped ROOT class names:
+
+  my $iter = SOOT::API::ClassIterator->new;
+  while (defined(my $class = $iter->next)) {
+    # use $class
+  }
+
 =head1 SEE ALSO
 
 L<SOOT>
