@@ -32,6 +32,7 @@ extern "C" {
 namespace SOOT {
   /// Set up the FULL inheritance chain for the given class
   void SetupClassInheritance(pTHX_ const char* className, TClass* theClass);
+  void SetupAUTOLOAD(pTHX_ const char* className);
 
   /// Create stub for a given class. Calls SetupClassInheritance to set up the inheritance chain
   void MakeClassStub(pTHX_ const char* className);
