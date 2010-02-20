@@ -17,7 +17,10 @@ my %knownBadClasses = map {($_=>1)} qw(
   TVirtualRefProxy
 );
 
-my %classes;
+# hack...
+my %classes = map {($_=>1)} qw(
+  ROOT::Fit::FitResult
+);
 open my $fh, '<', File::Spec->catfile('buildtools', 'caps') or die $!;
 while (<$fh>) {
   m{
