@@ -1,4 +1,5 @@
 SOOT*	O_OBJECT
+ClassIterator*	O_OBJECT
 std::vector< double >*	T_VECTORDOUBLE
 std::vector< Vec >*		T_VECTORVEC
 std::istream*		T_ISTREAM
