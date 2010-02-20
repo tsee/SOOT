@@ -98,7 +98,7 @@ namespace SOOT {
     sv_setsv(global,
              sv_2mortal(SOOT::EncapsulateObject(aTHX_ cobj,
                                                 (className==NULL ? cobj->ClassName() : className))));
-    global = get_sv(variable, 0); // FIXME this silences the "used only once" warning, but it is a awful solution
+    global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
     SOOT::PreventDestruction(aTHX_ global);
   }
 
@@ -108,7 +108,7 @@ namespace SOOT {
     SV* global = get_sv(variable, 1);
     SV* obj = sv_2mortal(SOOT::MakeDelayedInitObject(aTHX_ cobj, className));
     sv_setsv(global, obj);
-    global = get_sv(variable, 0); // FIXME this silences the "used only once" warning, but it is a awful solution
+    global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
     SOOT::PreventDestruction(aTHX_ global);
   }
 } // end namespace SOOT
