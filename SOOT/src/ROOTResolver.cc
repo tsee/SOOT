@@ -659,7 +659,7 @@ namespace SOOT {
         msg << "\n  " << candidates[iCand];
       }
     }
-    croak(msg.str().c_str());
+    croak("%s", msg.str().c_str());
   }
 } // end namespace SOOT
 
