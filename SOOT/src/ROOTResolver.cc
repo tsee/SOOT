@@ -524,7 +524,6 @@ namespace SOOT {
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
     
-    warn("PROTO=%s", JoinCProto(cproto));
     // Prepare CallFunc
     G__CallFunc theFunc;
     theFunc.SetFunc(*mInfo);

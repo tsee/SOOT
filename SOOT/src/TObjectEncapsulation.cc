@@ -58,7 +58,8 @@ namespace SOOT {
   {
     if (SvROK(thePerlObject)) {
       SV* inner = (SV*)SvRV(thePerlObject);
-      if (SvIOK(inner) && IsIndestructible(aTHX_ inner)) {
+      if (SvIOK(inner) && !IsIndestructible(aTHX_ inner)) {
+        //cout << "CLEARING " <<SvIV(inner) << endl;
         delete INT2PTR(TObject*, SvIV(inner));
         sv_setiv(inner, 0);
       }
@@ -68,7 +69,7 @@ namespace SOOT {
   void
   PreventDestruction(pTHX_ SV* thePerlObject) {
     if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
-      sv_magicext(thePerlObject, NULL, PERL_MAGIC_ext, &gNullMagicVTable, 0, 0 );
+      sv_magicext(SvRV(thePerlObject), NULL, PERL_MAGIC_ext, &gNullMagicVTable, 0, 0 );
     }
   }
 
