@@ -496,7 +496,7 @@ namespace SOOT {
 
     TObject* receiver;
     G__ClassInfo theClass(className);
-    G__MethodInfo* mInfo = NULL;
+    G__MethodInfo mInfo;
     long offset;
     bool constructor = false;
 
@@ -514,19 +514,18 @@ namespace SOOT {
     }
     FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects);
 
-    if (!mInfo->IsValid() || !mInfo->Name()) {
-      delete mInfo;
+    if (!mInfo.IsValid() || !mInfo.Name()) {
       CroakOnInvalidMethod(aTHX_ className, methName, c, cproto); // FIXME cproto may have been mangled by FindMethodPrototype
     }
 
     // Determine return type
-    char* retTypeStr = constructor ? (char*)className : (char*)mInfo->Type()->TrueName();
+    char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
     
     // Prepare CallFunc
     G__CallFunc theFunc;
-    theFunc.SetFunc(*mInfo);
+    theFunc.SetFunc(mInfo);
 
     SetMethodArguments(aTHX_ theFunc, args, argTypes);
 
@@ -538,13 +537,12 @@ namespace SOOT {
       addr = theFunc.ExecDouble((void*)((long)receiver + offset));
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
-    delete mInfo;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);
   }
 
 
   void
-  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
+  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo& mInfo,
                       const char* methName, std::vector<BasicType>& proto,
                       std::vector<std::string>& cproto, long int& offset,
                       const unsigned int nTObjects)
@@ -559,30 +557,30 @@ namespace SOOT {
 
     // Check if method methname with prototype cproto is present in the class
     char* cprotoStr = JoinCProto(cproto, 1);
-    mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+    mInfo = theClass.GetMethod(methName, (cprotoStr==NULL ? "" : cprotoStr), &offset);
     free(cprotoStr);
 
     /* Loop if we have to, i.e. there are T_OBJECTS ^= TObjects and the first
      * combination is not correct.
      */
-    if( nTObjects > 0 and !(mInfo->InterfaceMethod()) ) {
+    if( nTObjects > 0 and !(mInfo.InterfaceMethod()) ) {
       for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
         TwiddlePointersAndReferences(proto, cproto, reference_map);
         char* cprotoStr = JoinCProto(cproto, 1);
-        mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+        mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
         free(cprotoStr);
-        if (mInfo->InterfaceMethod())
+        if (mInfo.InterfaceMethod())
           break;
       }
 
       // Now with int* => double* if necessary
-      if (!(mInfo->InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
+      if (!(mInfo.InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
         for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
           TwiddlePointersAndReferences(proto, cproto, reference_map);
           char* cprotoStr = JoinCProto(cproto, 1);
-          mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+          mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
           free(cprotoStr);
-          if (mInfo->InterfaceMethod())
+          if (mInfo.InterfaceMethod())
             break;
         }
       } // end if need to try int* => double*
