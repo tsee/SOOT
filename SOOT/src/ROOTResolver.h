@@ -9,6 +9,7 @@
 
 #include <CallFunc.h>
 #include <Class.h>
+#include <TVirtualPad.h>
 
 #include <vector>
 #include <string>

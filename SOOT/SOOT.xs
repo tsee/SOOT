@@ -19,6 +19,7 @@
 #include <TDirectory.h>
 #include <TCanvas.h>
 #include <TVirtualPad.h>
+#include <TPad.h>
 
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers

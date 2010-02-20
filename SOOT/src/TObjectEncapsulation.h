@@ -4,6 +4,8 @@
 
 #include <TROOT.h>
 #include <TObject.h>
+#include <TVirtualPad.h>
+#undef Copy
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +21,8 @@ extern "C" {
 #endif
 
 namespace SOOT {
-  extern MGVTBL gNullMagicVTable; // used for identification of our magic
+  extern MGVTBL gNullMagicVTable; // used for identification of our PreventDestruction magic
+  extern MGVTBL gDelayedInitMagicVTable; // used for identification of our DelayedInit magic
 
   /** Creates a new Perl object which is a reference to a scalar blessed into
    *  the class. The scalar itself holds a pointer to the ROOT object.
@@ -40,6 +43,12 @@ namespace SOOT {
 
   /// Returns whether the given dereferenced Perl object may be destroyed
   bool IsIndestructible(pTHX_ SV* derefPObj);
+
+  /// Creates a new Perl TObject wrapper (as with EncapsulateObject) that dereferences itself on first access
+  SV* MakeDelayedInitObject(pTHX_ TObject** cobj, const char* className);
+
+  /// Replaces the object with its C-level dereference and removes the DelayedInit magic
+  void DoDelayedInit(pTHX_ SV* derefPObj);
 } // end namespace SOOT
 
 #endif

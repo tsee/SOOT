@@ -13,7 +13,7 @@ use TArray;
 
 our %EXPORT_TAGS = (
   'globals' => [ qw(
-    $gApplication $gSystem $gRandom $gROOT $gDirectory $gStyle
+    $gApplication $gSystem $gRandom $gROOT $gDirectory $gStyle $gPad
   ) ],
   'constants' => \@SOOT::Constants::Names,
 );
