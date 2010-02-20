@@ -111,7 +111,8 @@ foreach (1..1e8) {
 
 =pod
 
-# leaks like a sieve 2010-02-20
+# leaks like a sieve 2010-02-20 (despite the underlying object being deleted)
+# stops leaking with aada56a1b7564a4e4cdbe08fc6ec82bc3e92693c (2010-02-20)
 sub test {
   my $obj = TGraph->new(1e2, [(1) x 1e2], [(2) x 1e2]);
   undef $obj;
