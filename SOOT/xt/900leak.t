@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More tests => 2;
 use SOOT;
+use Time::HiRes qw/sleep/;
 pass("alive");
 
 warn "before";
@@ -96,7 +97,44 @@ foreach (1..1e6) {
 
 =cut
 
-warn "after";
+
+=pod
+
+# doesn't leak 2010-02-20
+my $obj = TGraph->new(1e4, [(1) x 1e4], [(2) x 1e4]);
+foreach (1..1e8) {
+  my $x = $obj->GetX();
+  undef $x;
+}
+
+=cut
+
+=pod
+
+# leaks like a sieve 2010-02-20
+sub test {
+  my $obj = TGraph->new(1e2, [(1) x 1e2], [(2) x 1e2]);
+  undef $obj;
+}
+
+foreach (1..1e8) {
+  test(); 
+}
+
+=cut
+
+=pod
+
+# stops leaking with 4f8540b820a41eca097e8556d705f9220bd8dad7 (2010-02-20)
+my $obj = TH1D->new("blah", "blah", 10, 0., 1.);
+foreach (1..1e8) {
+  my $x = $obj->GetNbinsX();
+  undef $x;
+}
+
+=cut
+
+warn "done";
 $go = <STDIN>;
 pass("alive");
 
