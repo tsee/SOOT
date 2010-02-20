@@ -7,9 +7,9 @@ use Carp 'croak';
 our $VERSION = '0.01';
 
 use base 'Exporter';
-require SOOT::Constants;
+use SOOT::Constants;
 use TObject; # needs to happen before XSLoader
-require TArray;
+use TArray;
 
 our %EXPORT_TAGS = (
   'globals' => [ qw(
