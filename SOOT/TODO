@@ -1,6 +1,3 @@
-Bugs:
-- GetX leaks like a sieve!
-
 Wrapper / guts:
 - Implement global function wrapping
 - Implement method caching
@@ -22,6 +19,7 @@ Wrapper / guts:
   => Reasonably simple stop-gap solution would be, for example, to
      overload CODE dereferencing for TObjects to behave as assignment operators.
      The above C code could become: "$gRandom->(...)".
+  ====> While mostly implemented now, this still fails on the const qualifier. Doh.
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
