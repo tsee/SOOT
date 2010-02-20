@@ -1,5 +1,20 @@
 Revision history for Perl extension SOOT.
 
+0.02  Sat Feb 20 17:30:00 2010
+  - List of candidate methods shown on bad method invocation.
+  - Fixed problems with globals (gROOT, etc) and global
+    interpreter destruction.
+  - Implemented wrapping of more globals: gStyle, gDirectory,
+    gROOT, gSystem, etc.
+  - A bunch of examples (some working, some not yet) in examples/
+  - Recognize "short" as integer type.
+  - Fixed memory leak of array-of-basic-type arguments and return
+    types.
+  - Fixed MethodInfo leak.
+  - Reference/Pointer equality. "const" references still to-do.
+  - More Perl-SOOT API: Class name iterator.
+  - Allow export of various constants/enums such as kRed, kTRUE, etc.
+
 0.01  Tue Feb  9 19:31:43 2010
-	- original version
+  - original version
 
