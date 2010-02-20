@@ -30,6 +30,7 @@
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
+#include "ClassIterator.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +54,7 @@ extern "C" {
 using namespace SOOT;
 using namespace std;
 
+// Broken due to bug in perl.
 /*
 void
 AUTOLOAD(...)
@@ -96,6 +98,8 @@ INCLUDE: XS/SOOTAPI.xs
 INCLUDE: XS/TObject.xs
 
 INCLUDE: rootclasses.xsinclude
+
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/ClassIterator.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 

@@ -8,7 +8,7 @@ our $VERSION = '0.01';
 
 use base 'Exporter';
 require SOOT::Constants;
-require TObject;
+use TObject; # needs to happen before XSLoader
 require TArray;
 
 our %EXPORT_TAGS = (
@@ -26,6 +26,8 @@ our @EXPORT;
 
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
+
+_bootstrap_AUTOLOAD(); # FIXME move to XS...
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -50,6 +52,19 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
+sub _bootstrap_AUTOLOAD {
+  my $classIter = SOOT::API::ClassIterator->new;
+  no strict 'refs';
+  while (defined(my $class = $classIter->next)) {
+    # they have their own AUTOLOAD
+    next if $class eq 'TObject' or $class eq 'TArray';
+    if ($class->isa('TObject')) {
+      *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
+    } elsif ($class->isa('TArray')) {
+      *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+    }
+  }
+}
 
 1;
 __END__
