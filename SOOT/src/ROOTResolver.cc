@@ -375,13 +375,15 @@ namespace SOOT {
 
   void
   SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
-                     const vector<BasicType>& argTypes, const unsigned int nSkip = 1)
+                     const vector<BasicType>& argTypes, std::vector<void*>& needsCleanup,
+                     const unsigned int nSkip = 1)
   {
     const unsigned int nElem = (unsigned int)(av_len(args)+1);
     for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
       SV* const* elem = av_fetch(args, iElem, 0);
       if (elem == NULL)
         croak("av_fetch failed. Severe error.");
+      void* vec = NULL;
       size_t len;
       switch (argTypes[iElem]) {
         case eINTEGER:
@@ -396,17 +398,23 @@ namespace SOOT {
         case eARRAY_INTEGER:
           // FIXME memory leak?
           // allocate C-array here and convert the AV
-          theFunc.SetArg((long)SOOT::AVToIntegerVec<int>(aTHX_ (AV*)SvRV(*elem), len));
+          vec = (void*)SOOT::AVToIntegerVec<int>(aTHX_ (AV*)SvRV(*elem), len);
+          theFunc.SetArg((long)vec);
+          needsCleanup.push_back(vec);
           break;
         case eARRAY_FLOAT:
           // FIXME memory leak?
           // allocate C-array here and convert the AV
-          theFunc.SetArg((long)SOOT::AVToFloatVec<double>(aTHX_ (AV*)SvRV(*elem), len));
+          vec = (void*)SOOT::AVToFloatVec<double>(aTHX_ (AV*)SvRV(*elem), len);
+          theFunc.SetArg((long)vec);
+          needsCleanup.push_back(vec);
           break;
         case eARRAY_STRING:
           // FIXME memory leak?
           // allocate C-array here and convert the AV
-          theFunc.SetArg((long)SOOT::AVToCStringVec(aTHX_ (AV*)SvRV(*elem), len));
+          vec = (void*)SOOT::AVToCStringVec(aTHX_ (AV*)SvRV(*elem), len);
+          theFunc.SetArg((long)vec);
+          needsCleanup.push_back(vec);
           break;
         case eTOBJECT:
           theFunc.SetArg((long)LobotomizeObject(aTHX_ *elem));
@@ -527,7 +535,8 @@ namespace SOOT {
     G__CallFunc theFunc;
     theFunc.SetFunc(mInfo);
 
-    SetMethodArguments(aTHX_ theFunc, args, argTypes);
+    vector<void*> needsCleanup;
+    SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup);
 
     long addr;
     double addrD;
@@ -535,6 +544,9 @@ namespace SOOT {
       addrD = theFunc.ExecInt((void*)((long)receiver + offset));
     else
       addr = theFunc.ExecDouble((void*)((long)receiver + offset));
+
+    for (unsigned int i = 0; i < needsCleanup.size(); ++i)
+      free(needsCleanup[i]);
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);

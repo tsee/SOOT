@@ -81,7 +81,8 @@ namespace SOOT {
                                     unsigned int reference_map);
 
   void SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
-                          const std::vector<BasicType>& argTypes, const unsigned int nSkip);
+                          const std::vector<BasicType>& argTypes,
+                          std::vector<void*>& needsCleanup, const unsigned int nSkip);
 
   SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr);
       

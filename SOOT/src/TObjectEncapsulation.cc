@@ -34,6 +34,8 @@ namespace SOOT {
   {
     SV* ref = newSV(0);
     sv_setref_pv(ref, className, (void*)theROOTObject );
+    // Not necessary?
+    //theROOTObject->SetBit(kMustCleanup);
     return ref;
   }
 
@@ -59,8 +61,9 @@ namespace SOOT {
     if (SvROK(thePerlObject)) {
       SV* inner = (SV*)SvRV(thePerlObject);
       if (SvIOK(inner) && !IsIndestructible(aTHX_ inner)) {
-        //cout << "CLEARING " <<SvIV(inner) << endl;
-        delete INT2PTR(TObject*, SvIV(inner));
+        TObject* obj = INT2PTR(TObject*, SvIV(inner));
+        //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
+        delete obj;
         sv_setiv(inner, 0);
       }
     }
