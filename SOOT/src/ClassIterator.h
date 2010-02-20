@@ -16,10 +16,14 @@ extern "C" {
 #endif
 
 namespace SOOT {
+
+  /// A simple iterator class for accessing the set of wrapped ROOT classes
   class ClassIterator {
   public:
+    /// Setup new iterator
     ClassIterator();
 
+    /// Return next class name or NULL when none left
     const char* next();
   private:
     unsigned int fClassNo;
