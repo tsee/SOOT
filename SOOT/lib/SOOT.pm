@@ -13,7 +13,8 @@ use TArray;
 
 our %EXPORT_TAGS = (
   'globals' => [ qw(
-    $gApplication $gSystem $gRandom $gROOT $gDirectory $gStyle $gPad
+    $gApplication $gSystem $gRandom $gROOT
+    $gDirectory $gStyle $gPad $gBenchmark
   ) ],
   'constants' => \@SOOT::Constants::Names,
 );
@@ -66,6 +67,12 @@ sub _bootstrap_AUTOLOAD {
   }
 }
 
+# For some reason, the normal gBenchmark will segfault on first use.
+# Thus we reinitialize it here...
+use vars '$gBenchmark';
+$gBenchmark = TBenchmark->new;
+
+
 1;
 __END__
 
@@ -117,6 +124,11 @@ C<:constants>, or C<:all> tags:
   my $graph = TGraph->new(3);
   $graph->SetLineColor(kRed);
   $graph->SetLineStyle(kDotted);
+
+The list of currently supported globals is:
+
+  $gApplication $gSystem $gRandom $gROOT
+  $gDirectory   $gStyle  $gPad    $gBenchmark
 
 =head1 SEE ALSO
 

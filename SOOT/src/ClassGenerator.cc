@@ -84,10 +84,11 @@ namespace SOOT {
     SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem);
     SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom);
     SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
-    //SetPerlGlobal(aTHX_ "SOOT::gBenchmark", gBenchmark); // FIXME gBenchmark crashes
     SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
     SetPerlGlobal(aTHX_ "SOOT::gDirectory", gDirectory);
     SetPerlGlobalDelayedInit(aTHX_ "SOOT::gPad", (TObject**)&gPad, "TVirtualPad"); // gPad NULL at this time!
+    // Initialized again in SOOT.pm to band-aid a SEGV:
+    SetPerlGlobalDelayedInit(aTHX_ "SOOT::gBenchmark", (TObject**)&gBenchmark, "TBenchmark");
   }
 
 
