@@ -37,17 +37,24 @@ namespace SOOT {
   void
   SetupClassInheritance(pTHX_ const char* className, TClass* theClass)
   {
-    // FIXME the base classes can be template classes. That screws up Perl pretty bad.
-    // FIXME for now, we just skip the base classes that are template classes.
+    // FIXME the base classes can be template classes. That screws up
+    //       Perl pretty badly. For now, we just skip the base classes that are template classes.
+    // FIXME We don't make the TH* classes descendants of the TArray classes for now because
+    //       the TArray classes have overridden (XSP!) constructors. We want the autloading
+    //       to kick in for the TH* classes. This needs some consideration and a more general
+    //       solution.
     ostringstream str;
     str << className << "::ISA";
     AV* isa = get_av(str.str().c_str(), 1);
     av_clear(isa);
     TIter next(theClass->GetListOfBases());
     TBaseClass* base;
+    bool isTH1 = theClass->InheritsFrom("TH1");
     while ((base = (TBaseClass*)next())) {
       TString name(base->GetName());
-      if (!name.Contains("<")) { // skip template classes. FIXME optimize
+      if (!name.Contains("<")
+          && (!isTH1 || !name.BeginsWith("TArray")))
+      { // skip template classes. FIXME optimize
         av_push(isa, newSVpv(base->GetName(), 0));
       }
     }
