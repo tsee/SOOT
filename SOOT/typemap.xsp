@@ -1,3 +1,4 @@
+%typemap{AV*}{simple};
 
 %typemap{TGraphFloatArray}{parsed}{%SV*%}{%
   $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetN());
@@ -6,6 +7,7 @@
 %typemap{TH1FloatArray}{parsed}{%SV*%}{%
   $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetNbinsX());
 %};
+
 
 %typemap{TArrayDoubleArray}{parsed}{%SV*%}{%
   $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetSize());
