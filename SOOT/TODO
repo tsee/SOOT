@@ -3,9 +3,10 @@ Wrapper / guts:
 - Implement method caching
 - Implement can()
 - Fix Color_t lookup and other primitive types
+  (Note: I might have fixed this by accident. SetLineColor(int) now works. Does GetLineColor?)
 - Implement casting
 - Investigate wrapping all/more enums
-- Investigate array conversion vs. memory
+- Investigate array conversion vs. memory (perl->C seems okay. Check C->perl)
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
 - Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
@@ -30,6 +31,7 @@ Packaging:
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
+- Auto-Convert examples/ to POD?
 - Check existing examples/ for FIXME's.
 - ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
 - Document the SOOT <-> ROOT differences
