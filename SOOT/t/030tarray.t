@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 267;
+use Test::More tests => 291;
 use SOOT;
 use SOOT::API qw/:all/;
 pass();
@@ -34,4 +34,6 @@ sub check_ary {
   foreach my $elem (@$perlary) {
     is($ary->GetAt($index++), $elem);
   }
+  $ary->SetAt(2, 0);
+  is($ary->GetAt(0), 2);
 }
