@@ -25,7 +25,7 @@ sub _tree {
   $tree->SetTextAlign(12);
   
   my $tnt = $tree->AddText('Tree');
-  $tnt->SetTextAlign(22);
+  $tnt->SetTextAlign(22); # FIXME Can't locate method 'SetTextAlign' via package enum
   $tnt->SetTextSize(0.030);
   $tree->AddText('fScanField');
   $tree->AddText('fMaxEventLoop');
@@ -248,7 +248,7 @@ sub _tree {
   $basketstore->Draw();
   $c1->Update();
   
-  $gBenchmark->Show('tree'); # FIXME implement $gBenchmark (I think the problem was an order-of-intialization one)
+  $gBenchmark->Show('tree');
 }
 
 _tree;
