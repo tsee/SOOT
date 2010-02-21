@@ -31,7 +31,8 @@ namespace SOOT {
     "INVALID",
   };
 
-#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject"))
+// FIXME checking for both TObject and TArray is expensive. Do we really have to do that?
+#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject") || sv_derived_from((sv), "TArray"))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -85,8 +86,9 @@ namespace SOOT {
           return eSTRING;
         }
       case SVt_PVLV:
-        if (SvROK(sv))
+        if (SvROK(sv)) {
           return IS_TOBJECT(sv) ? eTOBJECT : eREF;
+        }
         else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
           if (SvIOK(sv))
             return eINTEGER;
@@ -270,6 +272,10 @@ namespace SOOT {
     const unsigned int nElem = (unsigned int)(av_len(av)+1);
     if (nSkip >= nElem)
       return 0;
+    //cout << "TYPES..."<<endl;
+    //for (unsigned int i = nSkip; i< nElem; ++i) {
+    //  cout << "- "<< gBasicTypeStrings[GuessType(aTHX_ *av_fetch(av, i, 0))] << " " << *av_fetch(av, i, 0) << endl;
+    //}
     for (unsigned int iElem = nSkip; iElem < nElem; ++iElem) {
       elem = av_fetch(av, iElem, 0);
       if (elem == NULL)
@@ -278,7 +284,10 @@ namespace SOOT {
       if (type == eTOBJECT)
         ++nTObjects;
       avtypes.push_back(type);
-      cproto.push_back(CProtoFromType(aTHX_ *elem, len, type));
+      const char* thisCproto = CProtoFromType(aTHX_ *elem, len, type);
+      if (thisCproto == NULL)
+        croak("Invalid type '%s'", gBasicTypeStrings[type]);
+      cproto.push_back(thisCproto);
     }
     return nTObjects;
   }
