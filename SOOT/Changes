@@ -1,5 +1,15 @@
 Revision history for Perl extension SOOT.
 
+0.03  Sun Feb 21 21:00:00 2010
+  - Many more examples.
+  - Lazy initialization of ROOT globals (gPad!)
+  - Constants actually work now.
+  - gBenchmark
+  - TH1* doesn't inherit from TArray in the wrapper - for now.
+  - TArray* construction from Perl arrays:
+     my $tarrayd = TArrayD->new([1., 2., ...]);
+  - More tests!
+
 0.02  Sat Feb 20 17:30:00 2010
   - List of candidate methods shown on bad method invocation.
   - Fixed problems with globals (gROOT, etc) and global
