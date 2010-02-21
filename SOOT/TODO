@@ -20,6 +20,8 @@ Wrapper / guts:
      overload CODE dereferencing for TObjects to behave as assignment operators.
      The above C code could become: "$gRandom->(...)".
   ====> While mostly implemented now, this still fails on the const qualifier. Doh.
+- Auto-convert TArrayD argument types to Double_t*'s on demand
+  (same for other TArray*)
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
@@ -30,6 +32,8 @@ Documentation / UI:
 - Convert more examples and fix the ensuing madness.
 - Check existing examples/ for FIXME's.
 - ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
+- Document the SOOT <-> ROOT differences
+=> TArray*!
 
 Testing:
 - Much, much more testing...
