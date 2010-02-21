@@ -3,7 +3,7 @@ use warnings;
 use Test::More tests => 19;
 use SOOT;
 pass();
-is_deeply(\@TH1D::ISA, ["TH1", "TArrayD"]);
+is_deeply(\@TH1D::ISA, ["TH1"]);
 
 eval { TObject->new(qw(a b c)); };
 ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
