@@ -41,7 +41,7 @@ namespace SOOT {
   void GenerateClassStubs(pTHX);
 
   /// Initializes a bunch of globals such as gROOT, etc
-  void InitializeGlobals(pTHX);
+  void InitializePerlGlobals(pTHX);
 
   /** Fetches the given perl global variable and creates a new object holding
    *  the given TObject. The global is made magical with the PreventDestruction

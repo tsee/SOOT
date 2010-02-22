@@ -83,7 +83,7 @@ namespace SOOT {
 
 
   void
-  InitializeGlobals(pTHX)
+  InitializePerlGlobals(pTHX)
   {
     if (!gApplication)
       gApplication = new TApplication("SOOT App", NULL, NULL);
