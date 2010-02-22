@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 namespace SOOT {
-  extern MGVTBL gNullMagicVTable; // used for identification of our PreventDestruction magic
+  extern MGVTBL gIndestructibleMagicVTable; // used for identification of our PreventDestruction magic
   extern MGVTBL gDelayedInitMagicVTable; // used for identification of our DelayedInit magic
 
   /** Creates a new Perl object which is a reference to a scalar blessed into
@@ -35,9 +35,21 @@ namespace SOOT {
   TObject* LobotomizeObject(pTHX_ SV* thePerlObject, char*& className);
   /// Same as the other LobotomizeObject but ignoring the class name
   TObject* LobotomizeObject(pTHX_ SV* thePerlObject);
+
   /// Free the underlying TObject, set pointer to zero
   void ClearObject(pTHX_ SV* thePerlObject);
   
+  /// This corresponds to a C cast "(NewType*)obj"
+  void CastObject(pTHX_ SV* thePerlObject, const char* newType);
+  
+  /** Returns a new copy of the perl (T)Object that points to the same C TObject.
+   *  The ORIGINAL will get destruction-prevention magic attached (PreventDestruction),
+   *  so that the copy will dictate when the underlying TObject is freed.
+   *  If newType is not NULL, the new perl object will be blessed into the class newType.
+   *  FIXME This is a poor replacement for reference counting...
+   */
+  SV* CopyWeaken(pTHX_ SV* thePerlObject, const char* newType);
+
   /// Prevents destruction of an object by adding magic that is checked during ClearObject
   void PreventDestruction(pTHX_ SV* thePerlObject);
 

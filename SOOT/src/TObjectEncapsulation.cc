@@ -12,7 +12,7 @@ using namespace std;
 namespace SOOT {
 
   // Inspired by XS::Variable::Magic
-  MGVTBL gNullMagicVTable = {
+  MGVTBL gIndestructibleMagicVTable = {
       NULL, /* get */
       NULL, /* set */
       NULL, /* len */
@@ -93,21 +93,48 @@ namespace SOOT {
     }
   }
 
+
+  inline void
+  CastObject(pTHX_ SV* thePerlObject, const char* newType)
+  {
+    sv_bless(thePerlObject, gv_stashpv(newType, GV_ADD));
+  }
+
+
+  SV*
+  CopyWeaken(pTHX_ SV* thePerlObject, const char* newType)
+  {
+    TObject* rootObj;
+    char* className;
+    if (newType == NULL)
+      rootObj = LobotomizeObject(aTHX_ thePerlObject, className);
+    else {
+      className = (char*)newType;
+      rootObj = LobotomizeObject(aTHX_ thePerlObject);
+    }
+    PreventDestruction(aTHX_ thePerlObject);
+    return EncapsulateObject(aTHX_ rootObj, className);
+  }
+
+
   void
   PreventDestruction(pTHX_ SV* thePerlObject) {
     if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
-      sv_magicext(SvRV(thePerlObject), NULL, PERL_MAGIC_ext, &gNullMagicVTable, 0, 0 );
+      SV* inner = SvRV(thePerlObject);
+      if (!IsIndestructible(aTHX_ inner))
+        sv_magicext(inner, NULL, PERL_MAGIC_ext, &gIndestructibleMagicVTable, 0, 0 );
     }
     else {
       croak("bad");
     }
   }
 
+
   inline bool
   IsIndestructible(pTHX_ SV* derefPObj) {
     // My hat goes off to XS::Variable::Magic.
     // Essentially, we just check whether the attached magic is *exactly* the type
-    // (and value, we use gNullMagicVTable as an identifier) of our destruction-prevention
+    // (and value, we use gIndestructibleMagicVTable as an identifier) of our destruction-prevention
     // magic.
     MAGIC *mg;
     if (SvTYPE(derefPObj) >= SVt_PVMG) {
@@ -115,7 +142,7 @@ namespace SOOT {
         if (
             (mg->mg_type == PERL_MAGIC_ext)
             &&
-            (mg->mg_virtual == &gNullMagicVTable)
+            (mg->mg_virtual == &gIndestructibleMagicVTable)
         ) {
           return true;
         }
@@ -147,7 +174,7 @@ namespace SOOT {
       bool isIndestructible = false;
       for (mg = SvMAGIC(derefPObj); mg; mg = mg->mg_moremagic) {
         if ((mg->mg_type == PERL_MAGIC_ext)) {
-          if (mg->mg_virtual == &gNullMagicVTable) {
+          if (mg->mg_virtual == &gIndestructibleMagicVTable) {
             isIndestructible = true;
           }
           else if (mg->mg_virtual == &gDelayedInitMagicVTable) {
@@ -155,7 +182,7 @@ namespace SOOT {
             sv_setpviv(derefPObj, PTR2IV(ptr));
             sv_unmagic(derefPObj, PERL_MAGIC_ext);
             if (isIndestructible)
-              sv_magicext(derefPObj, NULL, PERL_MAGIC_ext, &gNullMagicVTable, 0, 0 ); // Same as PreventDestruction
+              sv_magicext(derefPObj, NULL, PERL_MAGIC_ext, &gIndestructibleMagicVTable, 0, 0 ); // Same as PreventDestruction
           }
         } // end is PERL_MAGIC_ext magic
       } // end foreach magic
