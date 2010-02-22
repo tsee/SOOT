@@ -10,23 +10,24 @@ my $go = <STDIN>;
 
 =pod
 
+# doesn't leak at e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 foreach (1..1e6) {
   my $scalar;
   my $obj;
   $obj = bless(\$scalar => 'TObject');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
   $obj = bless(\$scalar => 'TH1D');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
   $obj = bless([] => 'TObject');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
   $obj = bless([] => 'TH1D');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
   $obj = bless({} => 'TObject');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
   $obj = bless({} => 'TH1D');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
   $obj = bless({} => 'Something::Else');
-  SOOT::type($obj);
+  SOOT::API::type($obj);
 }
 
 =cut
@@ -37,19 +38,19 @@ foreach (1..1e6) {
   my $scalar;
   my $obj;
   $obj = bless(\$scalar => 'TObject');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
   $obj = bless(\$scalar => 'TH1D');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
   $obj = bless([] => 'TObject');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
   $obj = bless([] => 'TH1D');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
   $obj = bless({} => 'TObject');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
   $obj = bless({} => 'TH1D');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
   $obj = bless({} => 'Something::Else');
-  SOOT::cproto($obj);
+  SOOT::API::cproto($obj);
 }
 
 =cut
@@ -57,6 +58,7 @@ foreach (1..1e6) {
 
 =pod
 
+# doesn't leak at e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 # doesn't leak 2010-02-17
 my $obj = TGraph->new(12);
 foreach (1..1e6) {
@@ -68,6 +70,7 @@ foreach (1..1e6) {
 
 =pod
 
+# doesn't leak at e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 # doesn't leak 2010-02-17
 my $obj = TGraph->new(12);
 my $obj2 = TH1D->new("a","a",2,0.,1.);
@@ -77,15 +80,14 @@ foreach (1..1e6) {
 
 =cut
 
-=pod
 
+# FIXME LEAKS AT e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 # doesn't leak 2010-02-17
 foreach (1..1e6) {
   my $obj = TH1D->new("hist".$_, "hist".$_, 10, 0., 1.);
   undef $obj;
 }
 
-=cut
 
 =pod
 
