@@ -86,8 +86,11 @@ namespace SOOT {
       SV* inner = (SV*)SvRV(thePerlObject);
       if (SvIOK(inner) && !IsIndestructible(aTHX_ inner)) {
         TObject* obj = INT2PTR(TObject*, SvIV(inner));
-        //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
-        delete obj;
+        if (obj->TestBit(kCanDelete)) {
+          //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
+          obj->SetBit(kMustCleanup);
+          delete obj;
+        }
         sv_setiv(inner, 0);
       }
     }
