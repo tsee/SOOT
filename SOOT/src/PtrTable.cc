@@ -5,8 +5,8 @@ using namespace SOOT;
 
 #define PTRTABLE_HASH(op) PtrTable::hash(PTR2nat(op))
 
-PtrTable::PtrTable(UV size, NV threshold = 0.9)
-  : fSize(size), fItems(0), fThreshold(threshold)
+PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold = 0.9)
+  : fSize(size), fItems(0), fThreshold(threshold), fPerl(aTHX), fDtor(dtor)
 {
   if ((size < 2) || (size & (size - 1)))
     croak("invalid ptr table size: expected a power of 2 (>= 2), got %u", (unsigned int)size);
@@ -21,6 +21,7 @@ PtrTable::PtrTable(UV size, NV threshold = 0.9)
 /*****************************************************************************/
 PtrTable::~PtrTable()
 {
+  Clear();
   Safefree(fArray);
 }
 
@@ -146,7 +147,7 @@ PtrTable::Grow()
 
 /*****************************************************************************/
 void
-PtrTable::Clear(pTHX_ PtrTableEntryValueDtor dtor) {
+PtrTable::Clear() {
   if (fItems) {
     PtrTableEntry** const array = fArray;
     UV riter = fSize - 1;
@@ -157,7 +158,7 @@ PtrTable::Clear(pTHX_ PtrTableEntryValueDtor dtor) {
       while (entry) {
         PtrTableEntry* const temp = entry;
         entry = entry->next;
-        dtor(aTHX_ temp->value);
+        fDtor(aTHX_ temp->value);
         Safefree(temp);
       }
 

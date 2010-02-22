@@ -1,7 +1,8 @@
 /*
- * This is a customised version of the pointer table implementation in sv.c.
+ * This is a customised version of the pointer table implementation in Perl's sv.c.
+ * Just like Perl, is released under the GPL or the Artistic License.
  * First customized by chocolateboy 2009-02-25,
- * later for SOOT by Steffen Mueller
+ * 2010-02-22 for SOOT by Steffen Mueller
  */
 
 #ifndef __PtrTable_h_
@@ -38,16 +39,25 @@ namespace SOOT {
 
   class PtrTable {
   public:
-    PtrTable(UV size, NV threshold);
+    /** New PtrTable with a given number of pre-allocated slots
+     *  and a grow threshold with reasonable default.
+     *  The PtrTable keeps its associated Perl interpreter around (pTHX)
+     *  and requires a function pointer for the entry destruction.
+     */
+    PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold);
     ~PtrTable();
-
-    PtrAnnotation* Fetch(const TObject* key);
-    PtrAnnotation* Delete(TObject* key);
+    
+    /// Stores an element in the PtrTable, returning the previous value if any
     PtrAnnotation* Store(const TObject* key, PtrAnnotation* value);
-    PtrTableEntry* Find(const TObject* key);
-
-    void Clear(pTHX_ PtrTableEntryValueDtor dtor);
+    /// Fetches an element from the PtrTable
+    PtrAnnotation* Fetch(const TObject* key);
+    /// Deletes an element from the PtrTable, returning the previous value if any
+    PtrAnnotation* Delete(TObject* key);
+    /// Clear PtrTable
+    void Clear();
   private:
+    /// Searches an element in the PtrTable and returns its ENTRY
+    PtrTableEntry* Find(const TObject* key);
     /// Double the size of the array
     void Grow();
 
@@ -55,6 +65,8 @@ namespace SOOT {
     UV fSize;
     UV fItems;
     NV fThreshold;
+    tTHX fPerl;
+    PtrTableEntryValueDtor fDtor;
 
 #if PTRSIZE == 8
     /*
