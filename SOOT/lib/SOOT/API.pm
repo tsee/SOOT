@@ -6,7 +6,7 @@ require SOOT;
 use base 'Exporter';
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
-  type cproto
+  type cproto prevent_destruction
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -35,7 +35,7 @@ and subject to change. If you need a stable API, contact the author(s).
 
 None by default.
 
-You may chose to import individual functions (see synopsis) or
+You may chose to import individual functions (see below) or
 all exported functions. You can import all functions with
 
   use SOOT::API ':all';
@@ -51,6 +51,12 @@ string such as C<"INTEGER">.
 
 Tries to guess the SOOT type of its argument and returns a
 string such as C<"int"> or C<"TGraph">.
+
+=head2 prevent_destruction
+
+Manually marks a given Perl object as not responsible for freeing
+the underlying ROOT object. If this is necessary, that's a bug in SOOT.
+This is a natural cause of memory leaks...
 
 =head1 OTHER API CLASSES
 

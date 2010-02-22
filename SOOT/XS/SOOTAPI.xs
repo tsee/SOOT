@@ -24,3 +24,9 @@ cproto(sv)
     const char* cproto = CProtoFromType(aTHX_ sv, len, type);
     XPUSHp(cproto, len);
 
+void
+prevent_destruction(rootObject)
+    SV* rootObject
+  PPCODE:
+    SOOT::PreventDestruction(aTHX_ rootObject);
+
