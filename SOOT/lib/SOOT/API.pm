@@ -12,6 +12,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT;
 
+# XS cleanup
+END { SOOT::API::Cleanup() }
+
 1;
 __END__
 

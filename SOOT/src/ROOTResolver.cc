@@ -537,6 +537,10 @@ namespace SOOT {
 
     // Determine return type
     char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
+/*    cout << "MINFO="<<mInfo.Name() << " " << mInfo.Title() << " " << mInfo.NArg() << " " << mInfo.FileName() << endl;
+    cout << "CINFO="<<mInfo.MemberOf()->Name()<< endl;
+    cout << retTypeStr << " " << mInfo.Type()->Name() << endl;
+*/
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
     

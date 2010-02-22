@@ -29,6 +29,8 @@ namespace SOOT {
     int temp;
   } PtrAnnotation;
 
+  void ClearAnnotation(pTHX_ PtrAnnotation* pa);
+
   typedef void (*PtrTableEntryValueDtor)(pTHX_ PtrAnnotation*);
 
   typedef struct PtrTableEntry {
@@ -44,7 +46,7 @@ namespace SOOT {
      *  The PtrTable keeps its associated Perl interpreter around (pTHX)
      *  and requires a function pointer for the entry destruction.
      */
-    PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold);
+    PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold = 0.9);
     ~PtrTable();
     
     /// Stores an element in the PtrTable, returning the previous value if any

@@ -30,3 +30,7 @@ prevent_destruction(rootObject)
   PPCODE:
     SOOT::PreventDestruction(aTHX_ rootObject);
 
+void
+Cleanup()
+  PPCODE:
+    delete SOOT::gSOOTObjects;

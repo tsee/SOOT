@@ -5,7 +5,14 @@ using namespace SOOT;
 
 #define PTRTABLE_HASH(op) PtrTable::hash(PTR2nat(op))
 
-PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold = 0.9)
+namespace SOOT {
+  void
+  ClearAnnotation(pTHX_ PtrAnnotation* pa) {
+    Safefree(pa);
+  }
+} // end namespace SOOT
+
+PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold)
   : fSize(size), fItems(0), fThreshold(threshold), fPerl(aTHX), fDtor(dtor)
 {
   if ((size < 2) || (size & (size - 1)))
