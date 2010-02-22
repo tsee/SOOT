@@ -21,8 +21,11 @@ extern "C" {
 #endif
 
 namespace SOOT {
+  class PtrTable;
+
   extern MGVTBL gIndestructibleMagicVTable; // used for identification of our PreventDestruction magic
   extern MGVTBL gDelayedInitMagicVTable; // used for identification of our DelayedInit magic
+  extern PtrTable* gSOOTObjects;
 
   /** Creates a new Perl object which is a reference to a scalar blessed into
    *  the class. The scalar itself holds a pointer to the ROOT object.

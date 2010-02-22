@@ -9,7 +9,10 @@
 using namespace SOOT;
 using namespace std;
 
+#include "PtrTable.h"
+
 namespace SOOT {
+  PtrTable* gSOOTObjects = NULL;
 
   // Inspired by XS::Variable::Magic
   MGVTBL gIndestructibleMagicVTable = {
