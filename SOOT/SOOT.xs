@@ -32,6 +32,7 @@
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
 #include "ClassIterator.h"
+#include "PtrTable.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,8 +56,8 @@ extern "C" {
 using namespace SOOT;
 using namespace std;
 
-// Broken due to bug in perl.
 /*
+// Broken due to bug in perl.
 void
 AUTOLOAD(...)
   PPCODE:
