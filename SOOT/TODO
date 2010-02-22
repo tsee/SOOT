@@ -1,3 +1,18 @@
+Memory management:
+- This is an outline for better keeping track of the wrapped objects.
+  It will need revision/fleshing out with a fresh brain!
+  1) Write hashmap class for storage. Done => SOOT::PtrTable
+  2) Create global hashmap. Done => SOOT::gSOOTObjects
+  3) Each hashmap entry needs to keep track of all SV*'s that wrap
+     a given TObject*.
+     => Figure out a way to store this effectively in the
+        PtrAnnotation struct.
+     => Figure out when the entries need modification.
+        ==> EncapsulateObject
+        ==> ClearObject
+        ==> WeakCopy
+  ...
+
 Wrapper / guts:
 - Implement global function wrapping
 - Implement method caching
