@@ -50,7 +50,9 @@ namespace SOOT {
   /// Same as the other LobotomizeObject but ignoring the class name
   TObject* LobotomizeObject(pTHX_ SV* thePerlObject);
 
-  /// Free the underlying TObject, set pointer to zero
+  /** Free the underlying TObject, set pointer to zero.
+   *  This is to be considered INTERNAL TO SOOT only. => See UnregisterObject instead
+   */
   void ClearObject(pTHX_ SV* thePerlObject);
   
   /*  ... YAGNI ...
