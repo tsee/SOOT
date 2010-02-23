@@ -17,6 +17,8 @@ extern "C" {
 }
 #endif
 
+
+// FIXME Handle case of ROOT deleting a TObject before it's deleted from our table. Steal from PyROOT's MemoryRegulator::RecursiveRemove!
 namespace SOOT {
   class PtrTable;
 
