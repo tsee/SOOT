@@ -3,8 +3,13 @@
 
 /* must load ROOT stuff veeery early due to pollution */
 #undef Copy
+#undef Move
+#undef New
+#undef STATIC
+#undef Stat_t
 
 #include <TROOT.h>
+#include <Rtypes.h>
 #include <TClass.h>
 #include <TMethod.h>
 #include <Reflex/Scope.h>
@@ -24,5 +29,7 @@
 #include <TPad.h>
 
 #undef Copy
+#undef Move
+#undef New
 
 #endif
