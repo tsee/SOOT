@@ -82,7 +82,7 @@ T_VECTORDOUBLE
 OUTPUT
 
 O_TOBJECT
-	$arg = SOOT::EncapsulateObject(aTHX_ (TObject*)$var, "${my $t=$type; $t=~s/^\s*const\b\s*//;$t=~s/\s*[*&]*\s*$//;\$t}");
+	$arg = SOOT::RegisterObject(aTHX_ (TObject*)$var, "${my $t=$type; $t=~s/^\s*const\b\s*//;$t=~s/\s*[*&]*\s*$//;\$t}");
 
 T_VECTORVEC
 	AV* av = newAV();

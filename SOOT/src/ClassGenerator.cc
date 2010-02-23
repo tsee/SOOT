@@ -103,9 +103,9 @@ namespace SOOT {
   SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className)
   {
     SV* global = get_sv(variable, 1);
-    sv_setsv(global,
-             sv_2mortal(SOOT::EncapsulateObject(aTHX_ cobj,
-                                                (className==NULL ? cobj->ClassName() : className))));
+    SOOT::RegisterObject(aTHX_ cobj,
+                         (className==NULL ? cobj->ClassName() : className),
+                         global);
     global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
     SOOT::PreventDestruction(aTHX_ global);
   }
@@ -117,7 +117,6 @@ namespace SOOT {
     SV* obj = sv_2mortal(SOOT::MakeDelayedInitObject(aTHX_ cobj, className));
     sv_setsv(global, obj);
     global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
-    SOOT::PreventDestruction(aTHX_ global);
   }
 } // end namespace SOOT
 

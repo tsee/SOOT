@@ -4,7 +4,7 @@
 using namespace std;
 using namespace SOOT;
 
-#define PTRTABLE_HASH(op) PtrTable::hash(PTR2nat(op))
+#define PTRTABLE_HASH(ptr) PtrTable::hash(PTR2nat(ptr))
 
 namespace SOOT {
   void
@@ -13,11 +13,12 @@ namespace SOOT {
     // FIXME This needs to learn about the refcounting
     for (std::list<SV*>::iterator it = pa->fPerlObjects.begin();
          it != pa->fPerlObjects.end(); ++it)
-      SOOT::ClearObject(aTHX_ *it);
+      SOOT::UnregisterObject(aTHX_ *it);
 
-    Safefree(pa);
+    //Safefree(pa); // Not needed since UnregisterObject will free the annotation
   }
 } // end namespace SOOT
+
 
 PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold)
   : fSize(size), fItems(0), fThreshold(threshold), fPerl(aTHX), fDtor(dtor)
@@ -84,9 +85,9 @@ PtrAnnotation* PtrTable::FetchOrCreate(const TObject* key)
   if (entry) {
     return entry->value;
   } else {
-    PtrAnnotation* annotation;
-    Newx(annotation, 1, PtrAnnotation);
+    PtrAnnotation* annotation = new PtrAnnotation();
     annotation->fNReferences = 0;
+    annotation->fDoNotDestroy = false;
     Store(key, annotation);
     return annotation;
   }
@@ -127,7 +128,6 @@ PtrTable::Find(const TObject* key)
 {
   PtrTableEntry* entry;
   UV index = PTRTABLE_HASH(key) & (fSize - 1);
-
   for (entry = fArray[index]; entry; entry = entry->next) {
     if (entry->key == key)
       break;

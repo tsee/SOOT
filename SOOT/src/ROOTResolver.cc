@@ -470,7 +470,7 @@ namespace SOOT {
         //       char* const* where the *'s aren't all at the end
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
-        retval = EncapsulateObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
+        retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';
         free(typeStrWithoutPtr);

@@ -5,7 +5,7 @@ void
 DESTROY(self)
     SV* self
   PPCODE:
-    SOOT::ClearObject(aTHX_ self);
+    SOOT::UnregisterObject(aTHX_ self);
 
 
 SV*
@@ -13,7 +13,7 @@ as(self, newType)
     SV* self
     const char* newType
   CODE:
-    RETVAL = SOOT::CopyWeaken(aTHX_ self, newType);
+    RETVAL = SOOT::RegisterObject(aTHX_ self, newType);
   OUTPUT: RETVAL
 
 
@@ -26,7 +26,7 @@ void
 DESTROY(self)
     SV* self
   PPCODE:
-    SOOT::ClearObject(aTHX_ self);
+    SOOT::UnregisterObject(aTHX_ self);
 
 
 SV*
@@ -34,7 +34,7 @@ as(self, newType)
     SV* self
     const char* newType
   CODE:
-    RETVAL = SOOT::CopyWeaken(aTHX_ self, newType);
+    RETVAL = SOOT::RegisterObject(aTHX_ self, newType);
   OUTPUT: RETVAL
 
 

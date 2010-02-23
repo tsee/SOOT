@@ -29,6 +29,7 @@ namespace SOOT {
   typedef struct PtrAnnotation {
     unsigned int fNReferences;
     std::list<SV*> fPerlObjects;
+    bool fDoNotDestroy;
   } PtrAnnotation;
 
   void ClearAnnotation(pTHX_ PtrAnnotation* pa);
