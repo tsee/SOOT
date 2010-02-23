@@ -67,8 +67,8 @@ sub _bootstrap_AUTOLOAD {
   }
 }
 
-# For some reason, the normal gBenchmark will segfault on first use.
-# Thus we reinitialize it here...
+# For some reason, the normal gBenchmark from XS will segfault on first use.
+# Thus we initialize it here...
 use vars '$gBenchmark';
 $gBenchmark = TBenchmark->new;
 
