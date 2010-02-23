@@ -58,10 +58,13 @@ namespace SOOT {
     PtrAnnotation* Fetch(const TObject* key);
     /// Fetches an element from the PtrTable and creates it if it didn't exist
     PtrAnnotation* FetchOrCreate(const TObject* key);
-    /// Deletes an element from the PtrTable, returning the previous value if any
-    PtrAnnotation* Delete(TObject* key);
+    /// Deletes an element from the PtrTable
+    bool Delete(TObject* key);
     /// Clear PtrTable
     void Clear();
+
+    /// Print information about the table (for debugging only)
+    void PrintStats();
   private:
     /// Searches an element in the PtrTable and returns its ENTRY
     PtrTableEntry* Find(const TObject* key);

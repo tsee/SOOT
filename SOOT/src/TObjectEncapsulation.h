@@ -22,6 +22,16 @@ extern "C" {
 // FIXME Handle case of ROOT deleting a TObject before it's deleted from our table. Steal from PyROOT's MemoryRegulator::RecursiveRemove!
 namespace SOOT {
 
+   /// This class exists for the sole purpose of letting ROOT call into RecursiveRemove for clearing out TObject's
+   /// Only instance should live in XS/SOOTBOOT.xs
+   class TTObjectEncapsulator : public TObject {
+   public:
+     TTObjectEncapsulator() {}
+     ~TTObjectEncapsulator() {}
+     /// callback for ROOT/CINT
+     virtual void RecursiveRemove( TObject* object );
+   };
+
   extern MGVTBL gDelayedInitMagicVTable; // used for identification of our DelayedInit magic
   extern PtrTable* gSOOTObjects;
 

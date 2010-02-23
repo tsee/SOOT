@@ -4,6 +4,9 @@
 using namespace std;
 using namespace SOOT;
 
+#define P_DEBUG 1
+#undef P_DEBUG
+
 #define PTRTABLE_HASH(ptr) PtrTable::hash(PTR2nat(ptr))
 
 namespace SOOT {
@@ -17,6 +20,9 @@ namespace SOOT {
       SOOT::UnregisterObject(aTHX_ *it, true);
     }
     */
+#ifdef P_DEBUG
+    cout << "ClearAnnotation: deleting PtrAnnotation* '" << pa << "'" << endl;
+#endif    
     delete pa; // Needed since UnregisterObject can not free the annotation
   }
 } // end namespace SOOT
@@ -38,6 +44,9 @@ PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold)
 /*****************************************************************************/
 PtrTable::~PtrTable()
 {
+#ifdef P_DEBUG
+  cout << "~PtrTable(): Safefree'ing fArray: '" << fArray << "'" << endl;
+#endif
   Clear();
   Safefree(fArray);
   fArray = NULL;
@@ -45,14 +54,17 @@ PtrTable::~PtrTable()
 }
 
 /*****************************************************************************/
-PtrAnnotation*
+bool
 PtrTable::Delete(TObject* key)
 {
+#ifdef P_DEBUG 
+  cout << "PtrTable::Delete: DELETING TObject " << key << " from PtrTable." << endl;
+#endif
   PtrTableEntry* entry;
   PtrTableEntry* prev = NULL;
-  PtrAnnotation* annotation = NULL;
   UV index = PTRTABLE_HASH(key) & (fSize - 1);
 
+  bool deleted = false;
   for (entry = fArray[index]; entry; prev = entry, entry = entry->next) {
     if (entry->key == key) {
       if (prev)
@@ -61,13 +73,20 @@ PtrTable::Delete(TObject* key)
         fArray[index] = entry->next;
 
       --fItems;
-      annotation = entry->value;
+#ifdef P_DEBUG 
+      cout << "PtrTable::Delete: delete PtrAnnotation* '" << entry->value << "'." << endl;
+#endif
+      deleted = true;
+      delete entry->value;
+#ifdef P_DEBUG 
+      cout << "PtrTable::Delete: Safefree(PtrTableEntry* '" << entry << "')." << endl;
+#endif
       Safefree(entry);
       break;
     }
   } // end foreach entry in collision list
 
-  return annotation;
+  return deleted;
 }
 
 
@@ -196,6 +215,9 @@ PtrTable::Clear() {
         PtrTableEntry* const temp = entry;
         entry = entry->next;
         fDtor(aTHX_ temp->value);
+#ifdef P_DEBUG 
+        cout << "PtrTable::Clear: Safefree(PtrTableEntry* '" << temp << "')." << endl;
+#endif
         Safefree(temp);
       }
 
@@ -212,5 +234,46 @@ PtrTable::Clear() {
 }
 
 
+void
+PtrTable::PrintStats()
+{
+  cout << "==================================================================\n"
+       << "=                      PtrTable::PrintStats()                    =\n"
+       << "==================================================================\n"
+       << "\n"
+       << "== Globals ==\n"
+       << "Size="<<fSize<<"\nStored TObjects="<<fItems<<"\nThreshold="<<fThreshold<<"\n"
+       << "Perl ptr="<<(void*)fPerl<<"\n"<<endl;
+  if (fSize==0 || fItems==0)
+    return;
+
+  cout << "== Entries / RefPads ==" << endl;
+
+  UV iter = 0;
+  do {
+    PtrTableEntry* entry = fArray[iter];
+
+    while (entry) {
+      PtrTableEntry* const temp = entry;
+      entry = entry->next;
+
+      // entry info
+      cout << "= Entry " << (void*)temp << " =\n";
+      cout << "  Contains TObject* '" << (void*)temp->key << "' of class " << temp->key->ClassName() << "\n"
+           << "  PtrAnnotation* is '" << (void*)temp->value <<"'"<<endl;
+      PtrAnnotation* ann = temp->value;
+      cout << "    NReferences="<<ann->fNReferences<<endl;
+      cout << "    Must " << (ann->fDoNotDestroy ? "NOT " : "") << "be destroyed by SOOT\n";
+      for (std::list<SV*>::iterator it = (ann->fPerlObjects).begin();
+           it != (ann->fPerlObjects).end(); ++it)
+        cout << "    SV* " << (void*)(*it) << endl;
+      cout << endl;
+    }
+  } while (++iter != fSize);
+
+  cout << "== End of RefPads ==\n"<< endl;
+}
+
+#undef P_DEBUG
 #undef PTRTABLE_HASH
 

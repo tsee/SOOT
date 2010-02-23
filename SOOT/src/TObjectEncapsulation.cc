@@ -50,6 +50,8 @@ namespace SOOT {
     sv_setref_pv(theReference, className, (void*)theROOTObject );
     (refPad->fPerlObjects).push_back(theReference);
 
+    theROOTObject->SetBit(kMustCleanup);
+
     return theReference;
   }
 
@@ -79,17 +81,19 @@ namespace SOOT {
 
     --(refPad->fNReferences);
     sv_setiv(inner, 0);
+
     // FIXME doesn't work / isn't necessary?
     //sv_setsv_nomg(thePerlObject, &PL_sv_undef);
+
     if (refPad->fNReferences == 0) {
-      gSOOTObjects->Delete(obj);
-      if (!refPad->fDoNotDestroy && obj->TestBit(kCanDelete)) {
+      bool doNotDestroyTObj = refPad->fDoNotDestroy;
+      gSOOTObjects->Delete(obj); // also frees refPad!
+      if (!doNotDestroyTObj) {
+      //if (!refPad->fDoNotDestroy && obj->TestBit(kCanDelete)) {
         //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
         //obj->SetBit(kMustCleanup);
         delete obj;
       }
-      if (!mustNotClearRefPad)
-        delete refPad;
     }
 
     return;
@@ -159,6 +163,21 @@ namespace SOOT {
         } // end is PERL_MAGIC_ext magic
       } // end foreach magic
     } // end if magical
+  }
+
+  void
+  TTObjectEncapsulator::RecursiveRemove(TObject* object)
+  {
+    // global destruction...
+    if (!object || !gSOOTObjects)
+      return;
+
+    //cout << "ROOT asks us to remove references to " << object << endl;
+    //cout << "It is a " << object->ClassName() << endl;
+    //gSOOTObjects->PrintStats();
+
+    // Nuke it!
+    gSOOTObjects->Delete(object);
   }
 
 } // end namespace SOOT
