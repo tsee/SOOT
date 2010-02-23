@@ -1,9 +1,22 @@
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 use 5.008001;
+use lib '.';
+use inc::latest 'ExtUtils::XSpp';
+use inc::latest 'ExtUtils::ParseXS';
+use Config;
+use File::Spec;
+# bootstrap the bundled toolchain
+BEGIN {
+  if ($INC{"ExtUtils/ParseXS.pm"} =~ /\binc\b/) {
+    $ENV{PATH} = "buildtools" . $Config::Config{path_sep} . $ENV{PATH};
+  }
+}
+
 use ExtUtils::MakeMaker;
-use lib qw(. inc);
-use inc::SOOTBuild;
+
+unshift @INC, 'inc';
+require inc::SOOTBuild;
 
 my $CC = 'g++';
 
@@ -28,4 +41,5 @@ WriteMakefile(
       FILES => "src/SOOTClassnames.cc rootclasses.xsinclude rootclasses.h rootclasses.map",
     },
 );
+
 
