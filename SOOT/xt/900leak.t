@@ -11,6 +11,7 @@ my $go = <STDIN>;
 =pod
 
 # doesn't leak at e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
+# doesn't leak at fe99b3f6e7ed25c3b9d4e6e388818f860445673c (GC)
 foreach (1..1e6) {
   my $scalar;
   my $obj;
@@ -34,6 +35,7 @@ foreach (1..1e6) {
 
 =pod
 
+# doesn't leak at fe99b3f6e7ed25c3b9d4e6e388818f860445673c (GC)
 foreach (1..1e6) {
   my $scalar;
   my $obj;
@@ -58,6 +60,7 @@ foreach (1..1e6) {
 
 =pod
 
+# doesn't leak at fe99b3f6e7ed25c3b9d4e6e388818f860445673c (GC)
 # doesn't leak at e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 # doesn't leak 2010-02-17
 my $obj = TGraph->new(12);
@@ -70,6 +73,7 @@ foreach (1..1e6) {
 
 =pod
 
+# doesn't leak at fe99b3f6e7ed25c3b9d4e6e388818f860445673c (GC)
 # doesn't leak at e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 # doesn't leak 2010-02-17
 my $obj = TGraph->new(12);
@@ -81,6 +85,7 @@ foreach (1..1e6) {
 =cut
 
 
+# FIXME LEAKS AT fe99b3f6e7ed25c3b9d4e6e388818f860445673c (GC)
 # FIXME LEAKS AT e19f62548881a14be485f8ed56c59a1d32f00d61 (2010-02-22)
 # doesn't leak 2010-02-17
 foreach (1..1e6) {
@@ -88,6 +93,7 @@ foreach (1..1e6) {
   undef $obj;
 }
 
+=cut
 
 =pod
 
