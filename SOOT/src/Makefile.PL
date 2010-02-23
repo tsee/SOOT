@@ -6,7 +6,7 @@ use inc::SOOTBuild;
 # the contents of the Makefile that is written.
 
 WriteMakefile(
-  inc::SOOTBuild::GetMMArgs('src'),
+  inc::SOOTBuild::GetMMArgs('..'),
   NAME => 'src',
 );
 

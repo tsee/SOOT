@@ -51,18 +51,12 @@ if (!can_run($ROOTConfig)) {
 }
 
 sub GetMMArgs {
-  my $subdir = shift;
+  my $maindir = shift;
 
   my @typemaps;
   my @inc;
-  if ($subdir eq '.') {
-    @inc = qw(. src);
-    @typemaps = @Typemaps;
-  }
-  else {
-    @inc = qw(. ..);
-    @typemaps = map {File::Spec->catdir(File::Spec->updir, $_)} @Typemaps;
-  }
+  @inc = ($maindir, File::Spec->catdir($maindir, 'src'));
+  @typemaps = map {File::Spec->catdir($maindir, $_)} @Typemaps;
   if (defined $ENV{ROOTSYS}) {
     push @inc, File::Spec->catdir($ENV{ROOTSYS}, 'include'),
                File::Spec->catdir($ENV{ROOTSYS}, 'include', 'root');
