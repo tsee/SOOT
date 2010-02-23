@@ -2,10 +2,7 @@
 #ifndef __TObjectEncapsulation_h_
 #define __TObjectEncapsulation_h_
 
-#include <TROOT.h>
-#include <TObject.h>
-#include <TVirtualPad.h>
-#undef Copy
+#include "ROOTIncludes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +23,20 @@ namespace SOOT {
   extern MGVTBL gIndestructibleMagicVTable; // used for identification of our PreventDestruction magic
   extern MGVTBL gDelayedInitMagicVTable; // used for identification of our DelayedInit magic
   extern PtrTable* gSOOTObjects;
+
+  /** Registers a new TObject with the SOOT object table and returns a new
+   *  Perl object that encapsulates it. If the TObject was known before,
+   *  this increments the internal refcount and returns a Perl object that
+   *  refers to the same TObject.
+   *  "className" defaults to calling the TObject's ClassName method.
+   */
+  SV* RegisterObject(pTHX_ TObject* theROOTObject, const char* className = NULL);
+
+  /** Unregisters a Perl object with the SOOT object table, sets it to undef
+   *  and possibly also frees the underlying ROOT object if it's the last
+   *  reference.
+   */
+  void UnregisterObject(pTHX_ SV* thePerlObject);
 
   /** Creates a new Perl object which is a reference to a scalar blessed into
    *  the class. The scalar itself holds a pointer to the ROOT object.

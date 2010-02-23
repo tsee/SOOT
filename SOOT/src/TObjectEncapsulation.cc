@@ -53,6 +53,51 @@ namespace SOOT {
 
 
   SV*
+  RegisterObject(pTHX_ TObject* theROOTObject, const char* className)
+  {
+    if (className == NULL)
+      className = theROOTObject->ClassName();
+
+    // Fetch the reference pad for this TObject
+    PtrAnnotation* storage = gSOOTObjects->FetchOrCreate(theROOTObject);
+
+    storage->fNReferences++;
+    SV* newref = newSV(0);
+    sv_setref_pv(newref, className, (void*)theROOTObject );
+    storage->fPerlObjects.push_back(newref);
+    return newref;
+  }
+
+
+  void
+  UnregisterObject(pTHX_ SV* thePerlObject)
+  {
+    SV* inner = (SV*)SvRV(thePerlObject);
+    TObject* obj = INT2PTR(TObject*, SvIV(inner));
+
+    // Fetch the reference pad for this TObject
+    PtrAnnotation* storage = gSOOTObjects->Fetch(obj);
+    if (!storage)
+      return;
+
+    storage->fNReferences--;
+    sv_setiv(inner, 0);
+    sv_setsv_nomg(thePerlObject, &PL_sv_undef);
+
+    if (storage->fNReferences == 0) {
+      gSOOTObjects->Delete(obj);
+      if (obj->TestBit(kCanDelete)) {
+        //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
+        //obj->SetBit(kMustCleanup);
+        delete obj;
+      }
+    }
+
+    return;
+  }
+
+
+  SV*
   EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className)
   {
     SV* ref = newSV(0);
