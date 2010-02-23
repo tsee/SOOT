@@ -1,6 +1,7 @@
 #include "PtrTable.h"
+#include "TObjectEncapsulation.h"
 
-
+using namespace std;
 using namespace SOOT;
 
 #define PTRTABLE_HASH(op) PtrTable::hash(PTR2nat(op))
@@ -8,6 +9,12 @@ using namespace SOOT;
 namespace SOOT {
   void
   ClearAnnotation(pTHX_ PtrAnnotation* pa) {
+    // Iterate over the stored references and nuke them
+    // FIXME This needs to learn about the refcounting
+    for (std::list<SV*>::iterator it = pa->fPerlObjects.begin();
+         it != pa->fPerlObjects.end(); ++it)
+      SOOT::ClearObject(aTHX_ *it);
+
     Safefree(pa);
   }
 } // end namespace SOOT
@@ -66,6 +73,23 @@ PtrTable::Fetch(const TObject* key)
   PtrTableEntry const * const entry = Find(key);
 
   return entry ? entry->value : NULL;
+}
+
+
+/*****************************************************************************/
+PtrAnnotation* PtrTable::FetchOrCreate(const TObject* key)
+{
+  PtrTableEntry* entry = Find(key);
+
+  if (entry) {
+    return entry->value;
+  } else {
+    PtrAnnotation* annotation;
+    Newx(annotation, 1, PtrAnnotation);
+    annotation->fNReferences = 0;
+    Store(key, annotation);
+    return annotation;
+  }
 }
 
 

@@ -7,8 +7,7 @@
 
 #ifndef __PtrTable_h_
 #define __PtrTable_h_
-#include <TObject.h>
-#undef Copy
+#include "ROOTIncludes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,10 +22,13 @@ extern "C" {
 }
 #endif
 
+#include <list>
+
 namespace SOOT {
 
   typedef struct PtrAnnotation {
-    int temp;
+    unsigned int fNReferences;
+    std::list<SV*> fPerlObjects;
   } PtrAnnotation;
 
   void ClearAnnotation(pTHX_ PtrAnnotation* pa);
@@ -53,6 +55,8 @@ namespace SOOT {
     PtrAnnotation* Store(const TObject* key, PtrAnnotation* value);
     /// Fetches an element from the PtrTable
     PtrAnnotation* Fetch(const TObject* key);
+    /// Fetches an element from the PtrTable and creates it if it didn't exist
+    PtrAnnotation* FetchOrCreate(const TObject* key);
     /// Deletes an element from the PtrTable, returning the previous value if any
     PtrAnnotation* Delete(TObject* key);
     /// Clear PtrTable
