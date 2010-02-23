@@ -437,7 +437,7 @@ namespace SOOT {
 
 
   SV*
-  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr)
+  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr, bool isConstructor)
   {
     char* typeStrWithoutPtr;
     char* ptr;
@@ -471,6 +471,9 @@ namespace SOOT {
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
         retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
+        // If we're not creating a TObject via a constructor, it's likely not outs to delete
+        if (!isConstructor)
+          SOOT::PreventDestruction(aTHX_ retval); // FIXME optimize
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';
         free(typeStrWithoutPtr);
@@ -562,7 +565,7 @@ namespace SOOT {
       free(needsCleanup[i]);
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
-    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr);
+    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor);
   }
 
 
