@@ -33,4 +33,8 @@ prevent_destruction(rootObject)
 void
 Cleanup()
   PPCODE:
-    delete SOOT::gSOOTObjects;
+    PtrTable* tmp = SOOT::gSOOTObjects;
+    SOOT::gSOOTObjects = NULL;
+    tmp->Clear();
+    delete tmp;
+

@@ -42,13 +42,13 @@ namespace SOOT {
     // Fetch the reference pad for this TObject
     PtrAnnotation* refPad = gSOOTObjects->FetchOrCreate(theROOTObject);
 
-    refPad->fNReferences++;
+    ++(refPad->fNReferences);
 
     if (theReference == NULL)
       theReference = newSV(0);
 
     sv_setref_pv(theReference, className, (void*)theROOTObject );
-    refPad->fPerlObjects.push_back(theReference);
+    (refPad->fPerlObjects).push_back(theReference);
 
     return theReference;
   }
@@ -62,7 +62,7 @@ namespace SOOT {
 
 
   void
-  UnregisterObject(pTHX_ SV* thePerlObject)
+  UnregisterObject(pTHX_ SV* thePerlObject, bool mustNotClearRefPad)
   {
     if (!SvROK(thePerlObject))
       return;
@@ -73,14 +73,18 @@ namespace SOOT {
     TObject* obj = INT2PTR(TObject*, SvIV(inner));
     if (obj == NULL)
       return;
-
+    
+    // It's global destruction
+    if (SOOT::gSOOTObjects == NULL) {
+      return;
+    }
 
     // Fetch the reference pad for this TObject
     PtrAnnotation* refPad = gSOOTObjects->Fetch(obj);
     if (!refPad)
       return;
 
-    refPad->fNReferences--;
+    --(refPad->fNReferences);
     sv_setiv(inner, 0);
     // FIXME doesn't work / isn't necessary?
     //sv_setsv_nomg(thePerlObject, &PL_sv_undef);
@@ -91,7 +95,8 @@ namespace SOOT {
         //obj->SetBit(kMustCleanup);
         delete obj;
       }
-      delete refPad;
+      if (!mustNotClearRefPad)
+        delete refPad;
     }
 
     return;
@@ -202,9 +207,9 @@ namespace SOOT {
             sv_unmagic(derefPObj, PERL_MAGIC_ext);
             // Fetch the reference pad for this TObject and append this SV
             PtrAnnotation* refPad = gSOOTObjects->FetchOrCreate(ptr);
-            refPad->fNReferences++;
+            ++(refPad->fNReferences);
             sv_setpviv(derefPObj, PTR2IV(ptr));
-            refPad->fPerlObjects.push_back(thePerlObj);
+            (refPad->fPerlObjects).push_back(thePerlObj);
             refPad->fDoNotDestroy = true; // can't destroy late init objects
           }
           break;

@@ -37,8 +37,9 @@ namespace SOOT {
   /** Unregisters a Perl object with the SOOT object table, sets it to undef
    *  and possibly also frees the underlying ROOT object if it's the last
    *  reference.
+   *  If "mustNotClearRefPad" is set, the containing PtrAnnotation isn't freed.
    */
-  void UnregisterObject(pTHX_ SV* thePerlObject);
+  void UnregisterObject(pTHX_ SV* thePerlObject, bool mustNotClearRefPad = false);
 
   /** Given a Perl object (SV*) that's known to be one of our mock TObject like
    *  creatures, fetch the class name and the ROOT object.

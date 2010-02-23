@@ -10,12 +10,14 @@ namespace SOOT {
   void
   ClearAnnotation(pTHX_ PtrAnnotation* pa) {
     // Iterate over the stored references and nuke them
-    // FIXME This needs to learn about the refcounting
-    for (std::list<SV*>::iterator it = pa->fPerlObjects.begin();
-         it != pa->fPerlObjects.end(); ++it)
-      SOOT::UnregisterObject(aTHX_ *it);
-
-    //Safefree(pa); // Not needed since UnregisterObject will free the annotation
+    // FIXME Skip this and let the kernel handle it for now...
+    /*for (std::list<SV*>::iterator it = (pa->fPerlObjects).begin();
+         it != (pa->fPerlObjects).end(); ++it)
+    {
+      SOOT::UnregisterObject(aTHX_ *it, true);
+    }
+    */
+    delete pa; // Needed since UnregisterObject can not free the annotation
   }
 } // end namespace SOOT
 
@@ -38,6 +40,8 @@ PtrTable::~PtrTable()
 {
   Clear();
   Safefree(fArray);
+  fArray = NULL;
+  fSize = 0;
 }
 
 /*****************************************************************************/
@@ -126,6 +130,8 @@ PtrAnnotation* PtrTable::Store(const TObject* key, PtrAnnotation* value)
 PtrTableEntry*
 PtrTable::Find(const TObject* key)
 {
+  if (fSize == 0)
+    return NULL;
   PtrTableEntry* entry;
   UV index = PTRTABLE_HASH(key) & (fSize - 1);
   for (entry = fArray[index]; entry; entry = entry->next) {
