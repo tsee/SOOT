@@ -17,10 +17,10 @@ extern "C" {
 }
 #endif
 
+#include "PtrTable.h"
 
 // FIXME Handle case of ROOT deleting a TObject before it's deleted from our table. Steal from PyROOT's MemoryRegulator::RecursiveRemove!
 namespace SOOT {
-  class PtrTable;
 
   extern MGVTBL gDelayedInitMagicVTable; // used for identification of our DelayedInit magic
   extern PtrTable* gSOOTObjects;
@@ -70,6 +70,8 @@ namespace SOOT {
   /// Replaces the object with its C-level dereference and removes the DelayedInit magic
   void DoDelayedInit(pTHX_ SV* thePerlObject);
 } // end namespace SOOT
+
+#include "TObjectEncapsulation.inline.h"
 
 #endif
 

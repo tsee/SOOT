@@ -53,13 +53,6 @@ namespace SOOT {
     return theReference;
   }
 
-  // FIXME inline
-  SV*
-  RegisterObject(pTHX_ SV* thePerlObject, const char* className)
-  {
-    return RegisterObject(aTHX_ LobotomizeObject(aTHX_ thePerlObject), className);
-  }
-
 
   void
   UnregisterObject(pTHX_ SV* thePerlObject, bool mustNotClearRefPad)
@@ -103,43 +96,6 @@ namespace SOOT {
   }
 
 
-  TObject*
-  LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
-  {
-    DoDelayedInit(aTHX_ thePerlObject);
-    SV* inner = (SV*)SvRV(thePerlObject);
-    className = (char*)sv_reftype(inner, TRUE);
-    return INT2PTR(TObject*, SvIV(inner));
-  }
-
-
-  TObject*
-  LobotomizeObject(pTHX_ SV* thePerlObject)
-  {
-    DoDelayedInit(aTHX_ thePerlObject);
-    SV* inner = (SV*)SvRV(thePerlObject);
-    return INT2PTR(TObject*, SvIV(inner));
-  }
-
-
-  void
-  ClearObject(pTHX_ SV* thePerlObject)
-  {
-    if (SvROK(thePerlObject)) {
-      SV* inner = (SV*)SvRV(thePerlObject);
-      if (SvIOK(inner) && !IsIndestructible(aTHX_ thePerlObject)) {
-        TObject* obj = INT2PTR(TObject*, SvIV(inner));
-        if (obj->TestBit(kCanDelete)) {
-          //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
-          obj->SetBit(kMustCleanup);
-          delete obj;
-        }
-        sv_setiv(inner, 0);
-      }
-    }
-  }
-
-
   /*  ... YAGNI ...
   void
   CastObject(pTHX_ SV* thePerlObject, const char* newType)
@@ -168,19 +124,6 @@ namespace SOOT {
       croak("BAD");
   }
 
-  /// FIXME inline?
-  bool
-  IsIndestructible(pTHX_ SV* thePerlObject) {
-    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
-      PtrAnnotation* refPad = gSOOTObjects->Fetch(LobotomizeObject(aTHX_ thePerlObject));
-      if (!refPad)
-        croak("SOOT::IsIndestructible: Not an encapsulated ROOT object!");
-      return refPad->fDoNotDestroy;
-    }
-    else
-      croak("BAD");
-  }
-
 
   SV*
   MakeDelayedInitObject(pTHX_ TObject** cobj, const char* className) {
@@ -191,7 +134,7 @@ namespace SOOT {
   }
 
 
-  inline void
+  void
   DoDelayedInit(pTHX_ SV* thePerlObj) {
     // My hat goes off to XS::Variable::Magic.
     // Essentially, we just check whether the attached magic is *exactly* the type
