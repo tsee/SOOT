@@ -20,8 +20,6 @@ Wrapper / guts:
      overload CODE dereferencing for TObjects to behave as assignment operators.
      The above C code could become: "$gRandom->(...)".
   ====> While mostly implemented now, this still fails on the const qualifier. Doh.
-- Auto-convert TArrayD argument types to Double_t*'s on demand
-  (same for other TArray*)
 - Either lose the silly overloading or add string overloading to get the refaddr
 
 Packaging:
