@@ -17,6 +17,16 @@ as(self, newType)
   OUTPUT: RETVAL
 
 
+SV*
+keep(self)
+    SV* self
+  CODE:
+    SOOT::PreventDestruction(aTHX_ self);
+    SvREFCNT_inc(self);
+    RETVAL = self;
+  OUTPUT: RETVAL
+
+
 
 ####### FIXME The following is a super-evil workaround for the "type enum" bug, so that users can at least do GetXaxis()->as("TAxis")!
 
@@ -38,4 +48,13 @@ as(self, newType)
   OUTPUT: RETVAL
 
 
+
+SV*
+keep(self)
+    SV* self
+  CODE:
+    SOOT::PreventDestruction(aTHX_ self);
+    SvREFCNT_inc(self);
+    RETVAL = self;
+  OUTPUT: RETVAL
 
