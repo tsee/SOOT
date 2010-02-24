@@ -20,3 +20,4 @@ MANIFEST
 const-c.inc
 const-xs.inc
 lib/SOOT/Constants.pm
+lib/SOOT/Examples/*
