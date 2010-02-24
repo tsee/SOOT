@@ -12,6 +12,7 @@ type(sv)
     const char* type_str = SOOT::gBasicTypeStrings[type];
     XPUSHp(type_str, strlen(type_str));
 
+
 SV*
 cproto(sv)
     SV* sv
@@ -24,16 +25,19 @@ cproto(sv)
     const char* cproto = CProtoFromType(aTHX_ sv, len, type);
     XPUSHp(cproto, len);
 
+
 void
 prevent_destruction(rootObject)
     SV* rootObject
   PPCODE:
     SOOT::PreventDestruction(aTHX_ rootObject);
 
+
 void
 print_ptrtable_state()
   PPCODE:
     gSOOTObjects->PrintStats();
+
 
 void
 Cleanup()
@@ -42,4 +46,5 @@ Cleanup()
     SOOT::gSOOTObjects = NULL;
     tmp->Clear();
     delete tmp;
+
 
