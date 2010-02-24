@@ -36,16 +36,21 @@ sub UNIVERSAL::AUTOLOAD {
   $AUTOLOAD =~ s/::([^:]+)$//;
   my $meth = $1;
   my $class = $AUTOLOAD;
-  my $exists = SOOT::GenerateROOTClass($class);
+  my $ancestors = SOOT::GenerateROOTClass($class); # returns an array ref of ancestors on success
+  my $exists = ! ! $ancestors;
   if (not $exists) {
     return if $meth eq 'DESTROY';
     Carp::croak("Can't locate object method \"$meth\" via package \"$class\"");
   }
   else {
-    if ($class->isa('TObject')) {
-      *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-    } elsif ($class->isa('TArray')) {
-      *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+    # generate AUTOLOAD for the class and all of its previously undefined ancestors
+    no strict 'refs';
+    foreach my $classname ($class, @$ancestors) {
+      if ($classname->isa('TObject')) {
+        *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
+      } elsif ($classname->isa('TArray')) {
+        *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+      }
     }
     return SOOT::CallMethod($class, $meth, \@_);
   }
