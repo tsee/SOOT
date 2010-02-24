@@ -82,6 +82,7 @@ namespace SOOT {
       return;
 
     --(refPad->fNReferences);
+    (refPad->fPerlObjects).erase(thePerlObject); // nuke the SV* in the set
     sv_setiv(inner, 0);
 
     // FIXME doesn't work / isn't necessary?
