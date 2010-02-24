@@ -32,7 +32,9 @@ _bootstrap_AUTOLOAD(); # FIXME move to XS...
 
 sub UNIVERSAL::AUTOLOAD {
   our $AUTOLOAD;
+  Carp::cluck("AUTOLOAD CALLED");
   return if not defined $AUTOLOAD;
+  warn "!!!".$AUTOLOAD;
   $AUTOLOAD =~ s/::([^:]+)$//;
   my $meth = $1;
   my $class = $AUTOLOAD;
