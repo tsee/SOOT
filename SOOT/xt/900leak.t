@@ -106,6 +106,7 @@ foreach (1..1e6) {
 foreach (1..1e6) {
   my $obj = TH1D->new("hist".$_, "hist".$_, 10, 0., 1.);
   $obj->GetXaxis();
+  undef $obj;
 }
 
 =cut
@@ -113,6 +114,7 @@ foreach (1..1e6) {
 
 =pod
 
+# doesn't leak at 521258e980d7fa7f34a96df4620943210121341a (GC heuristics)
 # doesn't leak 2010-02-20
 my $obj = TGraph->new(1e4, [(1) x 1e4], [(2) x 1e4]);
 foreach (1..1e8) {
@@ -124,6 +126,7 @@ foreach (1..1e8) {
 
 =pod
 
+# doesn't leak at 521258e980d7fa7f34a96df4620943210121341a (GC heuristics)
 # leaks like a sieve 2010-02-20 (despite the underlying object being deleted)
 # stops leaking with aada56a1b7564a4e4cdbe08fc6ec82bc3e92693c (2010-02-20)
 sub test {
@@ -139,6 +142,7 @@ foreach (1..1e8) {
 
 =pod
 
+# doesn't leak at 521258e980d7fa7f34a96df4620943210121341a (GC heuristics)
 # stops leaking with 4f8540b820a41eca097e8556d705f9220bd8dad7 (2010-02-20)
 my $obj = TH1D->new("blah", "blah", 10, 0., 1.);
 foreach (1..1e8) {
