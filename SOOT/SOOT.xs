@@ -32,6 +32,7 @@ extern "C" {
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <cstring>
 
 using namespace SOOT;
@@ -118,6 +119,7 @@ CallMethod(className, methodName, argv)
     RETVAL = SOOT::CallMethod(aTHX_ className, methodName, arguments);
   OUTPUT: RETVAL
 
+
 SV*
 CallAssignmentOperator(className, receiver, model)
     char* className
@@ -130,4 +132,20 @@ CallAssignmentOperator(className, receiver, model)
     croak("CallAssignmentOperator not implemented correctly");
     RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
   OUTPUT: RETVAL
+
+
+SV*
+GenerateROOTClass(className)
+    char* className
+  CODE:
+    TClass* cl = TClass::GetClass(className);
+    if (!cl)
+      RETVAL = &PL_sv_undef;
+    else {
+      std::vector<TString> bases = SOOT::SetupClassInheritance(aTHX_ className, cl);
+      // FIXME convert to AV and return RV!
+      RETVAL = &PL_sv_undef;
+    }
+  OUTPUT: RETVAL
+
 
