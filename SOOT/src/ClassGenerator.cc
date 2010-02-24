@@ -34,15 +34,20 @@ namespace SOOT {
   }
 
 
-  void
+  std::vector<TString>
   SetupClassInheritance(pTHX_ const char* className, TClass* theClass)
   {
     // FIXME the base classes can be template classes. That screws up
     //       Perl pretty badly. For now, we just skip the base classes that are template classes.
     // FIXME We don't make the TH* classes descendants of the TArray classes for now because
-    //       the TArray classes have overridden (XSP!) constructors. We want the autloading
+    //       the TArray classes have overridden (XSP!) constructors. We want the autoloading
     //       to kick in for the TH* classes. This needs some consideration and a more general
     //       solution.
+    if (theClass == NULL) {
+      theClass = TClass::GetClass(className);
+      if (theClass == NULL)
+        return std::vector<TString>();
+    }
     ostringstream str;
     str << className << "::ISA";
     AV* isa = get_av(str.str().c_str(), 1);
@@ -50,14 +55,31 @@ namespace SOOT {
     TIter next(theClass->GetListOfBases());
     TBaseClass* base;
     bool isTH1 = theClass->InheritsFrom("TH1");
+    vector<TString> created;
     while ((base = (TBaseClass*)next())) {
       TString name(base->GetName());
       if (!name.Contains("<")
           && (!isTH1 || !name.BeginsWith("TArray")))
       { // skip template classes. FIXME optimize
+        ostringstream rstr;
+        rstr << name << "::isROOT";
+        string varname(rstr.str());
+        SV* isROOT = get_sv(varname.c_str(), 0);
+        if (!isROOT) {
+          vector<TString> sub = SetupClassInheritance(aTHX_ name.Data(), NULL);
+          for (unsigned int i = 0; i < sub.size(); ++i)
+            created.push_back(sub[i]);
+        }
         av_push(isa, newSVpv(base->GetName(), 0));
       }
     }
+
+    // mark $isROOT
+    ostringstream isrootstr;
+    isrootstr << className << "::isROOT";
+    get_sv(isrootstr.str().c_str(), 1);
+    get_sv(isrootstr.str().c_str(), 1); // FIXME there has to be a better way to silence the damn warning
+    return created;
   }
 
 
