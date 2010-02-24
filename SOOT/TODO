@@ -34,7 +34,6 @@ Packaging:
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
-- Auto-Convert examples/ to POD?
 - Check existing examples/ for FIXME's.
 - ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
 - Document the SOOT <-> ROOT differences
