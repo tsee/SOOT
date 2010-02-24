@@ -6,7 +6,7 @@ require SOOT;
 use base 'Exporter';
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
-  type cproto prevent_destruction
+  type cproto prevent_destruction print_ptrtable_state
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -60,6 +60,11 @@ string such as C<"int"> or C<"TGraph">.
 Manually marks a given Perl object as not responsible for freeing
 the underlying ROOT object. If this is necessary, that's a bug in SOOT.
 This is a natural cause of memory leaks...
+
+=head2 print_ptrtable_state
+
+Prints the full state of the SOOT-internal garbage collection
+pointer table.
 
 =head1 OTHER API CLASSES
 
