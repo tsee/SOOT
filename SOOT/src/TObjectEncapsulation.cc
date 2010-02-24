@@ -89,7 +89,7 @@ namespace SOOT {
 
     if (refPad->fNReferences == 0) {
       bool doNotDestroyTObj = refPad->fDoNotDestroy;
-      gSOOTObjects->Delete(obj); // also frees refPad!
+      gSOOTObjects->Delete(obj); // also frees refPad if necessary!
       if (!doNotDestroyTObj) {
       //if (!refPad->fDoNotDestroy && obj->TestBit(kCanDelete)) {
         //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
