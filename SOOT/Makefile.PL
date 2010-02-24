@@ -24,6 +24,7 @@ my $CC = 'g++';
 system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'genclassnames.pl')) and die $!;
 system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_root_xsp_include.pl')) and die $!;
 system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'genconstants.pl')) and die $!;
+system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_examples.pl')) and die $!;
 
 WriteMakefile(
     inc::SOOTBuild::GetMMArgs('.'),
