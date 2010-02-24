@@ -457,6 +457,8 @@ namespace SOOT {
         croak("FIXME Array return values to be implemented");
         break;
       case eTOBJECT:
+        if (addr == NULL)
+          return &PL_sv_undef;
         // FIXME this is so hideous it's not even funny
         typeStrWithoutPtr = strdup(retTypeStr);
         ptr = typeStrWithoutPtr;
