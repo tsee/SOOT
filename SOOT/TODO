@@ -4,7 +4,6 @@ Wrapper / guts:
 - Implement can()
 - Fix Color_t lookup and other primitive types
   (Note: I might have fixed this by accident. SetLineColor(int) now works. Does GetLineColor?)
-- Implement casting
 - Investigate wrapping all/more enums
 - Investigate array conversion vs. memory (perl->C seems okay. Check C->perl)
 - Investigate references
@@ -23,6 +22,7 @@ Wrapper / guts:
   ====> While mostly implemented now, this still fails on the const qualifier. Doh.
 - Auto-convert TArrayD argument types to Double_t*'s on demand
   (same for other TArray*)
+- Either lose the silly overloading or add string overloading to get the refaddr
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
