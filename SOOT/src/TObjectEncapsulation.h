@@ -73,6 +73,9 @@ namespace SOOT {
   /// Prevents destruction of an object by noting the fact in the object table
   void PreventDestruction(pTHX_ SV* thePerlObject);
 
+  /// Marks a given object as destructible by Perl
+  void MarkForDestruction(pTHX_ SV* thePerlObject);
+
   /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT
   bool IsIndestructible(pTHX_ SV* thePerlObject);
 

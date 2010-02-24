@@ -48,7 +48,9 @@ namespace SOOT {
       theReference = newSV(0);
 
     sv_setref_pv(theReference, className, (void*)theROOTObject );
-    (refPad->fPerlObjects).push_back(theReference);
+    // This was done for std::list
+    //(refPad->fPerlObjects).push_back(theReference);
+    (refPad->fPerlObjects).insert(theReference);
 
     theROOTObject->SetBit(kMustCleanup);
 
@@ -129,6 +131,26 @@ namespace SOOT {
   }
 
 
+  void
+  MarkForDestruction(pTHX_ SV* thePerlObject) {
+    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
+      SV* inner = (SV*)SvRV(thePerlObject);
+      TObject* ptr = INT2PTR(TObject*, SvIV(inner));
+      PtrAnnotation* refPad = gSOOTObjects->Fetch(ptr);
+      if (ptr == NULL || refPad == NULL) {
+        // late intialization always prevents destruction
+        return;
+      }
+      else {
+        // Normal encapsulated TObject
+        refPad->fDoNotDestroy = false;
+      }
+    } // end if it's a good object
+    else
+      croak("BAD");
+  }
+
+
   SV*
   MakeDelayedInitObject(pTHX_ TObject** cobj, const char* className) {
     SV* ref = newSV(0);
@@ -156,7 +178,9 @@ namespace SOOT {
             PtrAnnotation* refPad = gSOOTObjects->FetchOrCreate(ptr);
             ++(refPad->fNReferences);
             sv_setpviv(derefPObj, PTR2IV(ptr));
-            (refPad->fPerlObjects).push_back(thePerlObj);
+            // This was done for std::list
+            //(refPad->fPerlObjects).push_back(thePerlObj);
+            (refPad->fPerlObjects).insert(thePerlObj);
             refPad->fDoNotDestroy = true; // can't destroy late init objects
           }
           break;

@@ -14,7 +14,7 @@ namespace SOOT {
   ClearAnnotation(pTHX_ PtrAnnotation* pa) {
     // Iterate over the stored references and nuke them
     // FIXME Skip this and let the kernel handle it for now...
-    /*for (std::list<SV*>::iterator it = (pa->fPerlObjects).begin();
+    /*for (std::set<SV*>::iterator it = (pa->fPerlObjects).begin();
          it != (pa->fPerlObjects).end(); ++it)
     {
       SOOT::UnregisterObject(aTHX_ *it, true);
@@ -264,7 +264,7 @@ PtrTable::PrintStats()
       PtrAnnotation* ann = temp->value;
       cout << "    NReferences="<<ann->fNReferences<<endl;
       cout << "    Must " << (ann->fDoNotDestroy ? "NOT " : "") << "be destroyed by SOOT\n";
-      for (std::list<SV*>::iterator it = (ann->fPerlObjects).begin();
+      for (std::set<SV*>::iterator it = (ann->fPerlObjects).begin();
            it != (ann->fPerlObjects).end(); ++it)
         cout << "    SV* " << (void*)(*it) << endl;
       cout << endl;

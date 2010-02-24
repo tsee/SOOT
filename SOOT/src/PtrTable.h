@@ -22,13 +22,13 @@ extern "C" {
 }
 #endif
 
-#include <list>
+#include <set>
 
 namespace SOOT {
 
   typedef struct PtrAnnotation {
     unsigned int fNReferences;
-    std::list<SV*> fPerlObjects;
+    std::set<SV*> fPerlObjects;
     bool fDoNotDestroy;
   } PtrAnnotation;
 
