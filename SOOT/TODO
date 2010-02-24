@@ -1,18 +1,3 @@
-Memory management:
-- This is an outline for better keeping track of the wrapped objects.
-  It will need revision/fleshing out with a fresh brain!
-  1) Write hashmap class for storage. Done => SOOT::PtrTable
-  2) Create global hashmap. Done => SOOT::gSOOTObjects
-  3) Each hashmap entry needs to keep track of all SV*'s that wrap
-     a given TObject*.
-     => Figure out a way to store this effectively in the
-        PtrAnnotation struct.
-     => Figure out when the entries need modification.
-        ==> EncapsulateObject
-        ==> ClearObject
-        ==> WeakCopy
-  ...
-
 Wrapper / guts:
 - Implement global function wrapping
 - Implement method caching
@@ -43,6 +28,9 @@ Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
   without sacrificing CPAN-installation. (Specifically, investigate
   inlining of dependencies.)
+  => Inline dependencies (Done)
+  => Make inlined dependencies work! (Probably takes a conversion to
+     Module::Build!)
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
