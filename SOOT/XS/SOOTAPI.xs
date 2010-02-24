@@ -31,6 +31,11 @@ prevent_destruction(rootObject)
     SOOT::PreventDestruction(aTHX_ rootObject);
 
 void
+print_ptrtable_state()
+  PPCODE:
+    gSOOTObjects->PrintStats();
+
+void
 Cleanup()
   PPCODE:
     PtrTable* tmp = SOOT::gSOOTObjects;
