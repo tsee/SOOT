@@ -18,6 +18,7 @@ our %EXPORT_TAGS = (
     $gEnv
   ) ],
   'constants' => \@SOOT::Constants::Names,
+  'functions' => [qw( Load )],
 );
 use vars @{$EXPORT_TAGS{globals}};
 
@@ -68,9 +69,9 @@ sub _bootstrap_AUTOLOAD {
   }
 }
 
-sub Use {
+sub Load {
   shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
-  Carp::croak("Usage: SOOT->Use(classname, classname2, ...)")
+  Carp::croak("Usage: SOOT->Load(classname, classname2, ...)")
     if not @_;
 
   my $new = 0;
@@ -157,6 +158,19 @@ The list of currently supported globals is:
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
   $gEnv
+
+The list of currently exported functions:
+
+  Load(className, className2,...)
+
+=head1 FUNCTIONS
+
+=head2 Load
+
+Loads one or more ROOT classes and their base classes into Perl.
+Virtually all ROOT classes should be loaded out of the box.
+This function is only necessary if you load additional
+shared libraries.
 
 =head1 SEE ALSO
 
