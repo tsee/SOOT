@@ -68,6 +68,32 @@ sub _bootstrap_AUTOLOAD {
   }
 }
 
+sub Use {
+  shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
+  Carp::croak("Usage: SOOT->Use(classname, classname2, ...)")
+    if not @_;
+
+  my $new = 0;
+  foreach my $class (@_) {
+    no strict 'refs';
+    next if defined ${"${class}::isROOT"};
+    my $genclasses = GenerateROOTClass($class);
+    foreach my $gclass (@{$genclasses}) {
+      next if $gclass eq 'TObject' or $gclass eq 'TArray';
+      next if defined ${"${class}::isROOT"};
+      ++$new;
+      warn $gclass;
+      if ($gclass->isa('TObject')) {
+        *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
+      } elsif ($class->isa('TArray')) {
+        *{"${gclass}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+      }
+    }
+  }
+  
+  return $new;
+}
+
 # For some reason, the normal gBenchmark from XS will segfault on first use.
 # Thus we initialize it here...
 use vars '$gBenchmark';

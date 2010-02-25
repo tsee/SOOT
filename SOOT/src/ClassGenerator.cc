@@ -15,21 +15,22 @@ namespace SOOT {
   {
     for (unsigned int iClass = 0; iClass < gNClassNames; ++iClass) {
       const char* className = gClassNames[iClass];
-      MakeClassStub(aTHX_ className);
+      MakeClassStub(aTHX_ className, NULL);
     }
   }
 
-  void
-  MakeClassStub(pTHX_ const char* className) {
+  std::vector<TString>
+  MakeClassStub(pTHX_ const char* className, TClass* theClass) {
     if (strEQ(className, "TObject"))
-      return;
-    TClass* c = TClass::GetClass(className);
-    if (c == NULL) {
+      return vector<TString>();
+    if (theClass == NULL)
+      theClass = TClass::GetClass(className);
+    if (theClass == NULL) {
       // TODO handle classes that haven't been loaded yet (as shared library)
       // => Add special AUTOLOAD that will trigger a new invocation of SetupClassInheritance
-      return;
+      return vector<TString>();
     }
-    SetupClassInheritance(aTHX_ className, c);
+    return SetupClassInheritance(aTHX_ className, theClass);
     //SetupAUTOLOAD(aTHX_ className);
   }
 
@@ -56,6 +57,7 @@ namespace SOOT {
     TBaseClass* base;
     bool isTH1 = theClass->InheritsFrom("TH1");
     vector<TString> created;
+    created.push_back(className);
     while ((base = (TBaseClass*)next())) {
       TString name(base->GetName());
       if (!name.Contains("<")
@@ -66,6 +68,7 @@ namespace SOOT {
         string varname(rstr.str());
         SV* isROOT = get_sv(varname.c_str(), 0);
         if (!isROOT) {
+          cout << "new: " << varname << endl;
           vector<TString> sub = SetupClassInheritance(aTHX_ name.Data(), NULL);
           for (unsigned int i = 0; i < sub.size(); ++i)
             created.push_back(sub[i]);

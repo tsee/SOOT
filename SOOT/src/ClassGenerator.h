@@ -26,7 +26,7 @@ namespace SOOT {
   void SetupAUTOLOAD(pTHX_ const char* className);
 
   /// Create stub for a given class. Calls SetupClassInheritance to set up the inheritance chain
-  void MakeClassStub(pTHX_ const char* className);
+  std::vector<TString> MakeClassStub(pTHX_ const char* className, TClass* theClass);
 
   /// Iterates over all known classes (cf. buildtools/ in SOOT) and calls MakeClassStub
   void GenerateClassStubs(pTHX);

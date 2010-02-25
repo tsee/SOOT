@@ -142,13 +142,15 @@ GenerateROOTClass(className)
     if (!cl)
       RETVAL = &PL_sv_undef;
     else {
-      std::vector<TString> bases = SOOT::SetupClassInheritance(aTHX_ className, cl);
+      std::vector<TString> classes = SOOT::MakeClassStub(aTHX_ className, NULL);
+      // Convert vector<TString> to AV.
+      // FIXME test for leaks and make a typemap
       AV* av = newAV();
       RETVAL = newRV_noinc((SV*)av);
-      const unsigned int len = bases.size();
+      const unsigned int len = classes.size();
       av_extend(av, len-1);
       for (unsigned int i = 0; i < len; ++i)
-        av_store(av, i, newSVpv(bases[i].Data(), bases[i].Length()));
+        av_store(av, i, newSVpv(classes[i].Data(), classes[i].Length()));
     }
   OUTPUT: RETVAL
 
