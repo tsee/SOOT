@@ -143,8 +143,12 @@ GenerateROOTClass(className)
       RETVAL = &PL_sv_undef;
     else {
       std::vector<TString> bases = SOOT::SetupClassInheritance(aTHX_ className, cl);
-      // FIXME convert to AV and return RV!
-      RETVAL = &PL_sv_undef;
+      AV* av = newAV();
+      RETVAL = newRV_noinc((SV*)av);
+      const unsigned int len = bases.size();
+      av_extend(av, len-1);
+      for (unsigned int i = 0; i < len; ++i)
+        av_store(av, i, newSVpv(bases[i].Data(), bases[i].Length()));
     }
   OUTPUT: RETVAL
 
