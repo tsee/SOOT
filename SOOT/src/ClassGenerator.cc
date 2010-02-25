@@ -92,6 +92,7 @@ namespace SOOT {
     SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom);
     SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
     SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
+    SetPerlGlobal(aTHX_ "SOOT::gEnv", gEnv);
     SetPerlGlobal(aTHX_ "SOOT::gDirectory", gDirectory);
     SetPerlGlobalDelayedInit(aTHX_ "SOOT::gPad", (TObject**)&gPad, "TVirtualPad"); // gPad NULL at this time!
     // Initialized in SOOT.pm to band-aid a SEGV:

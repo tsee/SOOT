@@ -9,6 +9,7 @@
 #undef Stat_t
 
 #include <TROOT.h>
+#include <TEnv.h>
 #include <Rtypes.h>
 #include <TClass.h>
 #include <TMethod.h>

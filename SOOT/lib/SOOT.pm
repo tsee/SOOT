@@ -15,6 +15,7 @@ our %EXPORT_TAGS = (
   'globals' => [ qw(
     $gApplication $gSystem $gRandom $gROOT
     $gDirectory $gStyle $gPad $gBenchmark
+    $gEnv
   ) ],
   'constants' => \@SOOT::Constants::Names,
 );
@@ -129,6 +130,7 @@ The list of currently supported globals is:
 
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
+  $gEnv
 
 =head1 SEE ALSO
 
