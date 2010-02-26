@@ -713,7 +713,7 @@ namespace SOOT {
     }
 
     const char* what = (isFunction ? "function" : "method");
-    msg << "Can't locate " << what << "\"" << methName << "\" via package \""
+    msg << "Can't locate " << what << " \"" << methName << "\" via package \""
         << className << "\". From the arguments you supplied, the following C prototype was calculated:\n  "
         << className << "::" << methName << "(" << cprotoStr << ")";
     free(cprotoStr);
