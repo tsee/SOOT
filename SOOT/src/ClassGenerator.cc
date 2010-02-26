@@ -68,7 +68,6 @@ namespace SOOT {
         string varname(rstr.str());
         SV* isROOT = get_sv(varname.c_str(), 0);
         if (!isROOT) {
-          cout << "new: " << varname << endl;
           vector<TString> sub = SetupClassInheritance(aTHX_ name.Data(), NULL);
           for (unsigned int i = 0; i < sub.size(); ++i)
             created.push_back(sub[i]);
