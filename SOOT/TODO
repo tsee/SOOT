@@ -5,7 +5,6 @@ Wrapper / guts:
 - Fix Color_t lookup and other primitive types
   (Note: I might have fixed this by accident. SetLineColor(int) now works. Does GetLineColor?)
 - Investigate wrapping all/more enums
-- Investigate array conversion vs. memory (perl->C seems okay. Check C->perl)
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
 - Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
