@@ -90,7 +90,8 @@ namespace SOOT {
   SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
   SV* CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model);
 
-  void CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto);
+  void CroakOnInvalidCall(pTHX_ const char* className, const char* methName,
+                          TClass* c, const std::vector<std::string>& cproto, bool isFunction);
 } // end namespace SOOT
 
 #endif

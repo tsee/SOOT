@@ -543,9 +543,8 @@ namespace SOOT {
     }
     FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false));
 
-    if (!mInfo.IsValid() || !mInfo.Name()) {
-      CroakOnInvalidMethod(aTHX_ className, methName, c, cproto); // FIXME cproto may have been mangled by FindMethodPrototype
-    }
+    if (!mInfo.IsValid() || !mInfo.Name())
+      CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
 
     // Determine return type
     char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
@@ -698,7 +697,7 @@ namespace SOOT {
 
 
   void
-  CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto)
+  CroakOnInvalidCall(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto, bool isFunction = false)
   {
     ostringstream msg;
     char* cprotoStr = JoinCProto(cproto);
@@ -707,19 +706,20 @@ namespace SOOT {
 
     vector<string> candidates;
     TIter next(c->GetListOfAllPublicMethods());
-    TMethod* meth;
-    while ((meth = (TMethod*)next())) {
+    TFunction* meth;
+    while ((meth = (TFunction*)next())) {
       if (strEQ(meth->GetName(), methName)) {
         candidates.push_back(string(meth->GetPrototype()));
       }
     }
 
-    msg << "Can't locate method \"" << methName << "\" via package \""
+    const char* what = (isFunction ? "function" : "method");
+    msg << "Can't locate " << what << "\"" << methName << "\" via package \""
         << className << "\". From the arguments you supplied, the following C prototype was calculated:\n  "
         << className << "::" << methName << "(" << cprotoStr << ")";
     free(cprotoStr);
     if (!candidates.empty()) {
-      msg << "\nThere were the following methods of the same name, but with a different prototype:";
+      msg << "\nThere were the following class members of the same name, but with a different prototype:";
       for (unsigned int iCand = 0; iCand < candidates.size(); ++iCand) {
         msg << "\n  " << candidates[iCand];
       }
