@@ -30,7 +30,7 @@ foreach my $exdir (@example_dirs) {
   push @examples, make_example($_) for sort @examples_files;
   $pod =~ s/\$EXAMPLES/join '', @examples/ge;
 
-  open my $oh, '>', catfile($libdir, $exdirname.".pm") or die $!;
+  open my $oh, '>', catfile($libdir, $exdirname.".pod") or die $!;
   print $oh $pod;
   close $oh;
 }
