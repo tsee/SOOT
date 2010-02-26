@@ -29,6 +29,9 @@ Packaging:
   => Make inlined dependencies work! (Probably takes a conversion to
      Module::Build!)
 
+REPL:
+- Implement threading/persistent app & REPL
+
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
 - Check existing examples/ for FIXME's.
