@@ -5,7 +5,7 @@ use warnings;
 use Getopt::Long ();
 use File::Spec;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 use Capture::Tiny qw/capture/;
 
 sub usage {

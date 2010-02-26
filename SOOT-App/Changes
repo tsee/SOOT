@@ -1,5 +1,9 @@
 Revision history for Perl extension SOOT::App.
 
-0.01  Sun Deb 21 21:44:00 2010
+0.02  Fri Feb 26 21:44:00 2010
+  - Readline history
+  - Load .rootrc/.rootlogon
+
+0.01  Sun Feb 21 21:44:00 2010
   - original version
 
