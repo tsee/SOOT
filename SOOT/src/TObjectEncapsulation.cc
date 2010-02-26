@@ -103,20 +103,35 @@ namespace SOOT {
   }
 
 
-  /*  ... YAGNI ...
   void
-  CastObject(pTHX_ SV* thePerlObject, const char* newType)
-  {
-    sv_bless(thePerlObject, gv_stashpv(newType, GV_ADD));
+  PreventDestruction(pTHX_ TObject* theROOTObject) {
+    if (theROOTObject == NULL)
+      return;
+    PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
+    if (refPad == NULL) {
+      // late intialization always prevents destruction
+      return;
+    }
+    else {
+      // Normal encapsulated TObject
+      refPad->fDoNotDestroy = true;
+    }
   }
-  */
 
 
   void
   PreventDestruction(pTHX_ SV* thePerlObject) {
-    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
-      SV* inner = (SV*)SvRV(thePerlObject);
-      TObject* ptr = INT2PTR(TObject*, SvIV(inner));
+    // We accept either a reference (i.e. the blessed object)
+    // or the already dereferenced object which is really just an
+    // SvIOK with the pointer to the TObject.
+
+    // Dereference if necessary
+    if (SvROK(thePerlObject))
+      thePerlObject = (SV*)SvRV(thePerlObject);
+
+    // Check that we have what we presume to be a pointer
+    if (SvIOK(thePerlObject)) {
+      TObject* ptr = INT2PTR(TObject*, SvIV(thePerlObject));
       PtrAnnotation* refPad = gSOOTObjects->Fetch(ptr);
       if (ptr == NULL || refPad == NULL) {
         // late intialization always prevents destruction

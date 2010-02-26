@@ -65,13 +65,10 @@ namespace SOOT {
    */
   void ClearObject(pTHX_ SV* thePerlObject);
   
-  /*  ... YAGNI ...
-  /// This corresponds to a C cast "(NewType*)obj"
-  void CastObject(pTHX_ SV* thePerlObject, const char* newType);
-  */
-  
-  /// Prevents destruction of an object by noting the fact in the object table
+  /// Prevents destruction of an object by noting the fact in the object table (SV* variant ==> slow)
   void PreventDestruction(pTHX_ SV* thePerlObject);
+  /// Prevents destruction of an object by noting the fact in the object table (TObject variant ==> fast)
+  void PreventDestruction(pTHX_ TObject* theROOTObject);
 
   /// Marks a given object as destructible by Perl
   void MarkForDestruction(pTHX_ SV* thePerlObject);
