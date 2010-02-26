@@ -152,6 +152,17 @@ foreach (1..1e8) {
 
 =cut
 
+=pod
+
+# doesn't leak at 352c460d02845c0164d49443ce71154ef6c5e8ec (after GC heuristics)
+my $obj = TGraph->new(1e2, [(1) x 1e2], [(2) x 1e2]);
+foreach (1..1e8) {
+  my $x = $obj->GetX();
+  undef $x;
+}
+
+=cut
+
 warn "done";
 $go = <STDIN>;
 pass("alive");
