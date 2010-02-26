@@ -61,10 +61,12 @@ sub _bootstrap_AUTOLOAD {
   while (defined(my $class = $classIter->next)) {
     # they have their own AUTOLOAD
     next if $class eq 'TObject' or $class eq 'TArray';
-    if ($class->isa('TObject')) {
-      *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-    } elsif ($class->isa('TArray')) {
+    if ($class->isa('TArray')) {
       *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+    }
+    #elsif ($class->isa('TObject')) {
+    else {
+      *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
     }
   }
 }
@@ -83,10 +85,12 @@ sub Load {
       next if $gclass eq 'TObject' or $gclass eq 'TArray';
       next if defined ${"${class}::isROOT"};
       ++$new;
-      if ($gclass->isa('TObject')) {
-        *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-      } elsif ($class->isa('TArray')) {
+      if ($gclass->isa('TArray')) {
         *{"${gclass}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+      }
+      #elsif ($gclass->isa('TObject')) {
+      else {
+        *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
       }
     }
   }
