@@ -1,5 +1,5 @@
 Wrapper / guts:
-- Implement global function wrapping
+- Implement global function wrapping ==> Seems done, needs lots of refactoring and testing
 - Implement method caching
 - Implement can()
 - Fix Color_t lookup and other primitive types
