@@ -3,6 +3,7 @@ use 5.008001;
 use strict;
 use warnings;
 use Getopt::Long ();
+use File::Spec;
 
 our $VERSION = '0.01';
 use Capture::Tiny qw/capture/;
@@ -27,7 +28,7 @@ sub run {
   require SOOT;
 
   my $repl = Devel::REPL->new;
-  foreach (qw(FindVariable History LexEnv)) {
+  foreach (qw(FindVariable History LexEnv SOOT)) {
     $repl->load_plugin($_)
   }
   foreach (qw(Colors Completion DDS Interrupt
@@ -47,7 +48,6 @@ sub run {
   SOOT::Init($nologon ? 0 : 1);
   return $repl->run();
 }
-
 
 1;
 __END__
