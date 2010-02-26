@@ -104,22 +104,6 @@ namespace SOOT {
 
 
   void
-  PreventDestruction(pTHX_ TObject* theROOTObject) {
-    if (theROOTObject == NULL)
-      return;
-    PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
-    if (refPad == NULL) {
-      // late intialization always prevents destruction
-      return;
-    }
-    else {
-      // Normal encapsulated TObject
-      refPad->fDoNotDestroy = true;
-    }
-  }
-
-
-  void
   PreventDestruction(pTHX_ SV* thePerlObject) {
     // We accept either a reference (i.e. the blessed object)
     // or the already dereferenced object which is really just an

@@ -27,6 +27,17 @@ namespace SOOT {
 
 
   inline void
+  PreventDestruction(pTHX_ TObject* theROOTObject) {
+    if (theROOTObject != NULL) {
+      PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
+      // late intialization always prevents destruction => skip
+      if (refPad != NULL) // Normal encapsulated TObject
+        refPad->fDoNotDestroy = true;
+    }
+  }
+
+
+  inline void
   ClearObject(pTHX_ SV* thePerlObject)
   {
     if (SvROK(thePerlObject)) {
