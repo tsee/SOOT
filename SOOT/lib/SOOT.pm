@@ -83,7 +83,6 @@ sub Load {
       next if $gclass eq 'TObject' or $gclass eq 'TArray';
       next if defined ${"${class}::isROOT"};
       ++$new;
-      warn $gclass;
       if ($gclass->isa('TObject')) {
         *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
       } elsif ($class->isa('TArray')) {
