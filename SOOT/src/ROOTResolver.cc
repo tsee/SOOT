@@ -624,7 +624,7 @@ namespace SOOT {
     }
     if (freeCProtoStr)
       free(cprotoStr);
-;
+
     /* Loop if we have to, i.e. there are T_OBJECTS ^= TObjects and the first
      * combination is not correct.
      */
