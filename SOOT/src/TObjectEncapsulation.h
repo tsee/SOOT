@@ -73,8 +73,10 @@ namespace SOOT {
   /// Marks a given object as destructible by Perl
   void MarkForDestruction(pTHX_ SV* thePerlObject);
 
-  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT
+  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT (SV* variant ==> slow)
   bool IsIndestructible(pTHX_ SV* thePerlObject);
+  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT (TObject* variant ==> fast)
+  bool IsIndestructible(pTHX_ TObject* theROOTObject);
 
   /// Creates a new Perl TObject wrapper (as with RegisterObject) that dereferences itself on first access
   SV* MakeDelayedInitObject(pTHX_ TObject** cobj, const char* className);
