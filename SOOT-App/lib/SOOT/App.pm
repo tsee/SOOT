@@ -4,9 +4,13 @@ use strict;
 use warnings;
 use Getopt::Long ();
 use File::Spec;
+use threads;
+use Capture::Tiny qw/capture/;
+use Time::HiRes 'usleep';
+use vars '%SIG';
 
 our $VERSION = '0.02';
-use Capture::Tiny qw/capture/;
+our $AppThread;
 
 sub usage {
   print <<'HERE';
@@ -39,6 +43,7 @@ sub run {
       }
     };
   }
+  create_app_thread();
   package main;
   SOOT->import(':all');
   # FIXME: mst will likely kill me for this
@@ -47,6 +52,42 @@ sub run {
   $repl->formatted_eval("use SOOT qw/:all/");
   SOOT::Init($nologon ? 0 : 1);
   return $repl->run();
+}
+
+sub create_app_thread {
+  if (not $AppThread) {
+    $SOOT::gApplication->SetReturnFromRun(1);
+    $AppThread = threads->new(\&apploop);
+    usleep(5000); # FIXME find better way to fix this
+    $SOOT::gApplication->SetReturnFromRun(1);
+  }
+}
+
+sub apploop {
+  $SOOT::gApplication->SetReturnFromRun(1);
+  $SOOT::gApplication->Run();
+}
+
+sub kill_app_thread {
+  return if !$AppThread;
+  $SOOT::gApplication->Terminate();
+  $AppThread->kill('TERM')->kill('KILL')->detach;
+  $AppThread = undef;
+}
+
+END {
+  kill_app_thread();
+}
+
+SCOPE: {
+  my %sig;
+  sub init_signal_handlers {
+    if (not keys %sig) {
+      %sig = %SIG;
+      $SIG{TERM} = sub { kill_app_thread(); return $sig{TERM}->() if ref($SIG{TERM}) eq 'CODE' };
+      $SIG{INT}  = sub { kill_app_thread(); return $sig{INT}->() if ref($SIG{INT}) eq 'CODE' };
+    }
+  }
 }
 
 1;
