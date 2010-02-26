@@ -599,14 +599,14 @@ namespace SOOT {
       freeCProtoStr = false;
     }
     if (isFunction) {
-      // FIXME AAAAAAAAAAAAAAAAAAH!
+      // FIXME AAAAAAAAAAAAAAAAAAH! This is embarrassing
       TClass c(theClass.Name());
       TMethod* meth = c.GetMethodWithPrototype(methName, cprotoStr);
       if (!meth)
-        croak("Undefined subroutine &%s::%s called", theClass.Name(), methName);
+        CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
       void* ptr = meth->InterfaceMethod();
       if (!ptr)
-        croak("Undefined subroutine &%s::%s called", theClass.Name(), methName);
+        CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
       mInfo = G__MethodInfo(theClass);
       bool found = false;
       while (mInfo.Next()) {
@@ -615,9 +615,8 @@ namespace SOOT {
           break;
         }
       }
-      if (!found) {
-        croak("Undefined subroutine &%s::%s called", theClass.Name(), methName);
-      }
+      if (!found)
+        CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
     } else {
       mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
     }
