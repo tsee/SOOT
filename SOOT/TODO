@@ -42,3 +42,24 @@ Testing:
 => joincproto and friends
 => global variable tools
 
+
+BUGS:
+- delete doesn't work as expected:
+$ $g = TGraph->new(1, [1.],[1.])
+$TGraph1 = \do { my $v = 79536896 };
+bless( $TGraph1, 'TGraph' );
+$ $g2 = $g->as('TGraph')
+$TGraph1 = \do { my $v = 79536896 };
+bless( $TGraph1, 'TGraph' );
+$ $g3 = $g->as('TGraph')
+$TGraph1 = \do { my $v = 79536896 };
+bless( $TGraph1, 'TGraph' );
+$ $g3->delete;
+$ $g3
+INT
+$ print Dumper $g
+$VAR1 = bless( do{\(my $o = 79536896)}, 'TGraph' );
+$ print Dumper $g2
+$VAR1 = bless( do{\(my $o = 79536896)}, 'TGraph' );
+$ print Dumper $g3
+Runtime error: Bizarre copy of IO in anonlist at /usr/local/lib/perl/5.10.0/Data/Dumper.pm line 553.
