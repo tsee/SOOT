@@ -166,6 +166,15 @@ The list of currently exported functions:
 
   Load(className, className2,...)
 
+=head1 JUMP-START FOR C++-ROOT users
+
+This section outlines the differences between using
+ROOT from C++ or from Perl via SOOT. If in doubt, the two
+should behave the same, but there are a few subtle differences
+that a user must be aware of.
+
+This section is a TODO, still, blocking on availability of quality time.
+
 =head1 FUNCTIONS
 
 =head2 Load
