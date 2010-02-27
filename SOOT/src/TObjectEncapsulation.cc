@@ -204,5 +204,13 @@ namespace SOOT {
     gSOOTObjects->Delete(object);
   }
 
+
+  bool
+  IsSameTObject(pTHX_ SV* perlObj1, SV* perlObj2)
+  {
+    void* tobj1 = (void*)LobotomizeObject(aTHX_ perlObj1);
+    void* tobj2 = (void*)LobotomizeObject(aTHX_ perlObj2);
+    return(tobj1 == tobj2);
+  }
 } // end namespace SOOT
 

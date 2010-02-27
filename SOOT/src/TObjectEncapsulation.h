@@ -83,6 +83,9 @@ namespace SOOT {
 
   /// Replaces the object with its C-level dereference and removes the DelayedInit magic
   void DoDelayedInit(pTHX_ SV* thePerlObject);
+
+  /// Compares to Perl objects by comparing their underlying TObjects
+  bool IsSameTObject(pTHX_ SV* perlObj1, SV* perlObj2);
 } // end namespace SOOT
 
 #include "TObjectEncapsulation.inline.h"
