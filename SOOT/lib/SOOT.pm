@@ -171,9 +171,152 @@ The list of currently exported functions:
 This section outlines the differences between using
 ROOT from C++ or from Perl via SOOT. If in doubt, the two
 should behave the same, but there are a few subtle differences
-that a user must be aware of.
+that a user must be aware of and these should be documented
+here. If not, it's a bug. 
 
-This section is a TODO, still, blocking on availability of quality time.
+Note about terminology: When referring to a ROOT object,
+the underlying C++, TObject-derived object is meant.
+If the document mentions SOOT objects, that is the Perl-level
+wrapper object.
+
+=head2 Memory Management
+
+ROOT has a fairly complex idea of object ownership which is
+documented in its own section of the
+L<Users Manual|http://root.cern.ch/drupal/content/users-guide>.
+SOOT tries to implement a relatively simple and consistent
+memory management:
+
+Any object that was created with a constructor is SOOT's
+responsibility to clean up. All other objects are, by default,
+not freed by SOOT. That means for objects created with C<new()>,
+the memory of the underlying ROOT object will be freed when
+the last Perl-side reference to it goes out of scope.
+SOOT implements its own reference counting "garbage collection"
+in that you can create copies of SOOT objects that refer to
+the same underlying ROOT object and there will be double-freed memory.
+Examples:
+
+  sub test {
+    my $graph = TGraph->new(2, [0., 1.], [3., 5.]);
+    SCOPE: {
+      my $axis = $graph->GetXaxis();
+      my $otheraxis = $graph->GetXaxis();
+      # $axis and $otheraxis are really the same TObject underneath
+    }
+    # $axis and $otheraxis cease to exist, but don't free their TAxis
+    # objects because that would create a segmentation fault.
+  }
+  test();
+  # $graph won't exist here due to my's lexical scoping.
+  # $graph will free the memory of the underlying TGraph*!
+  # This also frees the TAxis and other sub-structures of the graph.
+
+Sometimes, this behaviour is not what you want. You can usually work
+around any problems by keeping references to objects around so that
+they're not freed earlier than you would like. Alternatively, you can
+manually mark objects as being owned by ROOT or SOOT:
+
+  # doesn't work because $cv goes out of scope
+  sub draw_histogram {
+    my $hist = shift;
+    my $cv = TCanvas->new("cv", "Awesome plot");
+    # style histogram and canvas here...
+    $hist->Draw();
+  }
+  my $histogram = ...
+  draw_histogram($histogram);
+  # $cv out of scope!
+
+  # Workaround 1: Pass around references.
+  sub draw_histogram2 {
+    my $hist = shift;
+    my $cv = TCanvas->new("cv", "Awesome plot");
+    $hist->Draw();
+    return $cv;
+  }
+  my $histogram = ...
+  my $canvas = draw_histogram($histogram);
+
+  # Workaround 2: Mark canvas object as global
+  sub draw_histogram3 {
+    my $hist = shift;
+    my $cv = TCanvas->new("cv", "Awesome plot")->keep;
+    $hist->Draw();
+  }
+  my $histogram = ...
+  draw_histogram($histogram);
+  # $cv is gone, but the TCanvas is held by ROOT.
+  # If necessary, you can get it again via $gROOT:
+  my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
+  # ...
+  # Later, you can manually delete an object:
+  $same_cv->delete; # deletes the UNDERLYING ROOT object, too!
+
+The above examples introduce three methods for manual memory management that
+are useful enough to highlight them again: C<keep()> marks a SOOT object
+as a global, that is, ROOT will hold on to the underlying TObject even if
+all SOOT references to it have been garbage collected. C<keep()> will
+return the same SOOT object it was called on, for convenience.
+
+In order to gain access to a ROOT object that is no longer accessible via
+SOOT, you can use the usual C<FindObject('name')> method of the C<TROOT>
+class via the C<$gROOT> (or C<$SOOT::gROOT>) global. This highlights
+an important detail about the ROOT wrapper: C<FindObject> returns a generic
+C<TObject*>. In C++, you would cast it into a C<TCanvas*>:
+
+  TCanvas* same_cv = (TCanvas*)gROOT->FindObject('cv');
+
+In the context of SOOT, explicit casting is done with the C<as('Typename')> method:
+
+  my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
+
+C<as('Typename')> returns a copy of the SOOT object it is called on with a new type.
+Finally, the C<delete()> method forcefully deletes a ROOT object and all of
+its SOOT wrappers. It is possible to use this to crash the program, so beware and
+use it sparingly.
+
+=head2 Object Behaviour
+
+Some operations are overloaded for all SOOT objects. Currently,
+you can use the C<==> comparison to check whether two SOOT objects
+refer to the same ROOT object:
+
+  my $graph1 = TGraph->new(2, [1., 2.], [3., 4.]);
+  my $graph2 = TGraph->new(1, [4.], [8.2]);
+  my $g1_copy = $graph1; # actually a shallow copy...
+  
+  say '$graph1 and $g1_copy are the same'
+    if $graph1 == $g1_copy;
+  
+  say '$graph1 and $graph2 are the same'
+    if $graph1 == $graph2;
+
+This will print:
+
+  $graph1 and $g1_copy are the same
+
+=head2 Availability of ROOT Classes
+
+TODO: This section is a draft. Things may or may not work at this point.
+
+By default, SOOT loads most of the available ROOT classes and
+wraps them for use in Perl. If some class is not available,
+you may try to load it as follows:
+
+  SOOT::Load( qw(TSomeClass TAnotherClassILike) );
+
+C<Load> will automatically try to load the specified classes' base
+classes as well. In future, it might be extended to inspect the
+class members and load any other ROOT classes that are part of its
+interface.
+
+If you want to use classes from a shared library that is not
+loaded by default, everything should work if you do the following:
+
+  # FIXME test this
+  $gSystem->Load('libSomething.so');
+  SOOT::Load('TSomething'); # or whatever
 
 =head1 FUNCTIONS
 
