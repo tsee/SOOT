@@ -1,7 +1,7 @@
 
 MODULE = SOOT		PACKAGE = SOOT::API
 
-SV
+SV*
 type(sv)
     SV* sv
   INIT:
