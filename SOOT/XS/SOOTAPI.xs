@@ -26,6 +26,17 @@ cproto(sv)
     XPUSHp(cproto, len);
 
 
+SV*
+is_same_object(obj1, obj2)
+    SV* obj1
+    SV* obj2
+  PPCODE:
+    if (SOOT::IsSameTObject(aTHX_ obj1, obj2))
+      XSRETURN_YES;
+    else
+      XSRETURN_NO;
+
+
 void
 prevent_destruction(rootObject)
     SV* rootObject

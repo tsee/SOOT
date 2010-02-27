@@ -3,7 +3,13 @@ use strict;
 use warnings;
 use vars qw/$AUTOLOAD/;
 
-#use overload 
+use overload 
+  '==' => sub {
+    if ($_[2] or not ref $_[1] or not $_[1]->isa('TObject')) {
+      return();
+    }
+    return SOOT::API::is_same_object($_[0], $_[1]);
+  };
 #  '&{}' => sub {
 #    my $obj = shift;
 #    my $class = ref($obj);
