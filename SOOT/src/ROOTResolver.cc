@@ -35,7 +35,10 @@ namespace SOOT {
   };
 
 // FIXME checking for both TObject and TArray is expensive. Do we really have to do that?
-#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject") || sv_derived_from((sv), "TArray"))
+//#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject") || sv_derived_from((sv), "TArray"))
+
+// This isn't really checking ->isa('TObject') but whether it's part of the SOOT/ROOT system
+#define IS_TOBJECT(sv) (sv_isobject((sv)) && hv_exists(SvSTASH((SV*)SvRV((sv))), "isROOT", 6))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -146,6 +149,7 @@ namespace SOOT {
             default:
 #ifdef SOOT_DEBUG
               cout << "SvROK && SvRV => default ("<<SvTYPE(SvRV(sv))<< ")"<< endl;
+              do_sv_dump(0, Perl_debug_log, sv, 0, 4, false, 4);
 #endif
               return eREF;
           }
@@ -627,7 +631,7 @@ namespace SOOT {
     char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
     bool freeCProtoStr = true;
     if (cprotoStr == NULL) {
-      cprotoStr = "";
+      cprotoStr = (char*)"";
       freeCProtoStr = false;
     }
     if (isFunction) {
@@ -664,7 +668,7 @@ namespace SOOT {
         char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
         bool freeCProtoStr = true;
         if (cprotoStr == NULL) {
-          cprotoStr = "";
+          cprotoStr = (char*)"";
           freeCProtoStr = false;
         }
         mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
@@ -681,7 +685,7 @@ namespace SOOT {
           char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
           bool freeCProtoStr = true;
           if (cprotoStr == NULL) {
-            cprotoStr = "";
+            cprotoStr = (char*)"";
             freeCProtoStr = false;
           }
           mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
