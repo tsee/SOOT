@@ -49,6 +49,17 @@ print_ptrtable_state()
   PPCODE:
     gSOOTObjects->PrintStats();
 
+void
+is_soot_class(className)
+    char* className
+  PPCODE:
+    string isROOTName = string(className) + string("isROOT");
+    SV* isROOT = get_sv(isROOTName.c_str(), 0);
+    if (isROOT == NULL)
+      XSRETURN_NO;
+    else
+      XSRETURN_YES;
+
 
 void
 Cleanup()

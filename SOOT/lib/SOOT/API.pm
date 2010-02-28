@@ -7,7 +7,7 @@ use base 'Exporter';
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
   type cproto prevent_destruction print_ptrtable_state
-  is_same_object
+  is_same_object is_soot_class
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -32,8 +32,9 @@ SOOT::API - Perl interface to Perl-ROOT wrapper internals
 =head1 DESCRIPTION
 
 This package exposes some of the internals of the Perl-ROOT
-wrapper to Perl. All functions are to be considered experimental
-and subject to change. If you need a stable API, contact the author(s).
+wrapper to Perl. All functions are to be considered experimental,
+mostly for internal use only, and certainly subject to change.
+If you need a stable API, contact the author(s).
 
 =head2 EXPORT
 
@@ -78,6 +79,14 @@ nature of TObject wrappers and compare to objects with
   $obj1 == $obj2
 
 for the same effect, but without the fragility.
+
+=head2 is_soot_class(className)
+
+Returns a boolean indicating whether the given class has
+been initialized as a SOOT class. If not, you can do so manually
+with
+
+  SOOT->Load($className)
 
 =head1 OTHER API CLASSES
 
