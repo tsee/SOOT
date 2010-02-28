@@ -11,6 +11,9 @@
 #include <cstring>
 #include <cstdlib>
 
+#define SOOT_DEBUG 1
+#undef SOOT_DEBUG
+
 using namespace SOOT;
 using namespace std;
 
@@ -71,6 +74,9 @@ namespace SOOT {
           return eINVALID; // VSTRING
 #endif
         if (SvROK(sv)) {
+#ifdef SOOT_DEBUG
+          cout << "Svt_PV && SvROK" << endl;
+#endif
           return eREF;
         } else {
           return eSTRING;
@@ -81,12 +87,18 @@ namespace SOOT {
           return eINVALID; // VSTRING
 #endif
         if (SvROK(sv)) {
+#ifdef SOOT_DEBUG
+          cout << "Svt_PVMG && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+#endif
           return IS_TOBJECT(sv) ? eTOBJECT : eREF;
         } else {
           return eSTRING;
         }
       case SVt_PVLV:
         if (SvROK(sv)) {
+#ifdef SOOT_DEBUG
+          cout << "Svt_PVLV && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+#endif
           return IS_TOBJECT(sv) ? eTOBJECT : eREF;
         }
         else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
@@ -97,7 +109,9 @@ namespace SOOT {
           else
             return eSTRING;
         } else {
+#ifdef SOOT_DEBUG
           cout << "lval"<<endl;
+#endif
           return eINVALID; // LVALUE
         }
       case SVt_PVAV:
@@ -130,6 +144,9 @@ namespace SOOT {
             case SVt_PVCV:
               return eCODE;
             default:
+#ifdef SOOT_DEBUG
+              cout << "SvROK && SvRV => default ("<<SvTYPE(SvRV(sv))<< ")"<< endl;
+#endif
               return eREF;
           }
         } else {
@@ -285,8 +302,15 @@ namespace SOOT {
         ++nTObjects;
       avtypes.push_back(type);
       const char* thisCproto = CProtoFromType(aTHX_ *elem, len, type);
-      if (thisCproto == NULL)
+      if (thisCproto == NULL) {
+#ifdef SOOT_DEBUG
+        cout << "types so far: ";
+        for (unsigned int i = 0; i < cproto.size(); i++)
+          cout << cproto[i] << ",";
+        cout << endl;
+#endif
         croak("Invalid type '%s'", gBasicTypeStrings[type]);
+      }
       cproto.push_back(thisCproto);
     }
     return nTObjects;
@@ -491,6 +515,9 @@ namespace SOOT {
   SV*
   CallMethod(pTHX_ const char* className, char* methName, AV* args)
   {
+#ifdef SOOT_DEBUG
+    cout << "CallMethod: " << className << "::" << methName << endl;
+#endif
     // Determine the class...
     TClass* c = TClass::GetClass(className);
     if (c == NULL)
@@ -500,6 +527,11 @@ namespace SOOT {
     vector<BasicType> argTypes;
     vector<string> cproto;
     unsigned int nTObjects = CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
+#ifdef SOOT_DEBUG
+    { char* cp = JoinCProto(cproto);
+      cout << "Full C proto: " << (cp==NULL?"NULL":cp) << endl;
+      free(cp); }
+#endif
     SV* perlCallReceiver;
     BasicType receiverType;
     if (argTypes.size() == 0) {
