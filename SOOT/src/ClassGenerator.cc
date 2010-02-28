@@ -21,23 +21,60 @@ namespace SOOT {
 
   std::vector<TString>
   MakeClassStub(pTHX_ const char* className, TClass* theClass) {
+    vector<TString> retval;
     if (strEQ(className, "TObject"))
-      return vector<TString>();
+      return retval;
     if (theClass == NULL)
       theClass = TClass::GetClass(className);
     if (theClass == NULL) {
       // TODO handle classes that haven't been loaded yet (as shared library)
       // => Add special AUTOLOAD that will trigger a new invocation of SetupClassInheritance
-      return vector<TString>();
+      return retval;
     }
-    return SetupClassInheritance(aTHX_ className, theClass);
+  
+    // Check whether this class has been ROOTified before
+    string isROOTName = string(className) + string("::isROOT");
+    SV* isROOT = get_sv(isROOTName.c_str(), 0);
+    if (isROOT != NULL) // done before
+      return retval;
+
+    // Note that this class is now ROOTified
+    get_sv(isROOTName.c_str(), 1);
+    get_sv(isROOTName.c_str(), 1); // FIXME there has to be a better way to silence 'used only once' warning
+    retval.push_back(className);
+
+    SetupTObjectMethods(aTHX_ className);
+
+    vector<TString> baseClasses = SetupClassInheritance(aTHX_ className, theClass);
+    retval.reserve(retval.size()+baseClasses.size());
+    retval.insert(retval.end(), baseClasses.begin(), baseClasses.end());
+
     //SetupAUTOLOAD(aTHX_ className);
   }
 
+// Note: Keep that header in sync.
+#include "ExternalXSUBs.h"
+
+  void
+  SetupTObjectMethods(pTHX_ const char* className)
+  {
+#if (PERL_REVISION == 5 && PERL_VERSION < 9)
+    char* file = __FILE__;
+#else
+    const char* file = __FILE__;
+#endif
+    // Note: *AUTOLOAD done in pure Perl
+    string clN(className);
+    newXS((clN+string("::DESTROY")).c_str(), XS_TObject_DESTROY, file);
+    newXS((clN+string("::keep")).c_str(), XS_TObject_keep, file);
+    newXS((clN+string("::as")).c_str(), XS_TObject_as, file);
+    newXS((clN+string("::delete")).c_str(), XS_TObject_delete, file);
+  }
 
   std::vector<TString>
   SetupClassInheritance(pTHX_ const char* className, TClass* theClass)
   {
+    vector<TString> retval;
     // FIXME the base classes can be template classes. That screws up
     //       Perl pretty badly. For now, we just skip the base classes that are template classes.
     // FIXME We don't make the TH* classes descendants of the TArray classes for now because
@@ -47,41 +84,26 @@ namespace SOOT {
     if (theClass == NULL) {
       theClass = TClass::GetClass(className);
       if (theClass == NULL)
-        return std::vector<TString>();
+        return retval;
     }
-    ostringstream str;
-    str << className << "::ISA";
-    AV* isa = get_av(str.str().c_str(), 1);
+    AV* isa = get_av((string(className)+string("::ISA")).c_str(), 1);
     av_clear(isa);
     TIter next(theClass->GetListOfBases());
     TBaseClass* base;
     bool isTH1 = theClass->InheritsFrom("TH1");
-    vector<TString> created;
-    created.push_back(className);
     while ((base = (TBaseClass*)next())) {
       TString name(base->GetName());
       if (!name.Contains("<")
           && (!isTH1 || !name.BeginsWith("TArray")))
       { // skip template classes. FIXME optimize
-        ostringstream rstr;
-        rstr << name << "::isROOT";
-        string varname(rstr.str());
-        SV* isROOT = get_sv(varname.c_str(), 0);
-        if (!isROOT) {
-          vector<TString> sub = SetupClassInheritance(aTHX_ name.Data(), NULL);
-          for (unsigned int i = 0; i < sub.size(); ++i)
-            created.push_back(sub[i]);
-        }
+        vector<TString> sub = MakeClassStub(aTHX_ name.Data(), NULL);
+        retval.reserve(retval.size()+sub.size());
+        retval.insert(retval.end(), sub.begin(), sub.end());
         av_push(isa, newSVpv(base->GetName(), 0));
       }
     }
 
-    // mark $isROOT
-    ostringstream isrootstr;
-    isrootstr << className << "::isROOT";
-    get_sv(isrootstr.str().c_str(), 1);
-    get_sv(isrootstr.str().c_str(), 1); // FIXME there has to be a better way to silence the damn warning
-    return created;
+    return retval;
   }
 
 

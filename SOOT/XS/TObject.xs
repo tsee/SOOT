@@ -1,3 +1,4 @@
+### NOTE: Any stuff you want to have all SOOT classes needs to be added to ClassGenerator, too
 
 MODULE = SOOT		PACKAGE = TObject
 

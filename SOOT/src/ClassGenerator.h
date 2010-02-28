@@ -21,12 +21,19 @@ extern "C" {
 #include <TString.h>
 
 namespace SOOT {
-  /// Set up the FULL inheritance chain for the given class; Returns an array of all created classes
-  std::vector<TString> SetupClassInheritance(pTHX_ const char* className, TClass* theClass);
-  void SetupAUTOLOAD(pTHX_ const char* className);
 
   /// Create stub for a given class. Calls SetupClassInheritance to set up the inheritance chain
   std::vector<TString> MakeClassStub(pTHX_ const char* className, TClass* theClass);
+
+  /** Set up the FULL inheritance chain for the given class.
+   *  Returns an array of all created classes.
+   *  Calls MakeClassStub internally.
+   *  You should be looking at MakeClassStub instead of calling this directly!
+   */
+  std::vector<TString> SetupClassInheritance(pTHX_ const char* className, TClass* theClass);
+
+  /// Install new XSUBs for the basic SOOT TObject API. Call MakeClassStub instead!
+  void SetupTObjectMethods(pTHX_ const char* className);
 
   /// Iterates over all known classes (cf. buildtools/ in SOOT) and calls MakeClassStub
   void GenerateClassStubs(pTHX);
@@ -48,6 +55,9 @@ namespace SOOT {
    *  Also assignes PreventDestruction magic.
    */
   void SetPerlGlobalDelayedInit(pTHX_ const char* variable, TObject** cobj, const char* className);
+
+  /// Unimplemented in XS...
+  void SetupAUTOLOAD(pTHX_ const char* className);
 } // end namespace SOOT
 
 #endif
