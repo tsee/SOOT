@@ -13,10 +13,37 @@ namespace SOOT {
   void
   GenerateClassStubs(pTHX)
   {
-    for (unsigned int iClass = 0; iClass < gNClassNames; ++iClass) {
+    // To be removed soon
+    /*for (unsigned int iClass = 0; iClass < gNClassNames; ++iClass) {
       const char* className = gClassNames[iClass];
       MakeClassStub(aTHX_ className, NULL);
+    }*/
+    vector<const char*> classes;
+    const int nClasses = gClassTable->Classes();
+    TPRegexp bad("T(?:Btree|List|Map|ObjArray|OrdCollection|RefArray)Iter"); // FIXME "Warning in <TClass::TClass>: no dictionary for class iterator<bidirectional_iterator_tag,TObject*,long,const TObject**,const TObject*&> is available"
+    for (unsigned int iClass = 0; iClass < nClasses; ++iClass) {
+      const char* className = gClassTable->At(iClass);
+      TString cn(className);
+      if (cn.Contains("<") || cn.Contains("::") || bad.MatchB(cn))
+        continue;
+      classes.push_back(className);
     }
+    for (unsigned int iClass = 0; iClass < classes.size(); ++iClass) {
+      //cout << classes[iClass] << endl;
+      vector<TString> c = MakeClassStub(aTHX_ classes[iClass], NULL);
+      //for (unsigned int i = 0; i < c.size(); i++) {
+      //  cout << "  => " << c[i] << endl;
+      //}
+    }
+    // ENOTWORKING
+    /*
+    TIter clIter( gROOT->GetListOfClasses() );
+    TClass* cl;
+    while ((cl = (TClass*)clIter.Next())) {
+      cout << cl->GetName() << endl;
+      MakeClassStub(aTHX_ cl->GetName(), cl);
+    }*/
+
   }
 
   std::vector<TString>
