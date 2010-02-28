@@ -1,7 +1,8 @@
 package TArray;
 use strict;
 use warnings;
-use vars qw/$AUTOLOAD/;
+use vars qw/$AUTOLOAD $isROOT/;
+BEGIN {$isROOT = 1}
 
 sub AUTOLOAD {
   $AUTOLOAD =~ s/::([^:]+)$//;

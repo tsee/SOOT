@@ -1,7 +1,8 @@
 package TObject;
 use strict;
 use warnings;
-use vars qw/$AUTOLOAD/;
+use vars qw/$AUTOLOAD $isROOT/;
+BEGIN {$isROOT = 1}
 
 use overload 
   '==' => sub {
