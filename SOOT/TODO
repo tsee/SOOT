@@ -20,6 +20,7 @@ Wrapper / guts:
      The above C code could become: "$gRandom->(...)".
   ====> While mostly implemented now, this still fails on the const qualifier. Doh.
 - Either lose the silly overloading or add string overloading to get the refaddr
+  (If so, add bool overloading, too)
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
