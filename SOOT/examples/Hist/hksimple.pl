@@ -33,7 +33,8 @@ foreach (0..299) {
   padRefresh($c1) if $_ and $_ % kUPDATE == 0;
 }
 
-$hpx[$_]->Fit("gaus","","") for 0..2;
+$hpx[$_]->Fit("gaus","","") for 0..2; # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID') at /home/tsee/perl/root/soot/SOOT/blib/lib/TObject.pm line 30.
+
 padRefresh($c1);
 
 sub padRefresh {
@@ -43,8 +44,8 @@ sub padRefresh {
   return if not defined $pad;
   $pad->Modified();
   $pad->Update();
-  my $tl = $pad->GetListOfPrimitives(); # FIXME This doesn't work yet (enum returned...)
-  return if not $tl;
+  my $tl = $pad->GetListOfPrimitives();
+  return if not defined $tl;
   for (my $i = 0; $i < $tl->GetSize(); $i++) {
     my $obj = $tl->At($i);
     padRefresh($obj, 1) if $obj->isa("TPad");
@@ -55,3 +56,4 @@ sub padRefresh {
 
 
 $gApplication->Run;
+

@@ -67,7 +67,7 @@ $padNcUP->SetTopMargin($Top_margin+0.005);
 $padNcUP->SetBottomMargin(0.00);
 
 my $frameNcUP = TH1F->new("frameNcUP","",100,0,$maxPlotPart);
-$frameNcUP->GetYaxis()->SetLabelOffset(0.005); # FIXME Get?axis still returning "enum"
+$frameNcUP->GetYaxis()->SetLabelOffset(0.005);
 $frameNcUP->GetYaxis()->SetLabelSize(0.12);
 $frameNcUP->SetMinimum($Nc_200_Min);
 $frameNcUP->SetMaximum($Nc_200_Max);

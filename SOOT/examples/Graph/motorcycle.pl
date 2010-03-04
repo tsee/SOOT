@@ -70,7 +70,7 @@ DrawSmooth($can,$grin,$grout,6,"Super Smoother: bass = 3","","");
 sub DrawSmooth {
    my ($can, $grin, $grout, $pad, $title, $xt, $yt) = @_;
    $can->cd($pad);
-   my $vFrame = $can->DrawFrame(0,-130,60,70); # FIXME this doesn't return a vFrame but an "enum"
+   my $vFrame = $can->DrawFrame(0,-130,60,70); # FIXME this doesn't return a vFrame but a "G__p2memfunc"
    $vFrame->SetTitle($title);
    $vFrame->SetTitleSize(0.2);
    $vFrame->SetXTitle($xt);

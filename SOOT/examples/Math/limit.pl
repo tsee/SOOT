@@ -39,7 +39,7 @@ $data->Draw("PE1,Same");
 $c1->Modified;
 $c1->Update;
 
-my $frame = $c1->GetFrame->as('TFrame'); # FIXME explicit cast needed due to enum bug
+my $frame = $c1->GetFrame;
 $frame->SetFillColor(21); 
 $frame->SetBorderSize(6);
 $frame->SetBorderMode(-1);
@@ -52,11 +52,11 @@ $gSystem->ProcessEvents;
 my $ds = TLimitDataSource->new($signal, $background, $data);
 my $l  = TLimit->new();
 
-my $cl = $l->ComputeLimit($ds, 50000); # FIXME should return TConfidenceLevel*, but returns 'int' => the 'enum' bug
+my $cl = $l->ComputeLimit($ds, 50000);
 printCL($cl, "Computing limits...");
 
 # Add stat uncertainty
-my $scl = $l->ComputeLimit($ds,50000,1);
+my $scl = $l->ComputeLimit($ds,50000,1); # FIXME returns int?
 printCL($scl, "Computing limits with stat systematics...");
 
 # Add some systematics
