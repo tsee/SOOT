@@ -1,3 +1,5 @@
+BUG: ClassGenerator uses ROOT's internal table whereas the AUTOLOAD-generating code still walks our own list of classes => funny crashes!
+
 Wrapper / guts:
 - Implement global function wrapping ==> Seems done, needs lots of refactoring and testing
 - Implement method caching
