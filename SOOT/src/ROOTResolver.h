@@ -74,7 +74,7 @@ namespace SOOT {
 
   /// Map any int* types to float*'s
   bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
-  void FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo& mInfo,
+  void FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
                            const char* methName, std::vector<BasicType>& proto,
                            std::vector<std::string>& cproto, long int& offset,
                            const unsigned int nTObjects, bool isFunction);

@@ -558,7 +558,7 @@ namespace SOOT {
 
     TObject* receiver;
     G__ClassInfo theClass(className);
-    G__MethodInfo mInfo;
+    G__MethodInfo* mInfo = NULL;
     long offset;
     bool constructor = false;
 
@@ -579,11 +579,11 @@ namespace SOOT {
     }
     FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false));
 
-    if (!mInfo.IsValid() || !mInfo.Name())
+    if (!mInfo->IsValid() || !mInfo->Name())
       CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
 
     // Determine return type
-    char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
+    char* retTypeStr = constructor ? (char*)className : (char*)mInfo->Type()->TrueName();
 /*    cout << "MINFO="<<mInfo.Name() << " " << mInfo.Title() << " " << mInfo.NArg() << " " << mInfo.FileName() << endl;
     cout << "CINFO="<<mInfo.MemberOf()->Name()<< endl;
     cout << retTypeStr << " " << mInfo.Type()->Name() << endl;
@@ -593,7 +593,7 @@ namespace SOOT {
     
     // Prepare CallFunc
     G__CallFunc theFunc;
-    theFunc.SetFunc(mInfo);
+    theFunc.SetFunc(*mInfo);
 
     vector<void*> needsCleanup;
     SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup, (perlCallReceiver == NULL ? 0 : 1));
@@ -614,7 +614,7 @@ namespace SOOT {
 
 
   void
-  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo& mInfo,
+  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
                       const char* methName, std::vector<BasicType>& proto,
                       std::vector<std::string>& cproto, long int& offset,
                       const unsigned int nTObjects, bool isFunction)
@@ -643,10 +643,10 @@ namespace SOOT {
       void* ptr = meth->InterfaceMethod();
       if (!ptr)
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
-      mInfo = G__MethodInfo(theClass);
+      mInfo = new G__MethodInfo(theClass);
       bool found = false;
-      while (mInfo.Next()) {
-        if (ptr == mInfo.InterfaceMethod()) {
+      while (mInfo->Next()) {
+        if (ptr == mInfo->InterfaceMethod()) {
           found = true;
           break;
         }
@@ -654,7 +654,7 @@ namespace SOOT {
       if (!found)
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
     } else {
-      mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
+      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
     }
     if (freeCProtoStr)
       free(cprotoStr);
@@ -662,7 +662,7 @@ namespace SOOT {
     /* Loop if we have to, i.e. there are T_OBJECTS ^= TObjects and the first
      * combination is not correct.
      */
-    if( nTObjects > 0 and !(mInfo.InterfaceMethod()) ) {
+    if( nTObjects > 0 and !(mInfo->InterfaceMethod()) ) {
       for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
         TwiddlePointersAndReferences(proto, cproto, reference_map);
         char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
@@ -671,15 +671,15 @@ namespace SOOT {
           cprotoStr = (char*)"";
           freeCProtoStr = false;
         }
-        mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
+        mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
         if (freeCProtoStr)
           free(cprotoStr);
-        if (mInfo.InterfaceMethod())
+        if (mInfo->InterfaceMethod())
           break;
       }
 
       // Now with int* => double* if necessary
-      if (!(mInfo.InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
+      if (!(mInfo->InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
         for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
           TwiddlePointersAndReferences(proto, cproto, reference_map);
           char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
@@ -688,10 +688,10 @@ namespace SOOT {
             cprotoStr = (char*)"";
             freeCProtoStr = false;
           }
-          mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
+          mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
           if (freeCProtoStr)
             free(cprotoStr);
-          if (mInfo.InterfaceMethod())
+          if (mInfo->InterfaceMethod())
             break;
         }
       } // end if need to try int* => double*
