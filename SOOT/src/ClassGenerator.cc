@@ -66,8 +66,8 @@ namespace SOOT {
       return retval;
 
     // Note that this class is now ROOTified
-    get_sv(isROOTName.c_str(), 1);
-    get_sv(isROOTName.c_str(), 1); // FIXME there has to be a better way to silence 'used only once' warning
+    SV* isr = get_sv(isROOTName.c_str(), 1);
+    sv_setiv(isr, 1);
     retval.push_back(className);
 
     SetupTObjectMethods(aTHX_ className);
