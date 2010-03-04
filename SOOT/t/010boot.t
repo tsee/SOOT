@@ -7,17 +7,17 @@ is_deeply(\@TH1D::ISA, ["TH1"]);
 
 eval { TObject->new(qw(a b c)); };
 ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
-diag($@) if $@;
+#diag($@) if $@;
 
 eval { TH1D->Foo(); };
 ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
-diag($@) if $@;
+#diag($@) if $@;
 
 TODO: {
   local $TODO = "TAdvancedGraphicsDialog isn't loaded by default => need to figure out dynamic .so loading";
   eval { TAdvancedGraphicsDialog->DoesntExist(); };
   ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
-  diag($@) if $@;
+  #diag($@) if $@;
 }
 
 my $tgraph = eval { TGraph->new(12); };
