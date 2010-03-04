@@ -27,7 +27,7 @@ for my $i (0..$nloop-1) {
 
 $h1->Draw();
 $pad1->Update(); #this will force the generation of the "stats" box
-my $ps1 = $h1->GetListOfFunctions()->FindObject("stats"); # FIXME GetListOfFunctions returns fake 'enum'
+my $ps1 = $h1->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
 $ps1->SetX1NDC(0.4); 
 $ps1->SetX2NDC(0.6);
 $pad1->Modified();
@@ -47,7 +47,7 @@ $h2->SetLineColor(kRed);
 $h2->Draw("sames");
 $pad2->Update();
 
-my $ps2 = $h2->GetListOfFunctions()->FindObject("stats");
+my $ps2 = $h2->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
 $ps2->SetX1NDC(0.65); 
 $ps2->SetX2NDC(0.85);
 $ps2->SetTextColor(kRed);

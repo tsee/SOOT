@@ -19,7 +19,7 @@ my $ey1 = [.8,.7,.6,.5,.4,.4,.5,.6,.7,.8];
 my $gr1 = TGraphErrors->new($n1,$x1,$y1,$ex1,$ey1);
 $gr1->SetMarkerColor(kBlue);
 $gr1->SetMarkerStyle(21);
-$gr1->Fit("pol6","q"); # FIXME Unhandled return type 'enum' (SOOT type 'INVALID')
+$gr1->Fit("pol6","q"); # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID')
 $mg->Add($gr1);
 
 # create second graph
@@ -39,8 +39,8 @@ $mg->Draw("ap");
 
  #force drawing of canvas to generate the fit TPaveStats
 $c1->Update();
-my $stats1 = $gr1->GetListOfFunctions()->FindObject("stats"); # FIXME the dreaded enum error...
-my $stats2 = $gr2->GetListOfFunctions()->FindObject("stats"); # FIXME the dreaded enum error...
+my $stats1 = $gr1->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
+my $stats2 = $gr2->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
 $stats1->SetTextColor(kBlue); 
 $stats2->SetTextColor(kRed); 
 $stats1->SetX1NDC(0.12); $stats1->SetX2NDC(0.32); $stats1->SetY1NDC(0.75);

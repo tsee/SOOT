@@ -38,7 +38,7 @@ $pad2->SetLeftMargin(0);
 $pad2->SetBottomMargin(0);
 $pad2->SetTickx(2);
 $pad2->SetTicky(2);
-$h2->GetYaxis()->SetLabelOffset(0.01); # FIXME GetYaxis returns 'enum'...
+$h2->GetYaxis()->SetLabelOffset(0.01);
 $h2->Draw();
 
 $pad3->cd();

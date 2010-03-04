@@ -12,7 +12,7 @@ sub _basic3d {
    $p1->cd();
 
    # creating a view
-   my $view = TView->new(1); # FIXME doesn't work as of 2010-02-19
+   my $view = TView->new(1); # FIXME doesn't work as of 2010-03-04 (TView not available in ROOT?)
    $view->SetRange(5,5,5,25,25,25);
 
    # create a first PolyLine3D

@@ -40,7 +40,7 @@ sub _logscale {
    $f1->Draw();
    $f2->Draw("same");
    $f3->Draw("same");
-   $f1->GetYaxis()->SetMoreLogLabels(); # FIXME Once more, Get?axis fails: (Can't locate object method "SetMoreLogLabels" via package "G__p2memfunc")
+   $f1->GetYaxis()->SetMoreLogLabels(); # FIXME Can't locate object method "SetMoreLogLabels" via package "G__p2memfunc" at examples/Basic/logscale.pl line 43.
    $pave1 = TPaveText->new(-6,2,6,6);
    $pave1->SetFillColor(42);
    $pave1->SetTextAlign(12);
