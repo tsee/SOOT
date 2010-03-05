@@ -34,3 +34,7 @@
   $$ = SOOT::IntegerVecToAV<short>(aTHX_ $1, THIS->GetSize());
 %};
 
+
+%typemap{TFormulaFloatArray}{parsed}{%SV*%}{%
+  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetNpar());
+%};

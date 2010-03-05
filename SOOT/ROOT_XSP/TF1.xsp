@@ -1,0 +1,6 @@
+%module{SOOT};
+
+class TF1 {
+  TFormulaFloatArray GetParErrors();
+};
+
