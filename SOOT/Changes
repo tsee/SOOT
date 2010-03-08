@@ -1,6 +1,20 @@
 Revision history for Perl extension SOOT.
 
-0.04  Fri Feb 26 21:00:00 2010
+0.05  Mon Mar  8 20:00 2010
+  - Completely revamped the way that the ROOT classes are bootstrapped.
+  - Fix for the "enum*" return value bug (cf. TH1D::GetXaxis())
+  - Implemented function calling (I.e. TMath::Abs())
+    => Hacky implementation, needs revisiting.
+  - TF1::GetParErrors() returns a Perl array now and so does
+    TFormula::GetParameters()
+  - Optimizations in TObjectEncapsulation.
+  - Fix for the return value of SOOT::API::type()
+  - SOOT::API::is_same_tobject() (and tests for object equality)
+  - SOOT::API::is_soot_class()
+  - Started documenting SOOT <-> ROOT differences for users
+  - Many more examples
+
+0.04  Fri Feb 26 21:00 2010
   - Memory leak fixes.
   - Inlined copy of toolchain => Doesn't fully work for building
     the src/ subdirectory yet.
@@ -22,7 +36,7 @@ Revision history for Perl extension SOOT.
     or rather ROOT<->Perl memory interface a la PyROOT's
     TMemoryRegulator.
 
-0.03  Sun Feb 21 21:00:00 2010
+0.03  Sun Feb 21 21:00 2010
   - Many more examples.
   - Lazy initialization of ROOT globals (gPad!)
   - Constants actually work now.
@@ -32,7 +46,7 @@ Revision history for Perl extension SOOT.
      my $tarrayd = TArrayD->new([1., 2., ...]);
   - More tests!
 
-0.02  Sat Feb 20 17:30:00 2010
+0.02  Sat Feb 20 17:30 2010
   - List of candidate methods shown on bad method invocation.
   - Fixed problems with globals (gROOT, etc) and global
     interpreter destruction.
@@ -47,6 +61,6 @@ Revision history for Perl extension SOOT.
   - More Perl-SOOT API: Class name iterator.
   - Allow export of various constants/enums such as kRed, kTRUE, etc.
 
-0.01  Tue Feb  9 19:31:43 2010
+0.01  Tue Feb  9 19:31 2010
   - original version
 
