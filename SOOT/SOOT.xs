@@ -155,3 +155,9 @@ GenerateROOTClass(className)
   OUTPUT: RETVAL
 
 
+void
+GenerateClassStubs()
+  PPCODE:
+    SOOT::GenerateClassStubs(aTHX);
+
+
