@@ -576,7 +576,7 @@ namespace SOOT {
       --nTObjects; // The invocant isn't used int FindMethodPrototype
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
-    FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false));
+    FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false), constructor);
 
     if (!mInfo->IsValid() || !mInfo->Name())
       CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
@@ -616,7 +616,8 @@ namespace SOOT {
   FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
                       const char* methName, std::vector<BasicType>& proto,
                       std::vector<std::string>& cproto, long int& offset,
-                      const unsigned int nTObjects, bool isFunction)
+                      const unsigned int nTObjects, bool isFunction,
+                      bool isConstructor)
 
   {
     // This comes practically verbatim from RubyROOT because of the reference map algorithm
@@ -625,6 +626,13 @@ namespace SOOT {
 
     // 2^nobjects == number of combinations of "*" and "&"
     unsigned int bitmap_end = static_cast<unsigned int>( 0x1 << nTObjects );
+
+    // Check for copy constructor. new TSome(TSome*) becomes new TSome(const TSome&)
+    if (isConstructor && cproto.size() == 2 && proto[1] == eTOBJECT) {
+      string clNameStr = string(theClass.Name());
+      if (cproto[1] == clNameStr+string("*"))
+        cproto[1] = string("const ") + clNameStr + string("&");
+    }
 
     // Check if method methname with prototype cproto is present in the class
     char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
