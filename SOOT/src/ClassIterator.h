@@ -2,6 +2,8 @@
 #ifndef __ClassIterator_h_
 #define __ClassIterator_h_
 
+#include "ROOTIncludes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
