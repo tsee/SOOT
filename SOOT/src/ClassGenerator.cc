@@ -13,11 +13,6 @@ namespace SOOT {
   void
   GenerateClassStubs(pTHX)
   {
-    // To be removed soon
-    /*for (unsigned int iClass = 0; iClass < gNClassNames; ++iClass) {
-      const char* className = gClassNames[iClass];
-      MakeClassStub(aTHX_ className, NULL);
-    }*/
     vector<const char*> classes;
 
     ClassIterator iter;
@@ -25,15 +20,6 @@ namespace SOOT {
     while ( (className = iter.next()) != NULL) {
       vector<TString> c = MakeClassStub(aTHX_ className, NULL);
     }
-    // ENOTWORKING
-    /*
-    TIter clIter( gROOT->GetListOfClasses() );
-    TClass* cl;
-    while ((cl = (TClass*)clIter.Next())) {
-      cout << cl->GetName() << endl;
-      MakeClassStub(aTHX_ cl->GetName(), cl);
-    }*/
-
   }
 
   std::vector<TString>
