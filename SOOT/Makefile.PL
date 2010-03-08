@@ -21,7 +21,6 @@ require inc::SOOTBuild;
 my $CC = 'g++';
 
 # todo move to later build stage
-system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'genclassnames.pl')) and die $!;
 system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_root_xsp_include.pl')) and die $!;
 system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'genconstants.pl')) and die $!;
 system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_examples.pl')) and die $!;
@@ -39,7 +38,7 @@ WriteMakefile(
     AUTHOR            => 'Steffen Mueller <smueller@cpan.org>',
     META_MERGE => { no_index => { directory => [qw(buildtools inc)], }, },
     clean => {
-      FILES => "src/SOOTClassnames.cc rootclasses.xsinclude rootclasses.h rootclasses.map",
+      FILES => "rootclasses.xsinclude rootclasses.h rootclasses.map",
     },
 );
 

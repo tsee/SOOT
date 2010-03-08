@@ -4,7 +4,6 @@
 
 #include "PerlCTypeConversion.h"
 #include "CPerlTypeConversion.h"
-#include "SOOTClassnames.h"
 #include <string>
 #include <iostream>
 #include <sstream>
