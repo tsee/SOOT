@@ -1,7 +1,7 @@
 
 #include "ClassGenerator.h"
 
-#include "SOOTClassnames.h"
+#include "ClassIterator.h"
 #include "TObjectEncapsulation.h"
 #include <string>
 #include <iostream>
@@ -19,21 +19,11 @@ namespace SOOT {
       MakeClassStub(aTHX_ className, NULL);
     }*/
     vector<const char*> classes;
-    const int nClasses = gClassTable->Classes();
-    TPRegexp bad("T(?:Btree|List|Map|ObjArray|OrdCollection|RefArray)Iter"); // FIXME "Warning in <TClass::TClass>: no dictionary for class iterator<bidirectional_iterator_tag,TObject*,long,const TObject**,const TObject*&> is available"
-    for (unsigned int iClass = 0; iClass < nClasses; ++iClass) {
-      const char* className = gClassTable->At(iClass);
-      TString cn(className);
-      if (cn.Contains("<") || cn.Contains("::") || bad.MatchB(cn))
-        continue;
-      classes.push_back(className);
-    }
-    for (unsigned int iClass = 0; iClass < classes.size(); ++iClass) {
-      //cout << classes[iClass] << endl;
-      vector<TString> c = MakeClassStub(aTHX_ classes[iClass], NULL);
-      //for (unsigned int i = 0; i < c.size(); i++) {
-      //  cout << "  => " << c[i] << endl;
-      //}
+
+    ClassIterator iter;
+    const char* className;
+    while ( (className = iter.next()) != NULL) {
+      vector<TString> c = MakeClassStub(aTHX_ className, NULL);
     }
     // ENOTWORKING
     /*
@@ -68,6 +58,7 @@ namespace SOOT {
     // Note that this class is now ROOTified
     SV* isr = get_sv(isROOTName.c_str(), 1);
     sv_setiv(isr, 1);
+    get_sv(isROOTName.c_str(), 1);
     retval.push_back(className);
 
     SetupTObjectMethods(aTHX_ className);
