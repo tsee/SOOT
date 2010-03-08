@@ -193,7 +193,7 @@ sub testAll {
   }
   printf(" %8.3f",$sw->CpuTime()*$cpn);
 
-  $gRandom->($r3); # FIXME Copy constructors or similar (see TODO)
+  $gRandom->($r3); # FIXME Assignment operators or similar (see TODO)
   $sw->Start();
   for (0..N-1) {
      $x = $f1->GetRandom();
