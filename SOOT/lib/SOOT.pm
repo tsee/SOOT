@@ -18,7 +18,7 @@ our %EXPORT_TAGS = (
     $gEnv
   ) ],
   'constants' => \@SOOT::Constants::Names,
-  'functions' => [qw( Load )],
+  'functions' => [qw( Load UpdateClasses )],
 );
 use vars @{$EXPORT_TAGS{globals}};
 
@@ -58,9 +58,11 @@ sub AUTOLOAD {
 sub _bootstrap_AUTOLOAD {
   my $classIter = SOOT::API::ClassIterator->new;
   no strict 'refs';
+  no warnings 'once';
   while (defined(my $class = $classIter->next)) {
     # they have their own AUTOLOAD
     next if $class eq 'TObject' or $class eq 'TArray';
+    next if ${"${class}::isROOT"};
     if ($class->isa('TArray')) {
       *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
     }
@@ -79,11 +81,11 @@ sub Load {
   my $new = 0;
   foreach my $class (@_) {
     no strict 'refs';
+    no warnings 'once';
     next if defined ${"${class}::isROOT"};
     my $genclasses = GenerateROOTClass($class);
     foreach my $gclass (@{$genclasses}) {
       next if $gclass eq 'TObject' or $gclass eq 'TArray';
-      next if defined ${"${class}::isROOT"};
       ++$new;
       if ($gclass->isa('TArray')) {
         *{"${gclass}::AUTOLOAD"} = \&TArray::AUTOLOAD;
@@ -96,6 +98,14 @@ sub Load {
   }
   
   return $new;
+}
+
+sub UpdateClasses {
+  shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
+  Carp::croak("Usage: SOOT->UpdateClasses()")
+    if @_;
+  GenerateClassStubs();
+  return 1;
 }
 
 # For some reason, the normal gBenchmark from XS will segfault on first use.
@@ -165,6 +175,7 @@ The list of currently supported globals is:
 The list of currently exported functions:
 
   Load(className, className2,...)
+  UpdateClasses()
 
 =head1 JUMP-START FOR C++-ROOT USERS
 
@@ -298,8 +309,6 @@ This will print:
 
 =head2 Availability of ROOT Classes
 
-TODO: This section is a draft. Things may or may not work at this point.
-
 By default, SOOT loads most of the available ROOT classes and
 wraps them for use in Perl. If some class is not available,
 you may try to load it as follows:
@@ -314,9 +323,25 @@ interface.
 If you want to use classes from a shared library that is not
 loaded by default, everything should work if you do the following:
 
-  # FIXME test this
-  $gSystem->Load('libSomething.so');
-  SOOT::Load('TSomething'); # or whatever
+  $gSystem->Load('libGeom.so');
+  $gSystem->Load('libGeomBuilder.so');
+  SOOT::UpdateClasses(); # Bind ALL new classes
+
+Alternatively you may bind only what you need:
+
+  $gSystem->Load('libGeom.so');
+  $gSystem->Load('libGeomBuilder.so');
+  SOOT::Load('TGeoMaterial'); # or whatever
+
+Updating all classes may be a relatively slow operation.
+A third approach is using the special TSystem::LoadNUpddate method
+which is not part of the normal ROOT interface:
+
+  $gSystem->Load('libGeom.so');
+  $gSystem->LoadNUpdate('libGeomBuilder.so');
+
+C<LoadNUpdate()> will bind any new classes B<if> the library was loaded
+successfully and wasn't loaded before.
 
 =head1 FUNCTIONS
 
@@ -326,6 +351,14 @@ Loads one or more ROOT classes and their base classes into Perl.
 Virtually all ROOT classes should be loaded out of the box.
 This function is only necessary if you load additional
 shared libraries.
+
+=head2 UpdateClasses
+
+After loading non-standard shared libraries that provide ROOT-based classes,
+it may be necessary to update the Perl-bindings for those classes. You may
+either use C<Load()> if you know which exact classes you want to bind, or
+you may call C<SOOT::UpdateClasses()> to check the whole ROOT class table
+for classes that were previously not available to Perl.
 
 =head1 SEE ALSO
 
