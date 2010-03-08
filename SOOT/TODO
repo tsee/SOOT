@@ -29,6 +29,7 @@ Packaging:
   => Inline dependencies (Done)
   => Make inlined dependencies work! (Probably takes a conversion to
      Module::Build!)
+- Fix generation of src.so
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
