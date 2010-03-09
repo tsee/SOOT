@@ -62,7 +62,6 @@ sub _bootstrap_AUTOLOAD {
   while (defined(my $class = $classIter->next)) {
     # they have their own AUTOLOAD
     next if $class eq 'TObject' or $class eq 'TArray';
-    next if ${"${class}::isROOT"};
     if ($class->isa('TArray')) {
       *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
     }
