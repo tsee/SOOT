@@ -30,6 +30,7 @@
 #include <TCanvas.h>
 #include <TVirtualPad.h>
 #include <TPad.h>
+#include <TAttImage.h>
 
 #undef Copy
 #undef Move
