@@ -16,6 +16,7 @@ our %EXPORT_TAGS = (
     $gApplication $gSystem $gRandom $gROOT
     $gDirectory $gStyle $gPad $gBenchmark
     $gEnv
+    $gHistImagePalette $gWebImagePalette
   ) ],
   'constants' => \@SOOT::Constants::Names,
   'functions' => [qw( Load UpdateClasses )],
@@ -170,6 +171,7 @@ The list of currently supported globals is:
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
   $gEnv
+  $gHistImagePalette $gWebImagePalette
 
 The list of currently exported functions:
 
