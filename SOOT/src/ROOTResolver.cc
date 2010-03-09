@@ -464,28 +464,36 @@ namespace SOOT {
 
 
   SV*
-  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr, bool isConstructor)
+  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr, bool isConstructor, std::vector<void*> needsCleanup)
   {
     char* typeStrWithoutPtr;
     char* ptr;
-    unsigned int ptr_level;
+    unsigned int ptr_level, i;
     SV* retval;
+
     switch (retType) {
       case eINTEGER:
-        return newSViv(addr);
+        retval = newSViv(addr);
+        break;
       case eFLOAT:
-        return newSVnv(addrD);
+        retval = newSVnv(addrD);
+        break;
       case eSTRING:
-        return newSVpv((char*)addr, strlen((char*)addr));
+        retval = newSVpv((char*)addr, strlen((char*)addr));
+        break;
       case eARRAY_INTEGER:
       case eARRAY_FLOAT:
       case eARRAY_STRING:
         // allocate C-array here and convert the AV
+        for (i = 0; i < needsCleanup.size(); ++i)
+          free(needsCleanup[i]);
         croak("FIXME Array return values to be implemented");
         break;
       case eTOBJECT:
-        if ((void*)addr == NULL)
-          return &PL_sv_undef;
+        if ((void*)addr == NULL) {
+          retval = &PL_sv_undef;
+          break;
+        }
         // FIXME this is so hideous it's not even funny
         typeStrWithoutPtr = strdup(retTypeStr);
         ptr = typeStrWithoutPtr;
@@ -506,12 +514,19 @@ namespace SOOT {
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';
         free(typeStrWithoutPtr);
-        return retval;
+        break;
       case eUNDEF:
-        return &PL_sv_undef;
+        retval = &PL_sv_undef;
+        break;
       default:
+        for (i = 0; i < needsCleanup.size(); ++i)
+          free(needsCleanup[i]);
         croak("Unhandled return type '%s' (SOOT type '%s')", retTypeStr, gBasicTypeStrings[retType]);
     } // end switch ret type
+
+    for (i = 0; i < needsCleanup.size(); ++i)
+      free(needsCleanup[i]);
+    return retval;
   }
 
 
@@ -537,9 +552,8 @@ namespace SOOT {
 #endif
     SV* perlCallReceiver;
     BasicType receiverType;
-    if (argTypes.size() == 0) {
+    if (argTypes.size() == 0)
       perlCallReceiver = NULL;
-    }
     else {
       // Fetch the call receiver (object or class name)
       SV** elem = av_fetch(args, 0, 0);
@@ -547,7 +561,8 @@ namespace SOOT {
         croak("BAD, elem zero");
       perlCallReceiver = *elem;
       receiverType = argTypes[0];
-      if (receiverType != eTOBJECT && receiverType != eSTRING) {
+      if (receiverType != eTOBJECT
+          && (receiverType != eSTRING || !strEQ(SvPV_nolen(perlCallReceiver), className))) {
         //croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
         //      methName, gBasicTypeStrings[receiverType]);
         // Assume it's a function
@@ -581,20 +596,26 @@ namespace SOOT {
     if (!mInfo->IsValid() || !mInfo->Name())
       CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
 
+    vector<void*> needsCleanup;
     // Determine return type
-    char* retTypeStr = constructor ? (char*)className : (char*)mInfo->Type()->TrueName();
+    char* retTypeStr;
+    if (constructor) {
+      retTypeStr = (char*)className;
+    } else {
+      // The strdup is because the method execution may nuke the return type in the method info...
+      retTypeStr = strdup((char*)mInfo->Type()->TrueName());
+      needsCleanup.push_back((void*)retTypeStr);
+    }
 /*    cout << "MINFO="<<mInfo.Name() << " " << mInfo.Title() << " " << mInfo.NArg() << " " << mInfo.FileName() << endl;
     cout << "CINFO="<<mInfo.MemberOf()->Name()<< endl;
     cout << retTypeStr << " " << mInfo.Type()->Name() << endl;
 */
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
-    
     // Prepare CallFunc
     G__CallFunc theFunc;
     theFunc.SetFunc(*mInfo);
 
-    vector<void*> needsCleanup;
     SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup, (perlCallReceiver == NULL ? 0 : 1));
 
     long addr;
@@ -604,11 +625,8 @@ namespace SOOT {
     else
       addr = theFunc.ExecInt((void*)((long)receiver + offset));
 
-    for (unsigned int i = 0; i < needsCleanup.size(); ++i)
-      free(needsCleanup[i]);
-
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
-    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor);
+    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor, needsCleanup);
   }
 
 
