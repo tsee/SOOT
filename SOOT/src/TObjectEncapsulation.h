@@ -19,7 +19,6 @@ extern "C" {
 
 #include "PtrTable.h"
 
-// FIXME Handle case of ROOT deleting a TObject before it's deleted from our table. Steal from PyROOT's MemoryRegulator::RecursiveRemove!
 namespace SOOT {
 
    /// This class exists for the sole purpose of letting ROOT call into RecursiveRemove for clearing out TObject's
