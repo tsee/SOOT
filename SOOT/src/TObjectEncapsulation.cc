@@ -1,5 +1,6 @@
 
 #include "TObjectEncapsulation.h"
+#include "SOOTDebug.h"
 
 #include <string>
 #include <iostream>

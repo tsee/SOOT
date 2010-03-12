@@ -1,5 +1,6 @@
 
 #include "CPerlTypeConversion.h"
+#include "SOOTDebug.h"
 
 
 using namespace SOOT;

@@ -4,4 +4,7 @@
 // #define SOOT_DEBUG 1
 #undef SOOT_DEBUG
 
+// #define SOOT_PTRTABLE_DEBUG 1
+#undef SOOT_PTRTABLE_DEBUG
+
 #endif

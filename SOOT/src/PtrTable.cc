@@ -1,11 +1,9 @@
 #include "PtrTable.h"
+#include "SOOTDebug.h"
 #include "TObjectEncapsulation.h"
 
 using namespace std;
 using namespace SOOT;
-
-#define P_DEBUG 1
-#undef P_DEBUG
 
 #define PTRTABLE_HASH(ptr) PtrTable::hash(PTR2nat(ptr))
 
@@ -20,7 +18,7 @@ namespace SOOT {
       SOOT::UnregisterObject(aTHX_ *it, true);
     }
     */
-#ifdef P_DEBUG
+#ifdef SOOT_PTRTABLE_DEBUG
     cout << "ClearAnnotation: deleting PtrAnnotation* '" << pa << "'" << endl;
 #endif    
     delete pa; // Needed since UnregisterObject can not free the annotation
@@ -44,7 +42,7 @@ PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold)
 /*****************************************************************************/
 PtrTable::~PtrTable()
 {
-#ifdef P_DEBUG
+#ifdef SOOT_PTRTABLE_DEBUG
   cout << "~PtrTable(): Safefree'ing fArray: '" << fArray << "'" << endl;
 #endif
   Clear();
@@ -57,7 +55,7 @@ PtrTable::~PtrTable()
 bool
 PtrTable::Delete(TObject* key)
 {
-#ifdef P_DEBUG 
+#ifdef SOOT_PTRTABLE_DEBUG 
   cout << "PtrTable::Delete: DELETING TObject " << key << " from PtrTable." << endl;
 #endif
   PtrTableEntry* entry;
@@ -73,12 +71,12 @@ PtrTable::Delete(TObject* key)
         fArray[index] = entry->next;
 
       --fItems;
-#ifdef P_DEBUG 
+#ifdef SOOT_PTRTABLE_DEBUG 
       cout << "PtrTable::Delete: delete PtrAnnotation* '" << entry->value << "'." << endl;
 #endif
       deleted = true;
       delete entry->value;
-#ifdef P_DEBUG 
+#ifdef SOOT_PTRTABLE_DEBUG 
       cout << "PtrTable::Delete: Safefree(PtrTableEntry* '" << entry << "')." << endl;
 #endif
       Safefree(entry);
@@ -215,7 +213,7 @@ PtrTable::Clear() {
         PtrTableEntry* const temp = entry;
         entry = entry->next;
         fDtor(aTHX_ temp->value);
-#ifdef P_DEBUG 
+#ifdef SOOT_PTRTABLE_DEBUG 
         cout << "PtrTable::Clear: Safefree(PtrTableEntry* '" << temp << "')." << endl;
 #endif
         Safefree(temp);
@@ -274,6 +272,5 @@ PtrTable::PrintStats()
   cout << "== End of RefPads ==\n"<< endl;
 }
 
-#undef P_DEBUG
 #undef PTRTABLE_HASH
 

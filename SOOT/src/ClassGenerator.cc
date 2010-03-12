@@ -1,5 +1,6 @@
 
 #include "ClassGenerator.h"
+#include "SOOTDebug.h"
 
 #include "ClassIterator.h"
 #include "TObjectEncapsulation.h"

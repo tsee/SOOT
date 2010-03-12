@@ -1,5 +1,6 @@
 
 #include "PerlCTypeConversion.h"
+#include "SOOTDebug.h"
 
 
 using namespace SOOT;
