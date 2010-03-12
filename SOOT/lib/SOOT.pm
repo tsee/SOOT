@@ -31,8 +31,6 @@ our @EXPORT;
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
 
-_bootstrap_AUTOLOAD(); # FIXME move to XS...
-
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.
@@ -56,23 +54,6 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-sub _bootstrap_AUTOLOAD {
-  my $classIter = SOOT::API::ClassIterator->new;
-  no strict 'refs';
-  no warnings 'once';
-  while (defined(my $class = $classIter->next)) {
-    # they have their own AUTOLOAD
-    next if $class eq 'TObject' or $class eq 'TArray';
-    if ($class->isa('TArray')) {
-      *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
-    }
-    #elsif ($class->isa('TObject')) {
-    else {
-      *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-    }
-  }
-}
-
 sub Load {
   shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
   Carp::croak("Usage: SOOT->Load(classname, classname2, ...)")
@@ -83,18 +64,7 @@ sub Load {
     no strict 'refs';
     no warnings 'once';
     next if defined ${"${class}::isROOT"};
-    my $genclasses = GenerateROOTClass($class);
-    foreach my $gclass (@{$genclasses}) {
-      next if $gclass eq 'TObject' or $gclass eq 'TArray';
-      ++$new;
-      if ($gclass->isa('TArray')) {
-        *{"${gclass}::AUTOLOAD"} = \&TArray::AUTOLOAD;
-      }
-      #elsif ($gclass->isa('TObject')) {
-      else {
-        *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-      }
-    }
+    GenerateROOTClass($class);
   }
   
   return $new;
