@@ -70,7 +70,7 @@ namespace SOOT {
   unsigned int CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
                                     std::vector<std::string>& cproto, const unsigned int nSkip = 0);
   /// Given a vector of strings, concatenates them to a single C string. Skips the first one by default.
-  char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip = 0);
+  char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip = 1);
 
   /// Map any int* types to float*'s
   bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
