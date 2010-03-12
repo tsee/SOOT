@@ -361,6 +361,38 @@ either use C<Load()> if you know which exact classes you want to bind, or
 you may call C<SOOT::UpdateClasses()> to check the whole ROOT class table
 for classes that were previously not available to Perl.
 
+=head1 INSTALLATION
+
+Eventually, SOOT I<might> be shipped with ROOT. Until that happens,
+you need to do the following: Set your ROOT paths as usual. Make sure
+the F<root-config> program is available and executable via the C<PATH>.
+
+Then build SOOT like any other CPAN module. To install a release from CPAN,
+type:
+
+  sudo cpan SOOT
+
+To do so manually, do:
+
+  tar -xzf SOOT-0.05.tar.gz
+  cd SOOT-0.05
+  perl Makefile.PL
+  make
+  make test
+  (sudo make install)
+
+Without installing, you may run the SOOT examples from the SOOT directory
+where you just typed C<make> as follows:
+
+  perl -Mblib examples/Hist/hstack.pl
+
+The C<-Mblib> indicates that perl should preferably load modules from the
+F<blib> (read: C<build-library>) directory of the current directory which
+contains the uninstalled SOOT library.
+
+B<NOTE:> At this point, SOOT requires a copy of ROOT that has been configured
+with the C<--enable-explicitlink> option, which -- sadly -- isn't the default.
+
 =head1 SEE ALSO
 
 L<http://root.cern.ch>
