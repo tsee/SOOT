@@ -2,6 +2,8 @@
 /* must load ROOT stuff veeery early due to pollution */
 #include "ROOTIncludes.h"
 
+#include "SOOTDebug.h"
+
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers
 // for which there is a ROOT_XSP/...xsp file
@@ -9,6 +11,7 @@
 
 #include "CPerlTypeConversion.h"
 #include "PerlCTypeConversion.h"
+#include "SOOTTypes.h"
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
