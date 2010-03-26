@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use File::Spec;
+use inc::latest 'ExtUtils::Constant';
 use ExtUtils::Constant 'WriteConstants';
 
 # tool to generate the necessary code for wrapping ROOT

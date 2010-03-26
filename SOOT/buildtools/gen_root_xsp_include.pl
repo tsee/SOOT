@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use File::Spec;
-use ExtUtils::Typemap;
+use inc::latest 'ExtUtils::Typemap';
 
 my $xsp_dir = 'ROOT_XSP';
 
