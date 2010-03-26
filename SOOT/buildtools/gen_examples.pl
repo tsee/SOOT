@@ -30,14 +30,14 @@ foreach my $exdir (@example_dirs) {
   push @examples, make_example($_) for sort @examples_files;
   $pod =~ s/\$EXAMPLES/join '', @examples/ge;
 
-  open my $oh, '>', catfile($libdir, $exdirname.".pod") or die $!;
+  open my $oh, '>', catfile($libdir, $exdirname.".pod") or die "Could not open file for writing: $!";
   print $oh $pod;
   close $oh;
 }
 
 sub make_example {
   my $file = shift;
-  my $text = do {local $/; open my $fh, '<', $file or die $!; <$fh>};
+  my $text = do {local $/; open my $fh, '<', $file or die "Could not open file '$file' for reading: $!"; <$fh>};
 
   my $filename = $file;
   $filename =~ s{^.*/([^/]+)$}{$1};

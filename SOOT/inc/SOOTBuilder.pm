@@ -8,6 +8,7 @@ use Config;
 use inc::latest 'Module::Build';
 use inc::latest 'ExtUtils::Typemap';
 use base 'Module::Build';
+use File::Find ();
 
 # utilities...
 ##############
@@ -89,7 +90,16 @@ sub ACTION_gen_constants {
 
 sub ACTION_gen_examples {
   my $self = shift;
+  my @files;
+  File::Find::find(
+    sub { push @files, $File::Find::name if /\.pod$/i; },
+    'lib'
+  );
+  chmod(0644, $_) for @files;
+
   system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_examples.pl')) and die $!;
+
+  #chmod(0444, $_) for @files;
 }
 
 our @Typemaps = qw(
