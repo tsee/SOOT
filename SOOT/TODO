@@ -26,10 +26,6 @@ Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
   without sacrificing CPAN-installation. (Specifically, investigate
   inlining of dependencies.)
-  => Inline dependencies (Done)
-  => Make inlined dependencies work! (Probably takes a conversion to
-     Module::Build!)
-- Fix generation of src.so
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
