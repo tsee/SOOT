@@ -73,7 +73,7 @@ my $builder = SOOTBuilder->new(
   # Location of our special C and XS source files
   c_source => 'src',
   #xs_files => {
-  #  'src/Qt4.xs' => 'lib/Qt4.xs'
+  #  'SOOT.xs' => 'lib/SOOT.xs'
   #},
 
   extra_compiler_flags  => \@flags,
