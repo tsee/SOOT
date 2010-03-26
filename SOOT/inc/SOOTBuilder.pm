@@ -33,14 +33,6 @@ sub can_run {
 
 ##################
 
-our @Typemaps = qw(
-  perlobject.map
-  typemap
-  rootclasses.map
-);
-#    'TYPEMAPS'    => \@typemaps,
-#    'CC'          => $CC,
-
 sub ACTION_code {
   my $self = shift;
   $self->depends_on('build_soot');
@@ -52,6 +44,7 @@ sub ACTION_build_soot {
   my $self = shift;
   $self->depends_on('gen_constants');
   $self->depends_on('gen_xsp_include');
+  $self->depends_on('merge_typemaps');
 
   #my $p = $self->{properties};
   #local $p->{extra_compiler_flags} = [
@@ -95,4 +88,26 @@ sub ACTION_gen_constants {
 sub ACTION_gen_examples {
   my $self = shift;
   system($^X, '-I.', '-Iinc', File::Spec->catfile('buildtools', 'gen_examples.pl')) and die $!;
+}
+
+our @Typemaps = qw(
+  perlobject.map
+  custom.map
+  rootclasses.map
+);
+
+sub ACTION_merge_typemaps {
+  my $self = shift;
+  $self->depends_on('gen_xsp_include');
+
+  print "Merging custom typemaps...\n";
+  use ExtUtils::Typemap;
+  my $outmap = ExtUtils::Typemap->new(file => 'typemap');
+  foreach my $typemap_file (@Typemaps) {
+    print "... merging $typemap_file\n";
+    $outmap->merge(typemap => ExtUtils::Typemap->new(file => $typemap_file));
+  }
+  print "Done merging typemaps.\n";
+  $outmap->write();
+  return 1;
 }
