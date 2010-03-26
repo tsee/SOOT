@@ -1,5 +1,18 @@
 Revision history for Perl extension SOOT.
 
+0.06  Fri Mar 26 20:00 2010
+  - Conversion to Module::Build!
+  - All non-core build-time dependencies should be bundled now.
+  - Expose $gHistImagePalette $gWebImagePalette
+  - Quite a few more examples.
+  - Copy constructors.
+  - Installation documentation
+  - SOOT->LoadNUpdate('libGeomBuilder.so');
+    => Will load the shared library and regenerate the class templates.
+  - Fix for method calling bug wrt. invalidated MethodInfo.
+  - AUTOLOAD bootstrapping now done in XS (read: C) for performance.
+  - Various simplifications and refactoring of the internals.
+
 0.05  Mon Mar  8 20:00 2010
   - Completely revamped the way that the ROOT classes are bootstrapped.
   - Fix for the "enum*" return value bug (cf. TH1D::GetXaxis())
