@@ -100,9 +100,19 @@ sub ACTION_merge_typemaps {
   my $self = shift;
   $self->depends_on('gen_xsp_include');
 
+  my $typemap = 'typemap';
+  if (-f $typemap) { # lazy!
+    my $latest = 1e9;
+    foreach my $file (@Typemaps) {
+      $latest = -s _ if -s $file < $latest;
+    }
+    if (-s $typemap > $latest) {
+      return 1;
+    }
+    unlink $typemap;
+  }
+
   print "Merging custom typemaps...\n";
-  use ExtUtils::Typemap;
-  unlink 'typemap' if -f 'typemap';
   my $outmap = ExtUtils::Typemap->new(file => 'typemap');
   foreach my $typemap_file (@Typemaps) {
     print "... merging $typemap_file\n";
@@ -112,3 +122,4 @@ sub ACTION_merge_typemaps {
   $outmap->write();
   return 1;
 }
+
