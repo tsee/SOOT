@@ -5,6 +5,8 @@ use File::Spec;
 use Carp;
 use Config;
 
+use inc::latest 'Module::Build';
+use inc::latest 'ExtUtils::Typemap';
 use base 'Module::Build';
 
 # utilities...
