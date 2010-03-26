@@ -43,14 +43,15 @@ our @Typemaps = qw(
 
 sub ACTION_code {
   my $self = shift;
-  $self->SUPER::ACTION_code(@_);
-
   $self->depends_on('build_soot');
+
+  $self->SUPER::ACTION_code(@_);
 }
 
 sub ACTION_build_soot {
   my $self = shift;
   $self->depends_on('gen_constants');
+  $self->depends_on('gen_xsp_include');
 
   #my $p = $self->{properties};
   #local $p->{extra_compiler_flags} = [
@@ -78,6 +79,7 @@ sub ACTION_build_soot {
   #}
 
   $self->depends_on('config_data');
+  $self->depends_on('gen_examples');
 }
 
 sub ACTION_gen_xsp_include {
