@@ -72,9 +72,9 @@ my $builder = SOOTBuilder->new(
 
   # Location of our special C and XS source files
   c_source => 'src',
-  #xs_files => {
-  #  'SOOT.xs' => 'lib/SOOT.xs'
-  #},
+  xs_files => {
+    'SOOT.xs' => 'lib/SOOT.xs'
+  },
 
   extra_compiler_flags  => \@flags,
   extra_linker_flags    => \@libs,
