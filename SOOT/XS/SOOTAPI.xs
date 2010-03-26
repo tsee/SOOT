@@ -1,7 +1,7 @@
 
 MODULE = SOOT		PACKAGE = SOOT::API
 
-SV*
+void
 type(sv)
     SV* sv
   INIT:
@@ -13,7 +13,7 @@ type(sv)
     XPUSHp(type_str, strlen(type_str));
 
 
-SV*
+void
 cproto(sv)
     SV* sv
   INIT:
@@ -26,7 +26,7 @@ cproto(sv)
     XPUSHp(cproto, len);
 
 
-SV*
+void
 is_same_object(obj1, obj2)
     SV* obj1
     SV* obj2
