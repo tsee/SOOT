@@ -102,6 +102,7 @@ sub ACTION_merge_typemaps {
 
   print "Merging custom typemaps...\n";
   use ExtUtils::Typemap;
+  unlink 'typemap' if -f 'typemap';
   my $outmap = ExtUtils::Typemap->new(file => 'typemap');
   foreach my $typemap_file (@Typemaps) {
     print "... merging $typemap_file\n";
