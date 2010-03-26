@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.2202';
+$VERSION = '2.2205';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
@@ -1520,9 +1520,14 @@ sub INCLUDE_handler ()
 
     ++ $IncludedFiles{$_} unless /\|\s*$/ ;
 
-    Warn("The INCLUDE directive with a command is deprecated." .
-         " Use INCLUDE_COMMAND instead!")
-      if /\|\s*$/ ;
+    if (/\|\s*$/ && /^\s*perl\s/) {
+      Warn("The INCLUDE directive with a command is discouraged." .
+           " Use INCLUDE_COMMAND instead! In particular using 'perl'" .
+           " in an 'INCLUDE: ... |' directive is not guaranteed to pick" .
+           " up the correct perl. The INCLUDE_COMMAND directive allows" .
+           " the use of \$^X as the currently running perl, see" .
+           " 'perldoc perlxs' for details.");
+    }
 
     PushXSStack();
 
