@@ -96,7 +96,6 @@ CallMethod(className, methodName, argv)
     char* methodName
     SV* argv
   INIT:
-    STRLEN len;
     AV* arguments;
   CODE:
   /*
@@ -128,9 +127,6 @@ CallAssignmentOperator(className, receiver, model)
     char* className
     SV* receiver
     SV* model
-  INIT:
-    STRLEN len;
-    AV* arguments;
   CODE:
     croak("CallAssignmentOperator not implemented correctly");
     RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
