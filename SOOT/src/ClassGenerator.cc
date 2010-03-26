@@ -54,7 +54,7 @@ namespace SOOT {
     vector<TString> baseClasses = SetupClassInheritance(aTHX_ className, theClass);
     retval.reserve(retval.size()+baseClasses.size());
     retval.insert(retval.end(), baseClasses.begin(), baseClasses.end());
-
+    return retval;
   }
 
 // Note: Keep that header in sync.
