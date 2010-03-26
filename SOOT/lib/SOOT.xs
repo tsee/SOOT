@@ -76,17 +76,17 @@ MODULE = SOOT		PACKAGE = SOOT
 
 PROTOTYPES: DISABLE
 
-INCLUDE: const-xs.inc
+INCLUDE: ../const-xs.inc
 
-INCLUDE: XS/SOOTBOOT.xs
+INCLUDE: ../XS/SOOTBOOT.xs
 
-INCLUDE: XS/SOOTAPI.xs
+INCLUDE: ../XS/SOOTAPI.xs
 
-INCLUDE: XS/TObject.xs
+INCLUDE: ../XS/TObject.xs
 
-INCLUDE: rootclasses.xsinclude
+INCLUDE: ../rootclasses.xsinclude
 
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/ClassIterator.xsp
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t ../typemap.xsp ../XS/ClassIterator.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 
