@@ -17,7 +17,7 @@ while(defined(my $file = readdir($dh))) {
   my $full = File::Spec->catfile($xsp_dir, $file);
   print $oh_xs <<ENDXSCODE;
 
-INCLUDE_COMMAND: \$^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp $full
+INCLUDE_COMMAND: \$^X -MExtUtils::XSpp::Cmd -e xspp -- -t ../typemap.xsp $full
 
 ENDXSCODE
   print $oh_h <<ENDHCODE;
