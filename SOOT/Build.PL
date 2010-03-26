@@ -25,14 +25,15 @@ push(@flags,
   '-Wall',
   '-xc++',
   '-I.',
-  '-C++', # from Makefile.PL
-  '-hiertype', # from Makefile.PL
+  '-Isrc',
+#  '-C++', # from Makefile.PL
+#  '-hiertype', # from Makefile.PL
 );
 
 my $rootConfig = defined($userRootConfig) ? $userRootConfig : 'root-config';
-if (!SOOTBuilder::can_run($rootConfig) {
+if (!SOOTBuilder::can_run($rootConfig)) {
   $rootConfig = File::Spec->catfile($ENV{ROOTSYS}, 'bin', 'root-config');
-  if (!SOOTBuilder::can_run($rootConfig) {
+  if (!SOOTBuilder::can_run($rootConfig)) {
     die <<HERE;
 Could not find the root-config utility which is necessary for building
 SOOT. You can either make sure it's available from your PATH environment,
@@ -44,8 +45,8 @@ HERE
 
 push @flags, split(' ', SOOTBuilder::striprun($rootConfig, '--cflags')),
              (defined $ENV{ROOTSYS}
-              ? (File::Spec->catdir($ENV{ROOTSYS}, 'include'),
-                 File::Spec->catdir($ENV{ROOTSYS}, 'include', 'root'))
+              ? ('-I'.File::Spec->catdir($ENV{ROOTSYS}, 'include'),
+                 '-I'.File::Spec->catdir($ENV{ROOTSYS}, 'include', 'root'))
               : ());
 push @libs, map { split(' ', $_) }
              ($Config::Config{lddlflags},
