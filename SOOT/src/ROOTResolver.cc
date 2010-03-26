@@ -158,7 +158,7 @@ namespace SOOT {
       free(cp); }
 #endif
     SV* perlCallReceiver;
-    BasicType receiverType;
+    BasicType receiverType = eINVALID;
     if (argTypes.size() == 0)
       perlCallReceiver = NULL;
     else {
@@ -225,8 +225,8 @@ namespace SOOT {
 
     SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup, (perlCallReceiver == NULL ? 0 : 1));
 
-    long addr;
-    double addrD;
+    long addr = 0;
+    double addrD = 0;
     if (retType == eFLOAT)
       addrD = theFunc.ExecDouble((void*)((long)receiver + offset));
     else
