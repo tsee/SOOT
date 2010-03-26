@@ -11,7 +11,7 @@ namespace SOOT {
   const char*
   ClassIterator::next()
   {
-    if (fClassNo < gClassTable->Classes()) {
+    if ((int)fClassNo < gClassTable->Classes()) {
       const char* name = gClassTable->At(fClassNo++);
       TString cn(name);
       if (cn.Contains("<") || cn.Contains("::") || gBadClassRegexp.MatchB(cn)) // FIXME optimize
