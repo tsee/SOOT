@@ -27,3 +27,4 @@ _build
 MYMETA.yml
 lib/SOOT.xs
 typemap
+META.yml
