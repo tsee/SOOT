@@ -62,6 +62,9 @@ namespace SOOT {
         case eTOBJECT:
           theFunc.SetArg((long)LobotomizeObject(aTHX_ *elem));
           break;
+        case eTOBJECTPTR:
+          theFunc.SetArg((long)(&LobotomizeObject(aTHX_ *elem)));
+          break;
         default:
           croak("BAD ARGUMENT");
       }
