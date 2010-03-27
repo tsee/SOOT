@@ -12,7 +12,7 @@ using namespace SOOT;
 using namespace std;
 
 namespace SOOT {
-  const char* gBasicTypeStrings[13] = {
+  const char* gBasicTypeStrings[14] = {
     "UNDEF",
     "INTEGER",
     "FLOAT",
@@ -25,6 +25,7 @@ namespace SOOT {
     "CODE",
     "REF",
     "TOBJECT",
+    "TOBJECTPTR",
     "INVALID",
   };
 
@@ -38,16 +39,16 @@ namespace SOOT {
   GuessType(pTHX_ SV* const sv)
   {
     switch (SvTYPE(sv)) {
-      case SVt_NULL:
+      case SVt_NULL: // undef
         return eUNDEF;
-      case SVt_IV:
+      case SVt_IV: // integer
         return eINTEGER;
-      case SVt_PVIV:
+      case SVt_PVIV: // 
         if (SvIOK(sv))
           return eINTEGER;
         else
           return eSTRING;
-      case SVt_NV:
+      case SVt_NV: // float
         if (SvIOK(sv))
           return eINTEGER;
         else
@@ -88,7 +89,7 @@ namespace SOOT {
         } else {
           return eSTRING;
         }
-      case SVt_PVLV:
+      case SVt_PVLV: // lvalue? (FIXME: check)
         if (SvROK(sv)) {
 #ifdef SOOT_DEBUG
           cout << "Svt_PVLV && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
@@ -108,9 +109,9 @@ namespace SOOT {
 #endif
           return eINVALID; // LVALUE
         }
-      case SVt_PVAV:
-      case SVt_PVHV:
-      case SVt_PVCV:
+      case SVt_PVAV: // literal perl array?
+      case SVt_PVHV: // literal perl hash?
+      case SVt_PVCV: // coderef?
         //return eARRAY;
         //return eHASH;
         //return eCODE;
@@ -130,6 +131,8 @@ namespace SOOT {
         if (SvROK(sv)) {
           if (IS_TOBJECT(sv))
             return eTOBJECT;
+          if (SvROK(SvRV(sv))) // This is a reference to a scalar holding a TOBJECT => TOBJECTPTR
+            return IS_TOBJECT(SvRV(sv)) ? eTOBJECTPTR : eREF;
           switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
               return _GuessCompositeType(aTHX_ sv);
@@ -191,6 +194,10 @@ namespace SOOT {
     switch (type) {
       case eTOBJECT:
         tmp = std::string(sv_reftype(SvRV(sv), TRUE)) + std::string("*");
+        len = tmp.length();
+        return tmp.c_str();
+      case eTOBJECTPTR:
+        tmp = std::string(sv_reftype(SvRV(sv), TRUE)) + std::string("**");
         len = tmp.length();
         return tmp.c_str();
       case eINTEGER:

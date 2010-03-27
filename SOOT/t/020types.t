@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 30;
+use Test::More tests => 31;
 use SOOT;
 use SOOT::API qw/:all/;
 pass();
@@ -43,6 +43,7 @@ SCOPE: {
   is(type($obj), 'TOBJECT');
   $obj = bless(\$scalar => 'TH1D');
   is(type($obj), 'TOBJECT');
+  is(type(\$obj), 'TOBJECTPTR');
 
   $obj = bless([] => 'TObject');
   is(type($obj), 'TOBJECT');

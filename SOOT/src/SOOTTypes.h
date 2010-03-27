@@ -44,9 +44,10 @@ namespace SOOT {
     eCODE,
     eREF,
     eTOBJECT,
+    eTOBJECTPTR,
     eINVALID,
   };
-  extern const char* gBasicTypeStrings[13];
+  extern const char* gBasicTypeStrings[14];
 
   /// Determine and return the BasicType of the given parameter
   BasicType GuessType(pTHX_ SV* const sv);
