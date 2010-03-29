@@ -93,6 +93,10 @@ PtrAnnotation*
 PtrTable::Fetch(const TObject* key)
 {
   PtrTableEntry const * const entry = Find(key);
+#ifdef SOOT_PTRTABLE_DEBUG 
+  cout << "PtrTable::Fetch: Fetching PtrAnnotation for key/TObject '" << (void*) key
+       << ". It's value is: '" << (void*) (entry?entry->value:NULL) << "'" << endl;
+#endif
 
   return entry ? entry->value : NULL;
 }
@@ -106,6 +110,10 @@ PtrAnnotation* PtrTable::FetchOrCreate(const TObject* key)
   if (entry) {
     return entry->value;
   } else {
+#ifdef SOOT_PTRTABLE_DEBUG 
+    cout << "PtrTable::FetchOrCreate: creating new PtrAnnotation for TObject "
+         << key << " because it didn't exist." << endl;
+#endif
     PtrAnnotation* annotation = new PtrAnnotation();
     annotation->fNReferences = 0;
     annotation->fDoNotDestroy = false;
@@ -119,7 +127,14 @@ PtrAnnotation* PtrTable::FetchOrCreate(const TObject* key)
 PtrAnnotation* PtrTable::Store(const TObject* key, PtrAnnotation* value)
 {
   PtrAnnotation* annotation = NULL;
+#ifdef SOOT_PTRTABLE_DEBUG 
+  cout << "PtrTable::Store: Storing PtrAnnotation '" << (void*) value
+       << "' for key/TObject '" << (void*) key << "'" << endl;
+#endif
   PtrTableEntry* entry = Find(key);
+#ifdef SOOT_PTRTABLE_DEBUG 
+  cout << "PtrTable::Store: PtrTableEntry " << (entry ? "existed" : "did not exist") << endl;
+#endif
 
   if (entry) {
     annotation = entry->value;
@@ -139,6 +154,7 @@ PtrAnnotation* PtrTable::Store(const TObject* key, PtrAnnotation* value)
       Grow();
   }
 
+
   return annotation;
 }
 
@@ -155,6 +171,10 @@ PtrTable::Find(const TObject* key)
     if (entry->key == key)
       break;
   }
+#ifdef SOOT_PTRTABLE_DEBUG 
+  cout << "PtrTable::Find: Found entry '" << (void*) entry
+       << "' for key/TObject '" << (void*) key << "'" << endl;
+#endif
 
   return entry;
 }
@@ -257,8 +277,8 @@ PtrTable::PrintStats()
 
       // entry info
       cout << "= Entry " << (void*)temp << " =\n";
-      cout << "  Contains TObject* '" << (void*)temp->key << "' of class " << temp->key->ClassName() << "\n"
-           << "  PtrAnnotation* is '" << (void*)temp->value <<"'"<<endl;
+      cout << "  Contains TObject* '" << (void*)temp->key << "'" << flush << " of class " << temp->key->ClassName() << endl;
+      cout << "  PtrAnnotation* is '" << (void*)temp->value <<"'"<<endl;
       PtrAnnotation* ann = temp->value;
       cout << "    NReferences="<<ann->fNReferences<<endl;
       cout << "    Must " << (ann->fDoNotDestroy ? "NOT " : "") << "be destroyed by SOOT\n";
