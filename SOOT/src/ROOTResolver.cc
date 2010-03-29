@@ -195,7 +195,7 @@ namespace SOOT {
       receiver = 0;
     }
     else {
-      --nTObjects; // The invocant isn't used int FindMethodPrototype
+      --nTObjects; // The invocant isn't used in FindMethodPrototype
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
     FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false), constructor);
@@ -219,6 +219,7 @@ namespace SOOT {
 */
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
+
     // Prepare CallFunc
     G__CallFunc theFunc;
     theFunc.SetFunc(*mInfo);
