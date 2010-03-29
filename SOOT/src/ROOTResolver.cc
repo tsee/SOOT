@@ -114,6 +114,7 @@ namespace SOOT {
         //       char* const* where the *'s aren't all at the end
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
+        //cout << "Registering object '" << (void*)addr << "' of type '" << typeStrWithoutPtr << "'" << endl;
         retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
         // If we're not creating a TObject via a constructor, it's likely not ours to delete
         if (!isConstructor)
@@ -287,7 +288,7 @@ namespace SOOT {
       if (!found)
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
     } else {
-      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset)); // FIXME valgrind thinks this might leak
     }
     if (freeCProtoStr)
       free(cprotoStr);
