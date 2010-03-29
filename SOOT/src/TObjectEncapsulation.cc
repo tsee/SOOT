@@ -96,7 +96,17 @@ namespace SOOT {
       //if (!refPad->fDoNotDestroy && obj->TestBit(kCanDelete)) {
         //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
         //obj->SetBit(kMustCleanup);
-        delete obj;
+        //cout << "Deleting TObject '" << (void*) obj << "'" << endl;
+        // Wild contortions just to call a destructor
+        const char* className = HvNAME(SvSTASH(SvRV(thePerlObject)));
+        G__ClassInfo cInfo(className);
+        string methName = string("~") + string(className);
+        long offset;
+        G__CallFunc func;
+        func.SetFunc(&cInfo, methName.c_str(), "", &offset);
+        func.Exec((void*)((long)obj+offset));
+        func.Init(); // FIXME is this needed?
+        //delete (void*)obj;
       }
     }
 
