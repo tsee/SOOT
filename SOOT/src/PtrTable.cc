@@ -277,7 +277,8 @@ PtrTable::PrintStats()
 
       // entry info
       cout << "= Entry " << (void*)temp << " =\n";
-      cout << "  Contains TObject* '" << (void*)temp->key << "'" << flush << " of class " << temp->key->ClassName() << endl;
+      cout << "  Contains TObject* '" << (void*)temp->key << "'" << flush;
+      cout << " of class " << temp->key->ClassName() << endl;
       cout << "  PtrAnnotation* is '" << (void*)temp->value <<"'"<<endl;
       PtrAnnotation* ann = temp->value;
       cout << "    NReferences="<<ann->fNReferences<<endl;
