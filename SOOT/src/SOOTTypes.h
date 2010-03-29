@@ -63,8 +63,8 @@ namespace SOOT {
   std::vector<BasicType> GuessTypes(pTHX_ AV* av);
 
   /// Converts the given SV or basic type to the corresponding C (proto)type
-  const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type);
-  const char* CProtoFromType(pTHX_ SV* const sv, STRLEN& len);
+  std::string CProtoFromType(pTHX_ SV* const sv, BasicType type);
+  std::string CProtoFromType(pTHX_ SV* const sv);
   char* CProtoFromAV(pTHX_ AV* av, const unsigned int nSkip);
   /** Calculate the C-type strings and the BasicTypes for all
    *  arguments in av and push them into the supplied containers.

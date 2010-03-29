@@ -21,9 +21,11 @@ cproto(sv)
   PPCODE:
     dXSTARG;
     type = GuessType(aTHX_ sv);
-    STRLEN len;
-    const char* cproto = CProtoFromType(aTHX_ sv, len, type);
-    XPUSHp(cproto, len);
+    string cproto = CProtoFromType(aTHX_ sv, type);
+    if (cproto.length() == 0)
+      XPUSHs(&PL_sv_undef);
+    else
+      XPUSHp(cproto.c_str(), cproto.length());
 
 
 void
