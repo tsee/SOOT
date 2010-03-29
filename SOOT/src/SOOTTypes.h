@@ -48,6 +48,9 @@ namespace SOOT {
   };
   extern const char* gBasicTypeStrings[13];
 
+  /// Is the given SV a SOOT object?
+  bool IsTObject(pTHX_ SV* sv);
+
   /// Determine and return the BasicType of the given parameter
   BasicType GuessType(pTHX_ SV* const sv);
   /// Determine and return the BasicType of the given c-type
@@ -75,6 +78,8 @@ namespace SOOT {
   /// Map any int* types to float*'s
   bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
 } // end namespace SOOT
+
+#include "SOOTTypes.inline.h"
 
 #endif
 

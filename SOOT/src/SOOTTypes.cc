@@ -28,8 +28,6 @@ namespace SOOT {
     "INVALID",
   };
 
-// This isn't really checking ->isa('TObject') but whether it's part of the SOOT/ROOT system
-#define IS_TOBJECT(sv) (sv_isobject((sv)) && hv_exists(SvSTASH((SV*)SvRV((sv))), "isROOT", 6))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -82,18 +80,18 @@ namespace SOOT {
 #endif
         if (SvROK(sv)) {
 #ifdef SOOT_DEBUG
-          cout << "Svt_PVMG && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+          cout << "Svt_PVMG && SvROK && (IsTObject(aTHX_ sv) ? eTOBJECT : eREF)" << endl;
 #endif
-          return IS_TOBJECT(sv) ? eTOBJECT : eREF;
+          return IsTObject(aTHX_ sv) ? eTOBJECT : eREF;
         } else {
           return eSTRING;
         }
       case SVt_PVLV:
         if (SvROK(sv)) {
 #ifdef SOOT_DEBUG
-          cout << "Svt_PVLV && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+          cout << "Svt_PVLV && SvROK && (IsTObject(aTHX_ sv) ? eTOBJECT : eREF)" << endl;
 #endif
-          return IS_TOBJECT(sv) ? eTOBJECT : eREF;
+          return IsTObject(aTHX_ sv) ? eTOBJECT : eREF;
         }
         else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
           if (SvIOK(sv))
@@ -128,7 +126,7 @@ namespace SOOT {
 #endif
       default:
         if (SvROK(sv)) {
-          if (IS_TOBJECT(sv))
+          if (IsTObject(aTHX_ sv))
             return eTOBJECT;
           switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
