@@ -80,6 +80,25 @@ namespace SOOT {
 
 
   template <typename T>
+  T*
+  AVToUIntegerVec(pTHX_ AV* av, size_t& len)
+  {
+    len = av_len(av)+1;
+    if (len == 0)
+      return NULL;
+    SV** elem;
+    T* retval = (T*)malloc(len*sizeof(T));
+    for (unsigned int i = 0; i < len; ++i) {
+      elem = av_fetch(av, i, 0);
+      if (elem == NULL)
+        croak("Bad AV element. Severe error");
+      retval[i] = SvUV(*elem);
+    }
+    return retval;
+  }
+
+
+  template <typename T>
   std::vector<T>
   AVToIntegerVec(pTHX_ AV* av)
   {
@@ -93,6 +112,25 @@ namespace SOOT {
       if (elem == NULL)
         croak("Bad AV element. Severe error");
       retval[i] = SvIV(*elem);
+    }
+    return retval;
+  }
+
+
+  template <typename T>
+  std::vector<T>
+  AVToUIntegerVec(pTHX_ AV* av)
+  {
+    size_t len = av_len(av)+1;
+    if (len == 0)
+      return NULL;
+    SV** elem;
+    std::vector<T> retval(len);
+    for (unsigned int i = 0; i < len; ++i) {
+      elem = av_fetch(av, i, 0);
+      if (elem == NULL)
+        croak("Bad AV element. Severe error");
+      retval[i] = SvUV(*elem);
     }
     return retval;
   }

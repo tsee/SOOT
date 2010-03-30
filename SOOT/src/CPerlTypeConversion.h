@@ -60,6 +60,21 @@ namespace SOOT {
 
   template <typename T>
   SV*
+  UIntegerVecToAV(pTHX_ const T* vec, const unsigned int nItems)
+  {
+    if (vec == NULL)
+      return &PL_sv_undef;
+
+    AV* av = newAV();
+    av_extend(av, nItems-1);
+    for (unsigned int i = 0; i < nItems; ++i)
+    av_store(av, i, newSVuv(vec[i]));
+    return newRV_noinc((SV*)av);
+  }
+
+
+  template <typename T>
+  SV*
   IntegerVecToAV(pTHX_ const std::vector<T>& vec)
   { return IntegerVecToAV<T>(aTHX_ &vec.front(), vec.size()); }
 
