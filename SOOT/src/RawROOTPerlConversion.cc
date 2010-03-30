@@ -64,7 +64,7 @@ namespace SOOT {
     switch (type) {
       SOOT_ToIntegerAV(Bool_t);
       //SOOT_ToIntegerAV(Char_t);
-      case kChar_t: return newSVpvn(*((char**)dataAddr), maxIndex);
+      case kChar_t: return newSVpvn((char*)dataAddr, maxIndex);
       SOOT_ToUIntegerAV(UChar_t);
       SOOT_ToIntegerAV(Short_t);
       SOOT_ToUIntegerAV(UShort_t);
@@ -100,6 +100,7 @@ namespace SOOT {
     Long_t offset = dm->GetOffset();
     EDataType type = (EDataType)dm->GetDataType()->GetType();
     void* dataAddr = (void*) ((Long_t)targetBaseAddr + offset);
+    char* buf;
 
     switch (type) {
       case kBool_t:    *((Bool_t*)dataAddr)    = (Bool_t)SvIV(src);    return;
@@ -115,7 +116,12 @@ namespace SOOT {
       case kULong64_t: *((ULong64_t*)dataAddr) = (ULong64_t)SvUV(src); return;
       case kFloat_t:   *((Float_t*)dataAddr)   = (Float_t)SvNV(src);   return;
       case kDouble_t:  *((Double_t*)dataAddr)  = (Double_t)SvNV(src);  return;
-      case kCharStar:  strcpy( *((char**)dataAddr), SvPV_nolen(src) ); return;
+      case kCharStar:
+        // FIXME investigate null-padding issues. In general the Char_t[5] thingies might not need it
+        free(*((char**)dataAddr));
+        buf = strdup(SvPV_nolen(src));
+        dataAddr = (void*)&buf;
+        return;
       default:
         croak("Invalid data member type");
     };
@@ -145,10 +151,10 @@ namespace SOOT {
       case kChar_t:
         // FIXME investigate null-padding issues. In general the Char_t[5] thingies might not need it
         buf = SvPV(src, len);
-        if (maxIndex < len)
+        if (maxIndex < (int)len)
           len = maxIndex;
-        strncpy( *((char**)dataAddr), buf, len );
-        ((char**)dataAddr)[len-1] = '\0'; // FIXME is this right?
+        strncpy( (char*)dataAddr, buf, len );
+        ((char*)dataAddr)[len] = '\0'; // FIXME is this right?
         return;
       SOOT_AVToUIntegerAry(UChar_t);
       SOOT_AVToIntegerAry(Short_t);
