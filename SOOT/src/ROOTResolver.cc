@@ -265,99 +265,15 @@ namespace SOOT {
     void* objAddr = (void*) SOOT::LobotomizeObject(aTHX_ perlCallReceiver);
 
     bool isGetter = cproto.size() == 1;
-    if (isGetter) {
+    if (isGetter)
       retval = SOOT::ConvertDataMemberToPerl(aTHX_ dm, objAddr);
-      return true;
+    else {
+      SV* argument = *av_fetch(args, 1, 0);
+      SOOT::ConvertSVToDataMember(aTHX_ dm, objAddr, argument);
     }
-/*    else {
-      SOOT::ConvertPerlValueToDataMember(aTHX_ dm, objAddr);
-      return true;
-    }*/
-
-    // FIXME: The following needs to be moved to a separate function:
-
-    // FIXME for now, we punt on multi-dim arrays. C->Perl conversion would be trivial, but the other way, not so due to variable dimension size in Perl
-    int aryDim = dm->GetArrayDim();
-    if (aryDim > 1)
-      croak("Invalid array dimension: We only support "
-            "direct access to simple types and 1-dim. arrays");
-
-    Long_t offset = dm->GetOffset();
-    int maxIndex = (aryDim == 1 ? dm->GetMaxIndex(0) : 0);
-
-    EDataType type = (EDataType)dm->GetDataType()->GetType();
-    //enum EDataType {
-    // kChar_t   = 1,  kUChar_t  = 11, kShort_t    = 2,  kUShort_t = 12, ==> done
-    // kInt_t    = 3,  kUInt_t   = 13, kLong_t     = 4,  kULong_t  = 14, ==> done
-    // kFloat_t  = 5,  kDouble_t =  8, kDouble32_t = 9,  kchar     = 10, ==> kDouble32_t? kchar?
-    // kBool_t   = 18, kLong64_t = 16, kULong64_t  = 17, kOther_t  = -1, ==> kOther_t?
-    // kNoType_t = 0,  kFloat16_t= 19,                                   ==> ?
-    // kCounter =  6,  kCharStar = 7,  kBits     = 15 /* for compatibility with TStreamerInfo */
-    //};
-    void* dataAddr = (void*) ((Long_t)objAddr + offset);
-
-    SV* argument = NULL;
-    cout << "MEMBER="<<methName<< " OFFSET="<<offset << " TYPE="<<type<< " MAXINDEX="<<maxIndex<<endl;
-    cout << cproto.size() << endl;
-    if (!isGetter) {
-      argument = *av_fetch(args, 1, 0);
-      if (aryDim != 0 && (!SvROK(argument) || SvTYPE(SvRV(argument)) != SVt_PVAV))
-        croak("Need array as argument for array value");
-    }
-
-    // FIXME This whole DataMember thing would be extremely easy to cache
-    size_t len;
-
-    switch (type) {
-    case kBool_t:
-      *((Bool_t*)dataAddr) = (Bool_t)SvIV(argument);
-      break;
-    case kChar_t:
-      *((Char_t*)dataAddr) = (Char_t)SvIV(argument);
-      break;
-    case kUChar_t:
-      *((UChar_t*)dataAddr) = (UChar_t)SvUV(argument);
-      break;
-    case kShort_t:
-      *((Short_t*)dataAddr) = (Short_t)SvIV(argument);
-      break;
-    case kUShort_t:
-      *((UShort_t*)dataAddr) = (UShort_t)SvUV(argument);
-      break;
-    case kInt_t:
-      if (aryDim == 1)
-        SOOT::AVToIntegerVecInPlace<Int_t>(aTHX_ (AV*)SvRV(argument), len, (Int_t*)dataAddr, maxIndex);
-      else *((Int_t*)dataAddr) = (Int_t)SvIV(argument);
-      break;
-    case kUInt_t:
-      *((UInt_t*)dataAddr) = (UInt_t)SvUV(argument);
-      break;
-    case kLong_t:
-      *((Long_t*)dataAddr) = (Long_t)SvIV(argument);
-      break;
-    case kULong_t:
-      *((ULong_t*)dataAddr) = (ULong_t)SvUV(argument);
-      break;
-    case kLong64_t:
-      *((Long64_t*)dataAddr) = (Long64_t)SvIV(argument);
-      break;
-    case kULong64_t:
-      *((ULong64_t*)dataAddr) = (ULong64_t)SvUV(argument);
-      break;
-    case kFloat_t:
-      *((Float_t*)dataAddr) = (Float_t)SvNV(argument);
-      break;
-    case kDouble_t:
-      *((Double_t*)dataAddr) = (Double_t)SvNV(argument);
-      break;
-    case kCharStar: // FIXME kchar?
-      strcpy( *((char**)dataAddr), SvPV_nolen(argument) );
-      break;
-    default:
-      break;
-    };
     return true;
   }
+
 
   void
   FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
