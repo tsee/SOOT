@@ -294,7 +294,7 @@ namespace SOOT {
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
     } else {
       delete mInfo;
-      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset)); // FIXME valgrind thinks this might leak
+      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
     }
     if (freeCProtoStr)
       free(cprotoStr);
