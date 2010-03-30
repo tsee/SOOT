@@ -1,5 +1,15 @@
 Revision history for Perl extension SOOT.
 
+0.07  Wed Mar 30 20:00 2010
+  - Fix memory leak on each method call.
+    => currently all leak checks pass!
+  - Call *correct* object destructors before free-ing ROOT objects.
+  - Some refactoring
+    => Replace macro IS_TOBJECT with an inlined function.
+    => Better debugging mode/output
+    => Better leak tests
+    => Replace some use of char* with std::strings
+
 0.06  Fri Mar 26 20:00 2010
   - Conversion to Module::Build!
   - All non-core build-time dependencies should be bundled now.
