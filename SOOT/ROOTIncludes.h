@@ -14,6 +14,8 @@
 #include <TEnv.h>
 #include <Rtypes.h>
 #include <TClass.h>
+#include <TDataMember.h>
+#include <TDataType.h>
 #include <TMethod.h>
 #include <Reflex/Scope.h>
 #include <CallFunc.h>
