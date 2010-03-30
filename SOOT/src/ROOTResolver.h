@@ -35,6 +35,11 @@ namespace SOOT {
                            std::vector<std::string>& cproto, long int& offset,
                            const unsigned int nTObjects, bool isFunction,
                            bool isConstructor);
+
+  /*** Checks whether a data member of the given name (methName) exists and is public.
+   *   If so, it either fetches from it or assigns to it depending on whether one or zero
+   *   arguments were supplied.
+   */
   bool FindDataMember(pTHX_ TClass* theClass, const char* methName,
                       const std::vector<std::string>& cproto, const unsigned int nTObjects,
                       SV*& retval, SV* perlCallReceiver, AV* args);
