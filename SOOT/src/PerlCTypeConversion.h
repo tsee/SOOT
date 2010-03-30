@@ -67,6 +67,8 @@ namespace SOOT {
     len = av_len(av)+1;
     if (maxNElems < len)
       len = maxNElems;
+    else if (maxNElems > len)
+      Zero( (void*)(address+len), maxNElems-len, T );
     SV** elem;
     for (unsigned int i = 0; i < len; ++i) {
       elem = av_fetch(av, i, 0);
@@ -103,6 +105,8 @@ namespace SOOT {
     len = av_len(av)+1;
     if (maxNElems < len)
       len = maxNElems;
+    else if (maxNElems > len)
+      Zero( (void*)(address+len), maxNElems-len, T );
     SV** elem;
     for (unsigned int i = 0; i < len; ++i) {
       elem = av_fetch(av, i, 0);
@@ -139,6 +143,8 @@ namespace SOOT {
     len = av_len(av)+1;
     if (maxNElems < len)
       len = maxNElems;
+    else if (maxNElems > len)
+      Zero( (void*)(address+len), maxNElems-len, T );
     SV** elem;
     for (unsigned int i = 0; i < len; ++i) {
       elem = av_fetch(av, i, 0);
