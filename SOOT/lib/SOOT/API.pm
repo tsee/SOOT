@@ -100,6 +100,25 @@ lets you iterate over all wrapped ROOT class names:
     # use $class
   }
 
+=head2 SOOT::Struct
+
+L<SOOT::Struct> provides an interface to defining and accessing
+C-structs from Perl. Example:
+
+  my $struct = SOOT::Struct->new(
+    name   => 'person_t',
+    fields => {
+      'name' => 'Char_t[20]',
+      'age'  => 'UInt_t',
+    },
+  );
+  
+  $struct->compile;
+  
+  my $person = person_t->new;
+  $person->name("Steffen"); # stores in struct via SOOT
+  print $person->name(), "\n"; # fetches via SOOT
+
 =head1 SEE ALSO
 
 L<SOOT>
