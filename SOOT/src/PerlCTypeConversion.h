@@ -61,6 +61,23 @@ namespace SOOT {
 
 
   template <typename T>
+  void
+  AVToFloatVecInPlace(pTHX_ AV* av, size_t& len, T* address, size_t maxNElems)
+  {
+    len = av_len(av)+1;
+    if (maxNElems < len)
+      len = maxNElems;
+    SV** elem;
+    for (unsigned int i = 0; i < len; ++i) {
+      elem = av_fetch(av, i, 0);
+      if (elem == NULL)
+        croak("Bad AV element. Severe error");
+      address[i] = SvNV(*elem);
+    }
+  }
+
+
+  template <typename T>
   T*
   AVToIntegerVec(pTHX_ AV* av, size_t& len)
   {
@@ -80,6 +97,23 @@ namespace SOOT {
 
 
   template <typename T>
+  void
+  AVToIntegerVecInPlace(pTHX_ AV* av, size_t& len, T* address, size_t maxNElems)
+  {
+    len = av_len(av)+1;
+    if (maxNElems < len)
+      len = maxNElems;
+    SV** elem;
+    for (unsigned int i = 0; i < len; ++i) {
+      elem = av_fetch(av, i, 0);
+      if (elem == NULL)
+        croak("Bad AV element. Severe error");
+      address[i] = SvIV(*elem);
+    }
+  }
+
+
+  template <typename T>
   T*
   AVToUIntegerVec(pTHX_ AV* av, size_t& len)
   {
@@ -95,6 +129,23 @@ namespace SOOT {
       retval[i] = SvUV(*elem);
     }
     return retval;
+  }
+
+
+  template <typename T>
+  void
+  AVToUIntegerVecInPlace(pTHX_ AV* av, size_t& len, T* address, size_t maxNElems)
+  {
+    len = av_len(av)+1;
+    if (maxNElems < len)
+      len = maxNElems;
+    SV** elem;
+    for (unsigned int i = 0; i < len; ++i) {
+      elem = av_fetch(av, i, 0);
+      if (elem == NULL)
+        croak("Bad AV element. Severe error");
+      address[i] = SvUV(*elem);
+    }
   }
 
 
