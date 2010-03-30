@@ -77,9 +77,8 @@ namespace SOOT {
       SOOT_ToFloatAV(Float_t);
       SOOT_ToFloatAV(Double_t);
     default:
-        croak("Invalid type of array for member");
-        return &PL_sv_undef; // not reached!
-        break;
+      croak("Invalid type of array for member");
+      return &PL_sv_undef; // not reached!
     };
     return &PL_sv_undef; // not reached!
   }
@@ -87,5 +86,88 @@ namespace SOOT {
 #undef SOOT_ToUIntegerAV
 #undef SOOT_ToIntegerAV
 
+
+  void
+  ConvertSVToDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src)
+  {
+    int aryDim = dm->GetArrayDim();
+    if (aryDim > 1)
+      croak("Invalid array dimension: We only support "
+            "direct access to simple types and 1-dim. arrays");
+    else if (aryDim == 1)
+      return ConvertSVToArrayDataMember(aTHX_ dm, targetBaseAddr, src);
+
+    Long_t offset = dm->GetOffset();
+    EDataType type = (EDataType)dm->GetDataType()->GetType();
+    void* dataAddr = (void*) ((Long_t)targetBaseAddr + offset);
+
+    switch (type) {
+      case kBool_t:    *((Bool_t*)dataAddr)    = (Bool_t)SvIV(src);    return;
+      case kChar_t:    *((Char_t*)dataAddr)    = (Char_t)SvIV(src);    return;
+      case kUChar_t:   *((UChar_t*)dataAddr)   = (UChar_t)SvUV(src);   return;
+      case kShort_t:   *((Short_t*)dataAddr)   = (Short_t)SvIV(src);   return;
+      case kUShort_t:  *((UShort_t*)dataAddr)  = (UShort_t)SvUV(src);  return;
+      case kInt_t:     *((Int_t*)dataAddr)     = (Int_t)SvIV(src);     return;
+      case kUInt_t:    *((UInt_t*)dataAddr)    = (UInt_t)SvUV(src);    return;
+      case kLong_t:    *((Long_t*)dataAddr)    = (Long_t)SvIV(src);    return;
+      case kULong_t:   *((ULong_t*)dataAddr)   = (ULong_t)SvUV(src);   return;
+      case kLong64_t:  *((Long64_t*)dataAddr)  = (Long64_t)SvIV(src);  return;
+      case kULong64_t: *((ULong64_t*)dataAddr) = (ULong64_t)SvUV(src); return;
+      case kFloat_t:   *((Float_t*)dataAddr)   = (Float_t)SvNV(src);   return;
+      case kDouble_t:  *((Double_t*)dataAddr)  = (Double_t)SvNV(src);  return;
+      case kCharStar:  strcpy( *((char**)dataAddr), SvPV_nolen(src) ); return;
+      default:
+        croak("Invalid data member type");
+    };
+    return;
+  }
+
+
+#define SOOT_AVToIntegerAry(type) case k##type: \
+  SOOT::AVToIntegerVecInPlace<type>(aTHX_ (AV*)SvRV(src), len, (type*)dataAddr, maxIndex); return
+#define SOOT_AVToUIntegerAry(type) case k##type: \
+  SOOT::AVToUIntegerVecInPlace<type>(aTHX_ (AV*)SvRV(src), len, (type*)dataAddr, maxIndex); return
+#define SOOT_AVToFloatAry(type) case k##type: \
+  SOOT::AVToFloatVecInPlace<type>(aTHX_ (AV*)SvRV(src), len, (type*)dataAddr, maxIndex); return
+  void
+  ConvertSVToArrayDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src)
+  {
+    Long_t offset = dm->GetOffset();
+    int maxIndex = dm->GetMaxIndex(0);
+    EDataType type = (EDataType)dm->GetDataType()->GetType();
+    void* dataAddr = (void*) ((Long_t)targetBaseAddr + offset);
+    size_t len;
+    char* buf;
+
+    switch (type) {
+      SOOT_AVToIntegerAry(Bool_t);
+      //SOOT_AVToIntegerAry(Char_t);
+      case kChar_t:
+        // FIXME investigate null-padding issues. In general the Char_t[5] thingies might not need it
+        buf = SvPV(src, len);
+        if (maxIndex < len)
+          len = maxIndex;
+        strncpy( *((char**)dataAddr), buf, len );
+        ((char**)dataAddr)[len-1] = '\0'; // FIXME is this right?
+        return;
+      SOOT_AVToUIntegerAry(UChar_t);
+      SOOT_AVToIntegerAry(Short_t);
+      SOOT_AVToUIntegerAry(UShort_t);
+      SOOT_AVToIntegerAry(Int_t);
+      SOOT_AVToUIntegerAry(UInt_t);
+      SOOT_AVToIntegerAry(Long_t);
+      SOOT_AVToUIntegerAry(ULong_t);
+      SOOT_AVToIntegerAry(Long64_t);
+      SOOT_AVToUIntegerAry(ULong64_t);
+      SOOT_AVToFloatAry(Float_t);
+      SOOT_AVToFloatAry(Double_t);
+    default:
+      croak("Invalid type of array for member");
+    };
+    return;
+  }
+#undef SOOT_AVToIntegerAry
+#undef SOOT_AVToUIntegerAry
+#undef SOOT_AVToFloatAry
 } // end namespace SOOT
 

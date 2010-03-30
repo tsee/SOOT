@@ -23,7 +23,8 @@ namespace SOOT {
   SV* ConvertDataMemberToPerl(pTHX_ TDataMember* dm, void* baseAddr);
   SV* ConvertArrayDataMemberToPerl(pTHX_ TDataMember* dm, void* baseAddr);
 
-  //void ConvertSVToDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src);
+  void ConvertSVToDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src);
+  void ConvertSVToArrayDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src);
 } // end namespace SOOT
 
 #endif
