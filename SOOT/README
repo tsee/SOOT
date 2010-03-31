@@ -239,8 +239,8 @@ INSTALLATION
 
     To do so manually, do:
 
-      tar -xzf SOOT-0.05.tar.gz
-      cd SOOT-0.05
+      tar -xzf SOOT-0.XX.tar.gz
+      cd SOOT-0.XX
       perl Makefile.PL
       make
       make test
@@ -263,6 +263,9 @@ SEE ALSO
     <http://root.cern.ch>
 
     SOOT::API exposes some of the underlying SOOT-internals.
+
+    SOOT::Struct allows for run-time creation/compilation of ROOT/C-level
+    structs. Structs created this way are available from Perl.
 
     SOOT::App implements a root.exe/CInt-like front-end using Devel::REPL.
     It is not part of SOOT and is available separately from CPAN.
