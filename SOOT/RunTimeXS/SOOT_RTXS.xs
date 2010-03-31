@@ -30,4 +30,5 @@ INCLUDE: ../RunTimeXS/SOOT_RTXS_scalar_setter.xs
 
 INCLUDE: ../RunTimeXS/SOOT_RTXS_array_getter.xs
 
+INCLUDE: ../RunTimeXS/SOOT_RTXS_array_setter.xs
 

@@ -70,4 +70,8 @@ STMT_START {                                                                 \
       PTR2UV( (void*)SOOT::LobotomizeObject(aTHX_ self) )          \
       + idxdata.offset                                             \
     );
+
+#define SOOT_RTXS_ASSERT_ARRAY_ARGUMENT                            \
+    if (!SvROK(src) || (SvTYPE(SvRV(src)) != SVt_PVAV))            \
+      croak("Need reference to an array as argument");
 #endif
