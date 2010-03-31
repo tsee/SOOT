@@ -48,6 +48,8 @@ push @flags, split(' ', SOOTBuilder::striprun($rootConfig, '--cflags')),
               ? ('-I'.File::Spec->catdir($ENV{ROOTSYS}, 'include'),
                  '-I'.File::Spec->catdir($ENV{ROOTSYS}, 'include', 'root'))
               : ());
+push @flags, '-IRunTimeXS';
+
 push @libs, map { split(' ', $_) }
              ($Config::Config{lddlflags},
               SOOTBuilder::striprun($rootConfig, '--ldflags'),
