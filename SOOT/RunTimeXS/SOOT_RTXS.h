@@ -1,3 +1,7 @@
+
+#ifndef _SOOT_RTXS_h_
+#define _SOOT_RTXS_h_
+
 #include "ppport.h"
 #include "perl.h"
 
@@ -189,3 +193,6 @@ I32 get_internal_array_index(I32 object_ary_idx) {
 
 #undef SOOT_RTXS_ACQUIRE_GLOBAL_LOCK
 #undef SOOT_RTXS_RELEASE_GLOBAL_LOCK
+
+#endif
+
