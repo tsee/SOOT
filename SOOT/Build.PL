@@ -110,6 +110,11 @@ my $builder = SOOTBuilder->new(
       bugtracker   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=SOOT',
       license      => 'http://www.opensource.org/licenses/gpl-2.0.php',
     },
+    no_index => {
+      directory => [
+        qw(buildtools src t ROOT_XSP xt XS inc examples)
+      ],
+    },
   },
 );
 
