@@ -6,13 +6,14 @@
  */
  /* Code released into the public domain. */
  /* C-ification and adaption to perl.h by Steffen Mueller 2009-11-03 */
+ /* Imported into SOOT and change of prefix by Steffen Mueller 2010-03-31 */
 
 #include "perl.h"
 
 #ifndef _MurmurHashNeutral2_h_
 #define _MurmurHashNeutral2_h_
 
-U32 CXSA_MurmurHashNeutral2(const void* key, STRLEN len, U32 _seed) {
+U32 SOOT_RTXS_MurmurHashNeutral2(const void* key, STRLEN len, U32 _seed) {
   const unsigned int m = 0x5bd1e995;
   const int r = 24;
 

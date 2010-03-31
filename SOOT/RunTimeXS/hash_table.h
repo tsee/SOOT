@@ -3,19 +3,23 @@
  *
  * This is a customised version of the pointer table implementation in sv.c
  *
- * tsee 2009-11-03
+ * smueller 2009-11-03
  *
  * - Taken from chocolateboy's B-Hooks-OP-Annotation.
  * - Added string-to-PTRV conversion using MurmurHash2.
  * - Converted to storing I32s (Class::XSAccessor indexes of the key name storage)
  *   instead of OP structures (pointers).
  * - Plenty of renaming and prefixing with CXSA_.
+ * 
+ * smueller 2010-03-31
+ *
+ * - Import a copy into SOOT with renaming of the prefix to SOOT_RTXS_
  */
 
 #include "ppport.h"
 #include "MurmurHashNeutral2.h"
 
-#define CXSA_string_hash(str, len) CXSA_MurmurHashNeutral2(str, len, 12345678)
+#define SOOT_RTXS_string_hash(str, len) SOOT_RTXS_MurmurHashNeutral2(str, len, 12345678)
 
 typedef struct HashTableEntry {
     struct HashTableEntry* next;
@@ -31,16 +35,16 @@ typedef struct {
     NV threshold;
 } HashTable;
 
-/* STATIC I32 CXSA_HashTable_delete(HashTable* table, const char* key, STRLEN len); */
-STATIC I32 CXSA_HashTable_fetch(HashTable* table, const char* key, STRLEN len);
-STATIC I32 CXSA_HashTable_store(HashTable* table, const char* key, STRLEN len, I32 value);
-STATIC HashTableEntry* CXSA_HashTable_find(HashTable* table, const char* key, STRLEN len);
-STATIC HashTable* CXSA_HashTable_new(UV size, NV threshold);
-STATIC void CXSA_HashTable_clear(HashTable* table);
-STATIC void CXSA_HashTable_free(HashTable* table);
-STATIC void CXSA_HashTable_grow(HashTable* table);
+/* STATIC I32 SOOT_RTXS_HashTable_delete(HashTable* table, const char* key, STRLEN len); */
+STATIC I32 SOOT_RTXS_HashTable_fetch(HashTable* table, const char* key, STRLEN len);
+STATIC I32 SOOT_RTXS_HashTable_store(HashTable* table, const char* key, STRLEN len, I32 value);
+STATIC HashTableEntry* SOOT_RTXS_HashTable_find(HashTable* table, const char* key, STRLEN len);
+STATIC HashTable* SOOT_RTXS_HashTable_new(UV size, NV threshold);
+STATIC void SOOT_RTXS_HashTable_clear(HashTable* table);
+STATIC void SOOT_RTXS_HashTable_free(HashTable* table);
+STATIC void SOOT_RTXS_HashTable_grow(HashTable* table);
 
-STATIC HashTable* CXSA_HashTable_new(UV size, NV threshold) {
+STATIC HashTable* SOOT_RTXS_HashTable_new(UV size, NV threshold) {
     HashTable* table;
 
     if ((size < 2) || (size & (size - 1))) {
@@ -62,9 +66,9 @@ STATIC HashTable* CXSA_HashTable_new(UV size, NV threshold) {
     return table;
 }
 
-STATIC HashTableEntry* CXSA_HashTable_find(HashTable* table, const char* key, STRLEN len) {
+STATIC HashTableEntry* SOOT_RTXS_HashTable_find(HashTable* table, const char* key, STRLEN len) {
     HashTableEntry* entry;
-    UV index = CXSA_string_hash(key, len) & (table->size - 1);
+    UV index = SOOT_RTXS_string_hash(key, len) & (table->size - 1);
 
     for (entry = table->array[index]; entry; entry = entry->next) {
         if (strcmp(entry->key, key) == 0)
@@ -76,9 +80,9 @@ STATIC HashTableEntry* CXSA_HashTable_find(HashTable* table, const char* key, ST
 
 /* currently unused */
 /*
-STATIC I32 CXSA_HashTable_delete(HashTable* table, const char* key, STRLEN len) {
+STATIC I32 SOOT_RTXS_HashTable_delete(HashTable* table, const char* key, STRLEN len) {
     HashTableEntry *entry, *prev = NULL;
-    UV index = CXSA_string_hash(key, len) & (table->size - 1);
+    UV index = SOOT_RTXS_string_hash(key, len) & (table->size - 1);
 
     I32 retval = -1;
     for (entry = table->array[index]; entry; prev = entry, entry = entry->next) {
@@ -102,20 +106,20 @@ STATIC I32 CXSA_HashTable_delete(HashTable* table, const char* key, STRLEN len) 
 }
 */
 
-STATIC I32 CXSA_HashTable_fetch(HashTable* table, const char* key, STRLEN len) {
-    HashTableEntry const * const entry = CXSA_HashTable_find(table, key, len);
+STATIC I32 SOOT_RTXS_HashTable_fetch(HashTable* table, const char* key, STRLEN len) {
+    HashTableEntry const * const entry = SOOT_RTXS_HashTable_find(table, key, len);
     return entry ? entry->value : -1;
 }
 
-STATIC I32 CXSA_HashTable_store(HashTable* table, const char* key, STRLEN len, I32 value) {
+STATIC I32 SOOT_RTXS_HashTable_store(HashTable* table, const char* key, STRLEN len, I32 value) {
     I32 retval = -1;
-    HashTableEntry* entry = CXSA_HashTable_find(table, key, len);
+    HashTableEntry* entry = SOOT_RTXS_HashTable_find(table, key, len);
 
     if (entry) {
         retval = entry->value;
         entry->value = value;
     } else {
-        const UV index = CXSA_string_hash(key, len) & (table->size - 1);
+        const UV index = SOOT_RTXS_string_hash(key, len) & (table->size - 1);
         Newx(entry, 1, HashTableEntry);
 
         Newx(entry->key, len+1, char);
@@ -128,14 +132,14 @@ STATIC I32 CXSA_HashTable_store(HashTable* table, const char* key, STRLEN len, I
         ++(table->items);
 
         if (((NV)table->items / (NV)table->size) > table->threshold)
-            CXSA_HashTable_grow(table);
+            SOOT_RTXS_HashTable_grow(table);
     }
 
     return retval;
 }
 
 /* double the size of the array */
-STATIC void CXSA_HashTable_grow(HashTable* table) {
+STATIC void SOOT_RTXS_HashTable_grow(HashTable* table) {
     HashTableEntry** array = table->array;
     const UV oldsize = table->size;
     UV newsize = oldsize * 2;
@@ -155,7 +159,7 @@ STATIC void CXSA_HashTable_grow(HashTable* table) {
         current_entry_ptr = array + oldsize;
 
         for (entry_ptr = array, entry = *array; entry; entry = *entry_ptr) {
-            UV index = CXSA_string_hash(entry->key, entry->len) & (newsize - 1);
+            UV index = SOOT_RTXS_string_hash(entry->key, entry->len) & (newsize - 1);
 
             if (index != i) {
                 *entry_ptr = entry->next;
@@ -169,7 +173,7 @@ STATIC void CXSA_HashTable_grow(HashTable* table) {
     }
 }
 
-STATIC void CXSA_HashTable_clear(HashTable *table) {
+STATIC void SOOT_RTXS_HashTable_clear(HashTable *table) {
     if (table && table->items) {
         HashTableEntry** const array = table->array;
         UV riter = table->size - 1;
@@ -197,9 +201,9 @@ STATIC void CXSA_HashTable_clear(HashTable *table) {
     }
 }
 
-STATIC void CXSA_HashTable_free(HashTable* table) {
+STATIC void SOOT_RTXS_HashTable_free(HashTable* table) {
     if (table) {
-        CXSA_HashTable_clear(table);
+        SOOT_RTXS_HashTable_clear(table);
         Safefree(table);
     }
 }
