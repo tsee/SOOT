@@ -8,10 +8,8 @@
 #include "SOOT_RTXS_hash_table.h"
 
 typedef struct {
-  U32 hash;
-  char* key;
-  I32 len; /* not STRLEN for perl internal UTF hacks and hv_common_keylen
-              -- man, these things can take you by surprise */
+  I32 offset;
+  U32 maxIndex;
 } soot_rtxs_hashkey;
 
 #ifdef USE_ITHREADS

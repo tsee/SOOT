@@ -55,10 +55,19 @@ STMT_START {                                                                 \
     void* dataAddr;                                                \
     const I32 offset = SOOT_RTXS_arrayindices[ix];
 
+#define SOOT_RTXS_INIT_ARRAY                                       \
+    void* dataAddr;                                                \
+    const soot_rtxs_hashkey idxdata = SOOT_RTXS_hashkeys[ix];
+
 #define SOOT_RTXS_CALCADDRESS                                      \
     dataAddr = INT2PTR(void*,                                      \
       PTR2UV( (void*)SOOT::LobotomizeObject(aTHX_ self) )          \
       + offset                                                     \
     );
 
+#define SOOT_RTXS_CALCADDRESS_ARRAY                                \
+    dataAddr = INT2PTR(void*,                                      \
+      PTR2UV( (void*)SOOT::LobotomizeObject(aTHX_ self) )          \
+      + idxdata.offset                                             \
+    );
 #endif
