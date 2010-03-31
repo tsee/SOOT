@@ -84,6 +84,8 @@ INCLUDE: ../XS/SOOTAPI.xs
 
 INCLUDE: ../XS/TObject.xs
 
+INCLUDE: ../RunTimeXS/SOOT_RTXS.xs
+
 INCLUDE: ../rootclasses.xsinclude
 
 INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t ../typemap.xsp ../XS/ClassIterator.xsp
