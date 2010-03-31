@@ -1,5 +1,8 @@
 /* This is all based on Class::XSAccessor code */
 
+#ifndef _SOOT_RTXS_macros_h_
+#define _SOOT_RTXS_macros_h_
+
 #define SOOT_RTXS_SUBNAME(name) XS_SOOT__RTXS_ ## name
 
 /* Install a new XSUB under 'name' and automatically set the file name */
@@ -48,4 +51,14 @@ STMT_START {                                                                 \
   SOOT_RTXS_hashkeys[function_index] = hashkey;                              \
 } STMT_END
 
+#define SOOT_RTXS_INIT                                             \
+    void* dataAddr;                                                \
+    const I32 offset = SOOT_RTXS_arrayindices[ix];
 
+#define SOOT_RTXS_CALCADDRESS                                      \
+    dataAddr = INT2PTR(void*,                                      \
+      PTR2UV( (void*)SOOT::LobotomizeObject(aTHX_ self) )          \
+      + offset                                                     \
+    );
+
+#endif
