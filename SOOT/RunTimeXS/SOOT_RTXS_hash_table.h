@@ -16,6 +16,9 @@
  * - Import a copy into SOOT with renaming of the prefix to SOOT_RTXS_
  */
 
+#ifndef _SOOT_RTXS_hash_table_h_
+#define _SOOT_RTXS_hash_table_h_
+
 #include "ppport.h"
 #include "MurmurHashNeutral2.h"
 
@@ -207,4 +210,6 @@ STATIC void SOOT_RTXS_HashTable_free(HashTable* table) {
         Safefree(table);
     }
 }
+
+#endif /* ifndef _SOOT_RTXS_hash_table_h_ */
 

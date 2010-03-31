@@ -5,7 +5,7 @@
 #include "ppport.h"
 #include "perl.h"
 
-#include "hash_table.h"
+#include "SOOT_RTXS_hash_table.h"
 
 typedef struct {
   U32 hash;
