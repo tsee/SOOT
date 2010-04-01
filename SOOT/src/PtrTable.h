@@ -75,7 +75,9 @@ namespace SOOT {
     UV fSize;
     UV fItems;
     NV fThreshold;
+#ifdef USE_ITHREADS
     tTHX fPerl;
+#endif /* USE_ITHREADS */
     PtrTableEntryValueDtor fDtor;
 
 #if PTRSIZE == 8

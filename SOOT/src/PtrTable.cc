@@ -27,7 +27,11 @@ namespace SOOT {
 
 
 PtrTable::PtrTable(pTHX_ UV size, PtrTableEntryValueDtor dtor, NV threshold)
-  : fSize(size), fItems(0), fThreshold(threshold), fPerl(aTHX), fDtor(dtor)
+  : fSize(size), fItems(0), fThreshold(threshold),
+#ifdef USE_ITHREADS
+    fPerl(aTHX),
+#endif /* USE_ITHREADS */
+    fDtor(dtor)
 {
   if ((size < 2) || (size & (size - 1)))
     croak("invalid ptr table size: expected a power of 2 (>= 2), got %u", (unsigned int)size);
@@ -261,7 +265,10 @@ PtrTable::PrintStats()
        << "\n"
        << "== Globals ==\n"
        << "Size="<<fSize<<"\nStored TObjects="<<fItems<<"\nThreshold="<<fThreshold<<"\n"
-       << "Perl ptr="<<(void*)fPerl<<"\n"<<endl;
+#ifdef USE_ITHREADS
+       << "Perl ptr="<<(void*)fPerl<<"\n"
+#endif /* USE_ITHREADS */
+       << endl;
   if (fSize==0 || fItems==0)
     return;
 
