@@ -266,10 +266,10 @@ namespace SOOT {
 
     bool isGetter = cproto.size() == 1;
     if (isGetter)
-      retval = SOOT::ConvertDataMemberToPerl(aTHX_ dm, objAddr);
+      retval = SOOT::InstallDataMemberToPerlConverter(aTHX_ dm, objAddr);
     else {
       SV* argument = *av_fetch(args, 1, 0);
-      SOOT::ConvertSVToDataMember(aTHX_ dm, objAddr, argument);
+      SOOT::InstallSVToDataMemberConverter(aTHX_ dm, objAddr, argument);
     }
     return true;
   }

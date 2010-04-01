@@ -10,21 +10,21 @@ using namespace std;
 
 namespace SOOT {
 
-#define SOOT_ToInteger(type) case k##type##: \
-  return SOOT::IntegerVecToAV<##type##>(aTHX_ (##type##*)dataAddr, maxIndex)
   SV*
-  ConvertDataMemberToPerl(pTHX_ TDataMember* dm, void* baseAddr)
+  InstallDataMemberToPerlConverter(pTHX_ TDataMember* dm, void* baseAddr)
   {
     int aryDim = dm->GetArrayDim();
     if (aryDim > 1)
       croak("Invalid array dimension: We only support "
             "direct access to simple types and 1-dim. arrays");
     else if (aryDim == 1)
-      return ConvertArrayDataMemberToPerl(aTHX_ dm, baseAddr);
+      return InstallArrayDataMemberToPerlConverter(aTHX_ dm, baseAddr);
 
     Long_t offset = dm->GetOffset();
     EDataType type = (EDataType)dm->GetDataType()->GetType();
     void* dataAddr = (void*) ((Long_t)baseAddr + offset);
+    //string name = string("ClassName::") + string("MemberName");
+    //INSTALL_NEW_CV_ARRAY_OBJ(name.c_str(), SOOT_RTXS_SUBNAME(get_struct_Bool_t), offset);
 
     switch (type) {
       case kBool_t:    return newSViv((IV) *((Bool_t*)dataAddr));
@@ -54,7 +54,7 @@ namespace SOOT {
 #define SOOT_ToFloatAV(type) case k##type: \
   return SOOT::FloatVecToAV<type>(aTHX_ (type*)dataAddr, maxIndex)
   SV*
-  ConvertArrayDataMemberToPerl(pTHX_ TDataMember* dm, void* baseAddr)
+  InstallArrayDataMemberToPerlConverter(pTHX_ TDataMember* dm, void* baseAddr)
   {
     Long_t offset = dm->GetOffset();
     int maxIndex = dm->GetMaxIndex(0);
@@ -88,14 +88,14 @@ namespace SOOT {
 
 
   void
-  ConvertSVToDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src)
+  InstallSVToDataMemberConverter(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src)
   {
     int aryDim = dm->GetArrayDim();
     if (aryDim > 1)
       croak("Invalid array dimension: We only support "
             "direct access to simple types and 1-dim. arrays");
     else if (aryDim == 1)
-      return ConvertSVToArrayDataMember(aTHX_ dm, targetBaseAddr, src);
+      return InstallArrayDataMemberToPerlConverter(aTHX_ dm, targetBaseAddr, src);
 
     Long_t offset = dm->GetOffset();
     EDataType type = (EDataType)dm->GetDataType()->GetType();
@@ -136,7 +136,7 @@ namespace SOOT {
 #define SOOT_AVToFloatAry(type) case k##type: \
   SOOT::AVToFloatVecInPlace<type>(aTHX_ (AV*)SvRV(src), len, (type*)dataAddr, maxIndex); return
   void
-  ConvertSVToArrayDataMember(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src)
+  InstallSVToArrayDataMemberConverter(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src)
   {
     Long_t offset = dm->GetOffset();
     int maxIndex = dm->GetMaxIndex(0);
