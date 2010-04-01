@@ -14,16 +14,16 @@ using namespace std;
 namespace SOOT {
 
 // FIXME check mortalization of return value!
-#define SOOT_ToIntegerValue(type) case k##type: \
-  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_##type), offset); \
+#define SOOT_AccessIntegerValue(type) case k##type: \
+  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(access_struct_##type), offset); \
   return newSViv((IV) *((type*)dataAddr));
 
-#define SOOT_ToUIntegerValue(type) case k##type: \
-  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_##type), offset); \
+#define SOOT_AccessUIntegerValue(type) case k##type: \
+  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(access_struct_##type), offset); \
   return newSVuv((UV) *((type*)dataAddr));
 
-#define SOOT_ToFloatValue(type) case k##type: \
-  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_##type), offset); \
+#define SOOT_AccessFloatValue(type) case k##type: \
+  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(access_struct_##type), offset); \
   return newSVnv((NV) *((type*)dataAddr));
 
   SV*
@@ -47,30 +47,30 @@ namespace SOOT {
     //INSTALL_NEW_CV_ARRAY_OBJ(name.c_str(), SOOT_RTXS_SUBNAME(get_struct_Bool_t), offset);
 
     switch (type) {
-      SOOT_ToIntegerValue(Bool_t);
-      SOOT_ToIntegerValue(Char_t);
-      SOOT_ToUIntegerValue(UChar_t);
-      SOOT_ToIntegerValue(Short_t);
-      SOOT_ToUIntegerValue(UShort_t);
-      SOOT_ToIntegerValue(Int_t);
-      SOOT_ToUIntegerValue(UInt_t);
-      SOOT_ToIntegerValue(Long_t);
-      SOOT_ToUIntegerValue(ULong_t);
-      SOOT_ToIntegerValue(Long64_t);
-      SOOT_ToUIntegerValue(ULong64_t);
-      SOOT_ToFloatValue(Float_t);
-      SOOT_ToFloatValue(Double_t);
+      SOOT_AccessIntegerValue(Bool_t);
+      SOOT_AccessIntegerValue(Char_t);
+      SOOT_AccessUIntegerValue(UChar_t);
+      SOOT_AccessIntegerValue(Short_t);
+      SOOT_AccessUIntegerValue(UShort_t);
+      SOOT_AccessIntegerValue(Int_t);
+      SOOT_AccessUIntegerValue(UInt_t);
+      SOOT_AccessIntegerValue(Long_t);
+      SOOT_AccessUIntegerValue(ULong_t);
+      SOOT_AccessIntegerValue(Long64_t);
+      SOOT_AccessUIntegerValue(ULong64_t);
+      SOOT_AccessFloatValue(Float_t);
+      SOOT_AccessFloatValue(Double_t);
       case kCharStar:
-        INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_CharStar), offset);
+        INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(access_struct_CharStar), offset);
         return newSVpvn(*((char**)dataAddr), strlen(*((char**)dataAddr))); // FIXME check mortalization
       default:
         croak("Invalid data member type");
     };
     return &PL_sv_undef;
   }
-#undef SOOT_ToIntegerValue
-#undef SOOT_ToUIntegerValue
-#undef SOOT_ToFloatValue
+#undef SOOT_AccessIntegerValue
+#undef SOOT_AccessUIntegerValue
+#undef SOOT_AccessFloatValue
 
 
 #define SOOT_ToIntegerAV(type) case k##type: \

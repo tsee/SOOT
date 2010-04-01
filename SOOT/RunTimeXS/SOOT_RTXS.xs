@@ -24,9 +24,7 @@ END()
             SOOT_RTXS_HashTable_free(SOOT_RTXS_reverse_hashkeys);
         }
 
-INCLUDE: ../RunTimeXS/SOOT_RTXS_scalar_getter.xs
-
-INCLUDE: ../RunTimeXS/SOOT_RTXS_scalar_setter.xs
+INCLUDE: ../RunTimeXS/SOOT_RTXS_scalar.xs
 
 INCLUDE: ../RunTimeXS/SOOT_RTXS_array_getter.xs
 
