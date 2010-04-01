@@ -73,7 +73,7 @@ my $builder = SOOTBuilder->new(
   #create_makefile_pl    => 'passthrough',
 
   # Location of our special C and XS source files
-  c_source => 'src',
+  c_source => ['src', 'RunTimeXS'],
   xs_files => {
     'SOOT.xs' => 'lib/SOOT.xs'
   },
@@ -91,6 +91,9 @@ my $builder = SOOTBuilder->new(
     'warnings'              => '0', # core as of 5.008
     'strict'                => '0', # core as of 5.008
   },
+#  configure_requires => {
+#    Module::Build => '0.3605', # bundled!?
+#  },
   build_requires => {
     # For the XS build process
     'ExtUtils::XSpp'        => '0.07',
