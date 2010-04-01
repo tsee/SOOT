@@ -1,6 +1,6 @@
 
-#ifndef __RawROOTPerlConversion_h_
-#define __RawROOTPerlConversion_h_
+#ifndef __DataMemberAccess_h_
+#define __DataMemberAccess_h_
 
 #include "ROOTIncludes.h"
 

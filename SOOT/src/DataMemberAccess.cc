@@ -1,5 +1,5 @@
 
-#include "RawROOTPerlConversion.h"
+#include "DataMemberAccess.h"
 #include "CPerlTypeConversion.h"
 #include "PerlCTypeConversion.h"
 #include "SOOTDebug.h"
@@ -95,7 +95,7 @@ namespace SOOT {
       croak("Invalid array dimension: We only support "
             "direct access to simple types and 1-dim. arrays");
     else if (aryDim == 1)
-      return InstallArrayDataMemberToPerlConverter(aTHX_ dm, targetBaseAddr, src);
+      return InstallSVToArrayDataMemberConverter(aTHX_ dm, targetBaseAddr, src);
 
     Long_t offset = dm->GetOffset();
     EDataType type = (EDataType)dm->GetDataType()->GetType();
