@@ -3,7 +3,7 @@
 #include "SOOT_RTXS_macros.h"
 
 #define SOOT_RTXS_EXTERNAL_XSUB(name) \
-  extern "C" void SOOT_RTXS_SUBNAME(name)(register PerlInterpreter* my_perl , CV* cv)
+  extern "C" void SOOT_RTXS_SUBNAME(name)(pTHX_ CV* cv)
 
 SOOT_RTXS_EXTERNAL_XSUB(access_struct_Bool_t);
 SOOT_RTXS_EXTERNAL_XSUB(access_struct_Char_t);
