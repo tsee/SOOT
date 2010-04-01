@@ -37,17 +37,14 @@ STMT_START {                                                                 \
 /* Install a new XSUB under 'name' and set the function index attribute
  * for hash-based objects. Requires a previous declaration of a CV* cv!
  **/
-#define INSTALL_NEW_CV_HASH_OBJ(name, xsub, obj_hash_key)                    \
+// FIXME in principle, we would prefer an array of structs here over an array!
+#define INSTALL_NEW_CV_HASH_OBJ(name, namelen, xsub, offset, maxIndex)       \
 STMT_START {                                                                 \
   soot_rtxs_hashkey hashkey;                                                 \
-  const U32 key_len = strlen(obj_hash_key);                                  \
-  const U32 function_index = get_hashkey_index(aTHX_ obj_hash_key, key_len); \
+  const U32 function_index = get_hashkey_index(aTHX_ name, namelen);         \
   INSTALL_NEW_CV_WITH_INDEX(name, xsub, function_index);                     \
-  Newx(hashkey.key, key_len+1, char);                                        \
-  Copy(obj_hash_key, hashkey.key, key_len, char);                            \
-  hashkey.key[key_len] = 0;                                                  \
-  hashkey.len = key_len;                                                     \
-  PERL_HASH(hashkey.hash, obj_hash_key, key_len);                            \
+  hashkey.offset = offset;                                                   \
+  hashkey.maxIndex = maxIndex;                                               \
   SOOT_RTXS_hashkeys[function_index] = hashkey;                              \
 } STMT_END
 
