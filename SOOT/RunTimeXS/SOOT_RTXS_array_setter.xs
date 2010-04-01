@@ -58,7 +58,7 @@ set_struct_array_Char_t(self, src)
     SOOT_RTXS_CALCADDRESS_ARRAY
     // FIXME investigate null-padding issues. In general the Char_t[5] thingies might not need it
     buf = SvPV(src, len);
-    if (idxdata.maxIndex < (int)len)
+    if (idxdata.maxIndex < len)
       len = idxdata.maxIndex;
     strncpy( (char*)dataAddr, buf, len );
     ((char*)dataAddr)[len] = '\0'; // FIXME is this right?
