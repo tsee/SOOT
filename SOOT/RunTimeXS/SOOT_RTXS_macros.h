@@ -74,4 +74,7 @@ STMT_START {                                                                 \
 #define SOOT_RTXS_ASSERT_ARRAY_ARGUMENT                            \
     if (!SvROK(src) || (SvTYPE(SvRV(src)) != SVt_PVAV))            \
       croak("Need reference to an array as argument");
+
+
 #endif
+

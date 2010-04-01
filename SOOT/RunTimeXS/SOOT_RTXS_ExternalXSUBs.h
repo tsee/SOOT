@@ -20,6 +20,22 @@ SOOT_RTXS_EXTERNAL_XSUB(access_struct_Float_t);
 SOOT_RTXS_EXTERNAL_XSUB(access_struct_Double_t);
 SOOT_RTXS_EXTERNAL_XSUB(access_struct_CharStar);
 
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Bool_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Char_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_UChar_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Short_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_UShort_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Int_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_UInt_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Long_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_ULong_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Long64_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_ULong64_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Float_t);
+SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_Double_t);
+// Doesn't exist:
+//SOOT_RTXS_EXTERNAL_XSUB(access_struct_array_CharStar);
+
 #undef SOOT_RTXS_EXTERNAL_XSUB
 
 #endif
