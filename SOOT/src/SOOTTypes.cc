@@ -39,7 +39,10 @@ namespace SOOT {
       case SVt_NULL:
         return eUNDEF;
       case SVt_IV:
-        return eINTEGER;
+        if (SvROK(sv))
+          goto DEFAULT; // sue me, this is a 5.12 fix (FIXME refactor)
+        else
+          return eINTEGER;
       case SVt_PVIV:
         if (SvIOK(sv))
           return eINTEGER;
@@ -51,14 +54,16 @@ namespace SOOT {
         else
           return eFLOAT;
       case SVt_PVNV:
-        if (SvNOK(sv))
-          return eFLOAT;
-        else if (SvIOK(sv))
+        if (SvIOK(sv))
           return eINTEGER;
+        else if (SvNOK(sv))
+          return eFLOAT;
         else
           return eSTRING;
 #ifdef SVt_RV /* no longer defined by default if PERL_CORE is defined */
+#if (SVt_RV != SVt_IV)
       case SVt_RV:
+#endif
 #endif
       case SVt_PV:
 #ifdef SvVOK
@@ -116,6 +121,7 @@ namespace SOOT {
       case SVt_PVGV: // GLOB
       case SVt_PVFM: // FORMAT
       case SVt_PVIO: // IO
+        return eINVALID;
 #ifdef SVt_BIND
       case SVt_BIND:
         return eINVALID; // BIND
@@ -124,6 +130,7 @@ namespace SOOT {
       case SVt_REGEXP:
         return eINVALID; // REGEXP
 #endif
+DEFAULT:
       default:
         if (SvROK(sv)) {
           if (IsTObject(aTHX_ sv))
