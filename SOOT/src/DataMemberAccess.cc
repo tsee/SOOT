@@ -4,21 +4,41 @@
 #include "PerlCTypeConversion.h"
 #include "SOOTDebug.h"
 
+#include "SOOT_RTXS.h"
+#include "SOOT_RTXS_ExternalXSUBs.h"
+
 
 using namespace SOOT;
 using namespace std;
 
 namespace SOOT {
 
+// FIXME check mortalization of return value!
+#define SOOT_ToIntegerValue(type) case k##type: \
+  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_##type), offset); \
+  return newSViv((IV) *((type*)dataAddr));
+
+#define SOOT_ToUIntegerValue(type) case k##type: \
+  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_##type), offset); \
+  return newSVuv((UV) *((type*)dataAddr));
+
+#define SOOT_ToFloatValue(type) case k##type: \
+  INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_##type), offset); \
+  return newSVnv((NV) *((type*)dataAddr));
+
   SV*
-  InstallDataMemberToPerlConverter(pTHX_ TDataMember* dm, void* baseAddr)
+  InstallDataMemberToPerlConverter(pTHX_ TClass* theClass, const char* methName,
+                                   TDataMember* dm, void* baseAddr)
   {
+    const string fullMemberName = string(theClass->GetName()) + string("::") + string(methName);
+
     int aryDim = dm->GetArrayDim();
     if (aryDim > 1)
       croak("Invalid array dimension: We only support "
             "direct access to simple types and 1-dim. arrays");
     else if (aryDim == 1)
       return InstallArrayDataMemberToPerlConverter(aTHX_ dm, baseAddr);
+      //return InstallArrayDataMemberToPerlConverter(aTHX_ fullMemberName, dm, baseAddr);
 
     Long_t offset = dm->GetOffset();
     EDataType type = (EDataType)dm->GetDataType()->GetType();
@@ -27,25 +47,31 @@ namespace SOOT {
     //INSTALL_NEW_CV_ARRAY_OBJ(name.c_str(), SOOT_RTXS_SUBNAME(get_struct_Bool_t), offset);
 
     switch (type) {
-      case kBool_t:    return newSViv((IV) *((Bool_t*)dataAddr));
-      case kChar_t:    return newSViv((IV) *((Char_t*)dataAddr));
-      case kUChar_t:   return newSVuv((UV) *((UChar_t*)dataAddr));
-      case kShort_t:   return newSViv((IV) *((Short_t*)dataAddr));
-      case kUShort_t:  return newSVuv((UV) *((UShort_t*)dataAddr));
-      case kInt_t:     return newSViv((IV) *((Int_t*)dataAddr));
-      case kUInt_t:    return newSVuv((UV) *((UInt_t*)dataAddr));
-      case kLong_t:    return newSViv((IV) *((Long_t*)dataAddr));
-      case kULong_t:   return newSVuv((UV) *((ULong_t*)dataAddr));
-      case kLong64_t:  return newSViv((IV) *((Long64_t*)dataAddr));
-      case kULong64_t: return newSVuv((UV) *((ULong64_t*)dataAddr));
-      case kFloat_t:   return newSVnv((NV) *((Float_t*)dataAddr));
-      case kDouble_t:  return newSVnv((NV) *((Double_t*)dataAddr));
-      case kCharStar:  return newSVpvn(*((char**)dataAddr), strlen(*((char**)dataAddr)));
+      SOOT_ToIntegerValue(Bool_t);
+      SOOT_ToIntegerValue(Char_t);
+      SOOT_ToUIntegerValue(UChar_t);
+      SOOT_ToIntegerValue(Short_t);
+      SOOT_ToUIntegerValue(UShort_t);
+      SOOT_ToIntegerValue(Int_t);
+      SOOT_ToUIntegerValue(UInt_t);
+      SOOT_ToIntegerValue(Long_t);
+      SOOT_ToUIntegerValue(ULong_t);
+      SOOT_ToIntegerValue(Long64_t);
+      SOOT_ToUIntegerValue(ULong64_t);
+      SOOT_ToFloatValue(Float_t);
+      SOOT_ToFloatValue(Double_t);
+      case kCharStar:
+        INSTALL_NEW_CV_ARRAY_OBJ(fullMemberName.c_str(), SOOT_RTXS_SUBNAME(get_struct_CharStar), offset);
+        return newSVpvn(*((char**)dataAddr), strlen(*((char**)dataAddr))); // FIXME check mortalization
       default:
         croak("Invalid data member type");
     };
     return &PL_sv_undef;
   }
+#undef SOOT_ToIntegerValue
+#undef SOOT_ToUIntegerValue
+#undef SOOT_ToFloatValue
+
 
 #define SOOT_ToIntegerAV(type) case k##type: \
   return SOOT::IntegerVecToAV<type>(aTHX_ (type*)dataAddr, maxIndex)

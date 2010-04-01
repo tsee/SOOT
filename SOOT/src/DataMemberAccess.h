@@ -25,7 +25,8 @@ namespace SOOT {
    *  Additionally performs the conversion and returns the result.
    *  Calls InstallArrayDataMemberToPerlConverter as appropriate.
    */
-  SV* InstallDataMemberToPerlConverter(pTHX_ TDataMember* dm, void* baseAddr);
+  SV* InstallDataMemberToPerlConverter(pTHX_ TClass* theClass, const char* methName,
+                                       TDataMember* dm, void* baseAddr);
   /// Internal to InstallDataMemberToPerlConverter!
   SV* InstallArrayDataMemberToPerlConverter(pTHX_ TDataMember* dm, void* baseAddr);
 

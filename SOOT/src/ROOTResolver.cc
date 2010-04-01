@@ -266,7 +266,7 @@ namespace SOOT {
 
     bool isGetter = cproto.size() == 1;
     if (isGetter)
-      retval = SOOT::InstallDataMemberToPerlConverter(aTHX_ dm, objAddr);
+      retval = SOOT::InstallDataMemberToPerlConverter(aTHX_ theClass, methName, dm, objAddr);
     else {
       SV* argument = *av_fetch(args, 1, 0);
       SOOT::InstallSVToDataMemberConverter(aTHX_ dm, objAddr, argument);
