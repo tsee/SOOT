@@ -4,9 +4,10 @@ use warnings;
 use inc::latest;
 
 #                        Module::Build
+#                        ExtUtils::ParseXS
+#                        ExtUtils::Typemap
 foreach my $module (qw( ExtUtils::XSpp
-                        ExtUtils::Typemap
-                        ExtUtils::ParseXS
+                        ExtUtils::CBuilder
                     ))
 {
   inc::latest->bundle_module($module, 'inc');
