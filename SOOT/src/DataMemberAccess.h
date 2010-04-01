@@ -26,18 +26,10 @@ namespace SOOT {
    *  Calls InstallArrayDataMemberToPerlConverter as appropriate.
    */
   SV* InstallDataMemberToPerlConverter(pTHX_ TClass* theClass, const char* methName,
-                                       TDataMember* dm, void* baseAddr);
+                                       TDataMember* dm, void* baseAddr, SV* argument);
   /// Internal to InstallDataMemberToPerlConverter!
-  SV* InstallArrayDataMemberToPerlConverter(pTHX_ TDataMember* dm, void* baseAddr);
-
-  /** Installs a new XSUB that converts the given source Perl structure to
-   *  a ROOT TDataMember of the struct/object that lives at baseAddr.
-   *  Additionally performs the conversion and returns the result.
-   *  Calls InstallSVToArrayDataMemberConverter as appropriate.
-   */
-  void InstallSVToDataMemberConverter(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src);
-  /// Internal to InstallSVToArrayDataMemberConverter!
-  void InstallSVToArrayDataMemberConverter(pTHX_ TDataMember* dm, void* targetBaseAddr, SV* src);
+  SV* InstallArrayDataMemberToPerlConverter(pTHX_ TClass* theClass, const char* methName,
+                                            TDataMember* dm, void* baseAddr, SV* argument);
 } // end namespace SOOT
 
 #endif
