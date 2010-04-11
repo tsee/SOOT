@@ -26,8 +26,7 @@ push(@flags,
   '-xc++',
   '-I.',
   '-Isrc',
-#  '-C++', # from Makefile.PL
-#  '-hiertype', # from Makefile.PL
+  '-Wno-unused', # FIXME is this a gccism?
 );
 
 my $rootConfig = defined($userRootConfig) ? $userRootConfig : 'root-config';
