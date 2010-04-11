@@ -1,9 +1,33 @@
 Revision history for Perl extension SOOT.
 
+0.08  Sun Apr 11 12:12 2010
+* Bug Fixes:
+  - Perl 5.12 compatibility.
+  - Now buildable on unthreaded perls.
+* New features:
+  - SOOT::Struct: Dynamic struct generation
+    You can use SOOT::Struct to create new C-level struct types
+    at run-time. These structs are then also available as Perl
+    classes with the corresponding accessor methods for the
+    struct attributes.
+  - RunTimeXS: Cached accessor methods for structs.
+    RunTimeXS is a mechanism to create XSUBs at run time. It's
+    currently used to install the accessor methods for structs.
+    This brings a 60-fold speed-up for struct access:
+    O(millions) calls per second!
+* Internals:
+  - unsigned int array conversions
+  - AVToIntegerVecInPlace and friends for conversion of an
+    AV to existing, pre-allocated data members
+* Updates, etc:
+  - Brought bundled Module::Build and ExtUtils::CBuilder up to date.
+
 0.07  Wed Mar 30 20:00 2010
+* Bug Fixes:
   - Fix memory leak on each method call.
     => currently all leak checks pass!
   - Call *correct* object destructors before free-ing ROOT objects.
+* Internals:
   - Some refactoring
     => Replace macro IS_TOBJECT with an inlined function.
     => Better debugging mode/output
@@ -11,6 +35,7 @@ Revision history for Perl extension SOOT.
     => Replace some use of char* with std::strings
 
 0.06  Fri Mar 26 20:00 2010
+* New features:
   - Conversion to Module::Build!
   - All non-core build-time dependencies should be bundled now.
   - Expose $gHistImagePalette $gWebImagePalette
@@ -19,7 +44,9 @@ Revision history for Perl extension SOOT.
   - Installation documentation
   - SOOT->LoadNUpdate('libGeomBuilder.so');
     => Will load the shared library and regenerate the class templates.
+* Bug fixes:
   - Fix for method calling bug wrt. invalidated MethodInfo.
+* Internals:
   - AUTOLOAD bootstrapping now done in XS (read: C) for performance.
   - Various simplifications and refactoring of the internals.
 
