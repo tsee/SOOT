@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use base 'Exporter';
 use SOOT::Constants;
