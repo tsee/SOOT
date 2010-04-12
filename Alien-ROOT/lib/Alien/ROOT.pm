@@ -21,7 +21,7 @@ $VERSION = eval $VERSION;
 
 =head1 DESCRIPTION
 
-
+Installs or detects CERN's ROOT library.
 
 =head1 METHODS
 
@@ -49,6 +49,7 @@ sub new {
     libdir      => undef,
     bindir      => undef,
     incdir      => undef,
+    etcdir      => undef,
     archdir     => undef, # internal
   };
 
@@ -278,6 +279,26 @@ sub incdir {
 
   return $self->_config_get_one_line_param('incdir', qw(--incdir));
 }
+
+
+=head2 $aroot->etcdir
+
+This method returns the path to the 'etc' directory of ROOT.
+
+Example code:
+
+  my $dir = $aroot->etcdir;
+
+=cut
+
+sub etcdir {
+  my $self = shift;
+
+  Carp::croak('You must call this method as an object') unless ref($self);
+
+  return $self->_config_get_one_line_param('etcdir', qw(--etcdir));
+}
+
 
 
 ########################################
