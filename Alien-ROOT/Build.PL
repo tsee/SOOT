@@ -33,7 +33,7 @@ my $builder = Alien::ROOT::Builder->new(
     'Capture::Tiny'       => 0, # TODO: bundle somehow? Use IPC::Open2/3?
   },
   build_requires => {
-    'Test::More'              => 0.62,
+    'Test::More'              => 0,
     'ExtUtils::CBuilder'      => 0,
     'File::Fetch'             => 0, # TODO: bundle and setup bundling logic
     'Archive::Extract'        => 0, # TODO: bundle and setup bundling logic
