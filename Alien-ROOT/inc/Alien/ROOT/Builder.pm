@@ -66,6 +66,7 @@ sub ACTION_build_ROOT {
 sub ACTION_install {
   my $self = shift;
   $self->SUPER::ACTION_code;
+  $self->depends_on( 'build_ROOT' );
   return if not $self->notes( 'build_ROOT' );
   $self->install_ROOT;
 }
@@ -102,14 +103,14 @@ sub fetch_ROOT {
 sub extract_ROOT {
   my $self = shift;
 
-  return if -d $self->notes( 'build_data' )->{data}{directory};
-  my $archive = $self->notes( 'build_data' )->{data}{archive};
-  if (!$archive) {
+  return if -d $self->notes( 'build_data' )->{directory};
+  my $archive = $self->notes( 'build_data' )->{archive};
+  if (not $archive or not -e $archive) {
     $self->fetch_ROOT;
-    $archive = $self->notes( 'build_data' )->{data}{archive};
+    $archive = $self->notes( 'build_data' )->{archive};
   }
 
-  print "Extracting wxWidgets...\n";
+  print "Extracting ROOT...\n";
 
   $self->_load_bundled_modules;
   $Archive::Extract::PREFER_BIN = 1;
@@ -126,8 +127,8 @@ sub build_ROOT {
   my $prefix = $self->aroot_install_arch_auto_dir('root');
   my @cmd = (
     qw(sh configure),
-    '--prefix', $prefix,
-    '--etcdir', File::Spec->catfile($prefix, 'etc'),
+    '--prefix='.$prefix,
+    '--etcdir='.File::Spec->catfile($prefix, 'etc'),
     '--enable-explicitlink', # needed for SOOT
   );
 
@@ -135,15 +136,25 @@ sub build_ROOT {
   chdir $dir;
 
   # do not reconfigure unless necessary
-  # print $cmd, "\n";
-  if (not -f 'Makefile') {
+  if (not -f 'config.status') {
     system(@cmd) and die "Build failed while running '@cmd': $?";
   }
-  my $make = $self->notes('build_data')->{make};
+  my $make = $self->notes('make');
   system($make) and die "Build failed while running '$make': $?";
   chdir $ORIG_DIR;
 }
 
+
+sub install_ROOT {
+  my $self = shift;
+
+  my $dir = $self->notes('build_data')->{directory};
+  chdir $dir;
+
+  my $make = $self->notes('make');
+  system($make, 'install') and die "Build failed while running '$make install': $?";
+  chdir $ORIG_DIR;
+}
 
 
 1;
