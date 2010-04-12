@@ -2,6 +2,7 @@
 use 5.008;
 use strict;
 use warnings;
+use inc::latest 'Module::Build';
 
 use lib 'inc';
 use Alien::ROOT::Builder;
