@@ -77,4 +77,43 @@ sub ACTION_clean {
   return $rc;
 }
 
+
+#ftp://root.cern.ch/root/root_v5.26.00.source.tar.gz
+sub fetch_ROOT {
+    my $self = shift;
+
+    return if defined $self->notes('build_data')->{archive}
+           and -f $self->notes('build_data')->{archive};
+
+    $self->_load_bundled_modules;
+    print "Fetching ROOT...\n";
+    print "fetching from: ", $self->notes('build_data')->{url}, "\n";
+
+    my $ff = File::Fetch->new( uri => $self->notes('build_data')->{url} );
+    my $path = $ff->fetch(to => File::Spec->curdir);
+    die 'Unable to fetch archive' unless $path;
+    $self->notes('build_data')->{archive} = $path;
+}
+
+sub extract_ROOT {
+    my $self = shift;
+
+    return if -d $self->notes( 'build_data' )->{data}{directory};
+    my $archive = $self->notes( 'build_data' )->{data}{archive};
+    if (!$archive) {
+      $self->fetch_ROOT;
+      $archive = $self->notes( 'build_data' )->{data}{archive};
+    }
+
+    print "Extracting wxWidgets...\n";
+
+    $self->_load_bundled_modules;
+    $Archive::Extract::PREFER_BIN = 1;
+    my $ae = Archive::Extract->new( archive => $archive );
+
+    die 'Error: ', $ae->error unless $ae->extract;
+
+    #$self->patch_ROOT;
+}
+
 1;
