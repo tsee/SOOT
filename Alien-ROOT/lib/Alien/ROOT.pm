@@ -309,22 +309,26 @@ sub _archdir {
 
 sub _configure {
   my $self = shift;
-  
-  my $root_config;
-  if (defined $ENV{ROOTSYS}) {
-    $root_config = File::Spec->catfile($ENV{ROOTSYS}, 'bin', 'root-config');
-    $root_config = undef if not -x $root_config;
-  }
-  else {
-    $root_config = $self->_can_run('root-config');
-  }
 
+  my $root_config;
+  # try to get it from our arch dir
   if (not defined $root_config) {
     my $archdir = $self->_archdir();
     if (defined $archdir and -d $archdir) {
       $root_config = File::Spec->catdir($archdir, 'root', 'bin', 'root-config');
       $root_config = undef if not -x $root_config;
     }
+  }
+
+  # try ROOTSYS 
+  if (not defined $root_config and defined $ENV{ROOTSYS}) {
+    $root_config = File::Spec->catfile($ENV{ROOTSYS}, 'bin', 'root-config');
+    $root_config = undef if not -x $root_config;
+  }
+
+  # try to access root-config
+  if (not defined $root_config) {
+    $root_config = $self->_can_run('root-config');
   }
 
   if (not defined $root_config) {
