@@ -46,6 +46,9 @@ sub new {
     cflags      => undef,
     ldflags     => undef,
     features    => undef,
+    libdir      => undef,
+    bindir      => undef,
+    incdir      => undef,
   };
 
   bless($self, $class);
@@ -82,6 +85,52 @@ sub installed {
   return $self->{installed};
 }
 
+=head2 $aroot->setup_environment
+
+Sets up the C<PATH> and C<LD_LIBRARY_PATH> environment
+variables to point at the correct paths for ROOT.
+
+Throws an exception if ROOT was not found, so wrap this in an C<eval>
+or check C<$aroot-E<gt>installed> before using this.
+
+=cut
+
+sub setup_environment {
+  my $self = shift;
+  Carp::croak('You must call this method as an object') unless ref($self);
+  die "ROOT was not found. Make the 'root-config' utility accessible or set the ROOTSYS variable"
+    if not $self->installed;
+ 
+  my $bindir = $self->bindir;
+  my $libdir = $self->libdir;
+
+  if ($^O =~ /win32/i) {
+    $ENV{PATH} = $self->_add_to_path($ENV{PATH}, $bindir, $libdir);
+  }
+  else {
+    $ENV{PATH} = $self->_add_to_path($ENV{PATH}, $bindir);
+  }
+  $ENV{LD_LIBRARY_PATH} = $self->_add_to_path($ENV{LD_LIBRARY_PATH}, $libdir);
+}
+
+sub _add_to_path {
+  my $self = shift;
+  my $string = shift;
+  my @paths = @_;
+
+  my $sep = $Config::Config{path_sep};
+  my @split = split /\Q$sep\E/, $string;
+
+  my %exists;
+  $exists{$_}++ for @split;
+
+  foreach my $path (@paths) {
+    unshift @split, $path if not exists $exists{$path};
+  }
+  return join $sep, @split;
+}
+
+
 =head2 $aroot->version
 
 Determine the installed version of ROOT, as a string.
@@ -99,6 +148,7 @@ sub version {
 
   return $self->_config_get_one_line_param('version', '--version');
 }
+
 
 =head2 $aroot->ldflags
 
@@ -124,6 +174,7 @@ sub ldflags {
 # Glob to create an alias to ldflags
 *linker_flags = *ldflags;
 
+
 =head2 $aroot->cflags
 
 =head2 $aroot->compiler_flags
@@ -145,6 +196,7 @@ sub cflags {
   return $self->_config_get_one_line_param('cflags', qw(--cflags --auxcflags));
 }
 *compiler_flags = *cflags;
+
 
 =head2 $aroot->features
 
@@ -169,6 +221,65 @@ sub features {
 }
 
 
+=head2 $aroot->bindir
+
+This method returns the path to the executable directory of ROOT.
+
+Example code:
+
+  my $dir = $aroot->bindir;
+  system(File::Spec->catfile($dir, 'root'));
+
+=cut
+
+sub bindir {
+  my $self = shift;
+
+  Carp::croak('You must call this method as an object') unless ref($self);
+
+  return $self->_config_get_one_line_param('bindir', qw(--bindir));
+}
+
+
+=head2 $aroot->libdir
+
+This method returns the path to the library (F<lib/>) directory of ROOT.
+
+Example code:
+
+  my $dir = $aroot->libdir;
+
+=cut
+
+sub libdir {
+  my $self = shift;
+
+  Carp::croak('You must call this method as an object') unless ref($self);
+
+  return $self->_config_get_one_line_param('libdir', qw(--libdir));
+}
+
+
+=head2 $aroot->incdir
+
+This method returns the path to the include directory of ROOT.
+
+Example code:
+
+  my $dir = $aroot->incdir;
+
+=cut
+
+sub incdir {
+  my $self = shift;
+
+  Carp::croak('You must call this method as an object') unless ref($self);
+
+  return $self->_config_get_one_line_param('incdir', qw(--incdir));
+}
+
+
+########################################
 # Private methods to find & fill out information
 
 sub _configure {
@@ -229,7 +340,6 @@ sub _config_get_one_line_param {
   $self->{$param} = (split /\n/, $out, 2)[0];
   return $self->{$param};
 }
-
 
 1;
 
