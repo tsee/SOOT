@@ -49,6 +49,12 @@ my $builder = Alien::ROOT::Builder->new(
       bugtracker   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Alien-ROOT',
       license      => 'http://www.opensource.org/licenses/gpl-2.0.php',
     },
+    no_index => {
+      directory => [
+        qw(buildtools t xt inc examples)
+      ],
+    },
+
   },
 );
 
