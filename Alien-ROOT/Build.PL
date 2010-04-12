@@ -8,6 +8,11 @@ use Alien::ROOT::Builder;
 
 use Env '@PATH';
 
+our $USER_CONFIG = {
+  archive => 'root_v5.26.00.source.tar.gz',
+};
+
+
 my $builder = Alien::ROOT::Builder->new(
   module_name           => 'Alien::ROOT',
   license               => 'unrestricted',
@@ -24,12 +29,13 @@ my $builder = Alien::ROOT::Builder->new(
     'ExtUtils::MakeMaker' => 0,
     'File::Spec'          => 0,
     'File::Path'          => 0,
-    'Capture::Tiny'       => 0,
+    'Capture::Tiny'       => 0, # TODO: bundle somehow? Use IPC::Open2/3?
   },
   build_requires => {
     'Test::More'              => 0.62,
     'ExtUtils::CBuilder'      => 0,
-    'File::Fetch'             => 0,
+    'File::Fetch'             => 0, # TODO: bundle and setup bundling logic
+    'Archive::Extract'        => 0, # TODO: bundle and setup bundling logic
   },
 
   add_to_cleanup => [ 'Alien-ROOT-*' ],
@@ -44,6 +50,12 @@ my $builder = Alien::ROOT::Builder->new(
     },
   },
 );
+
+my $build_data = {%$USER_CONFIG};
+$build_data->{url} = 'ftp://root.cern.ch/root/' . $build_data->{archive};
+$build_data->{directory} = 'root'; # this is pretty retarded :(
+
+$builder->notes('build_data' => $build_data);
 
 # Use Alien::ROOT to see if it's already installed
 use lib 'lib';
