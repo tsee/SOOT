@@ -4,11 +4,75 @@ use strict;
 use warnings;
 
 use base 'Module::Build';
+use Alien::ROOT::Builder::Utility qw(aroot_touch);
 
 use Cwd ();
 use Carp ();
 
 my $ORIG_DIR = Cwd::cwd();
+
+# use the system version of a module if present; in theory this could lead to
+# compatibility problems (if the latest version of one of the dependencies,
+# installed in @INC is incompatible with the bundled version of a module)
+sub _load_bundled_modules {
+  # the load order is important: all dependencies must be loaded
+  # before trying to load a module
+  require inc::latest;
+
+  inc::latest->import( $_ )
+    foreach qw(version
+               Locale::Maketext::Simple
+               Params::Check
+               Module::Load
+               Module::Load::Conditional
+               IPC::Cmd
+               Archive::Extract
+               File::Fetch
+               Capture::Tiny);
+}
+
+sub ACTION_build {
+  my $self = shift;
+  # try to make "perl Makefile.PL && make test" work
+  # but avoid doubly building ROOT when doing
+  # "perl Makefile.PL && make && make test"
+  unlink 'configured' if -f 'configured';
+  $self->SUPER::ACTION_build;
+}
+
+
+sub ACTION_code {
+  my $self = shift;
+
+  $self->SUPER::ACTION_code;
+  return if not $self->notes( 'build_ROOT' );
+
+  # see comment in ACTION_build for why 'configured' is used
+  return if -f 'configured';
+  $self->depends_on( 'build_ROOT' );
+  $self->install_ROOT;
+  # see comment in ACTION_build for why 'configured' is used
+  aroot_touch( 'configured' );
+  $self->add_to_cleanup( 'configured' );
+}
+
+
+sub ACTION_build_ROOT {
+  my $self = shift;
+  return if not $self->notes( 'build_ROOT' );
+  $self->fetch_ROOT;
+  $self->extract_ROOT;
+  $self->build_root;
+}
+
+# installs to blib/
+sub ACTION_install_ROOT {
+  my $self = shift;
+  return if not $self->notes( 'build_ROOT' );
+  $self->depends_on( 'build_perl' );
+  $self->install_root;
+}
+
 
 # These are utility commands for getting into and out of our build directory
 sub _chdir_or_die {
