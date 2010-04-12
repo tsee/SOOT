@@ -16,7 +16,7 @@ our $USER_CONFIG = {
 
 my $builder = Alien::ROOT::Builder->new(
   module_name           => 'Alien::ROOT',
-  license               => 'unrestricted',
+  license               => 'gpl',
   dist_author           => 'Steffen Mueller <smueller@cpan.org>',
   dist_version_from     => 'lib/Alien/ROOT.pm',
   dynamic_config        => 1,
