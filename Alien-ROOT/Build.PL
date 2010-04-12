@@ -1,7 +1,5 @@
 #!/usr/bin/perl
-# Build.PL
-#  Script to build and install this distribution
-
+use 5.008;
 use strict;
 use warnings;
 
@@ -22,11 +20,16 @@ my $builder = Alien::ROOT::Builder->new(
   create_makefile_pl    => 'passthrough',
 
   requires => {
-    'perl'              => 5.006,
+    'perl'                => 5.008,
+    'ExtUtils::MakeMaker' => 0,
+    'File::Spec'          => 0,
+    'File::Path'          => 0,
+    'Capture::Tiny'       => 0,
   },
   build_requires => {
     'Test::More'              => 0.62,
     'ExtUtils::CBuilder'      => 0,
+    'File::Fetch'             => 0,
   },
 
   add_to_cleanup => [ 'Alien-ROOT-*' ],
@@ -73,7 +76,9 @@ unless ($asoot->installed) {
       }
     }
   }
-  $make = $builder->prompt('What is your system "make" command?', $make);
+  if (not defined $make or not -x $make) {
+    $make = $builder->prompt('What is your system "make" command?', $make);
+  }
 
   $builder->notes(make => $make);
 
