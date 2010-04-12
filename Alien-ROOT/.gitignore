@@ -13,5 +13,7 @@ MANIFEST
 .soot_hist
 MYMETA.yml
 META.yml
-./Build
-./_build
+Build
+_build
+root
+root_*.source.tar.gz
