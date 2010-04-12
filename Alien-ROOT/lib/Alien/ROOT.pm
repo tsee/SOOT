@@ -49,6 +49,7 @@ sub new {
     libdir      => undef,
     bindir      => undef,
     incdir      => undef,
+    archdir     => undef, # internal
   };
 
   bless($self, $class);
@@ -282,6 +283,30 @@ sub incdir {
 ########################################
 # Private methods to find & fill out information
 
+sub _archdir {
+  my $self = shift;
+  
+  if (not defined $self->{archdir}) {
+    my $path = File::Spec->catdir(
+      'auto', split(/::/, __PACKAGE__),
+    );
+
+    # Find the full dir withing @INC
+    foreach my $inc ( @INC ) {
+      next unless defined $inc and not ref $inc;
+      my $dir = File::Spec->catdir( $inc, $path );
+      next unless -d $dir;
+      unless ( -r $dir ) {
+        croak("Found directory '$dir', but no read permissions");
+      }
+      $self->{archdir} = $dir;
+      last;
+    }
+  }
+
+  return $self->{archdir};
+}
+
 sub _configure {
   my $self = shift;
   
@@ -293,7 +318,15 @@ sub _configure {
   else {
     $root_config = $self->_can_run('root-config');
   }
-    
+
+  if (not defined $root_config) {
+    my $archdir = $self->_archdir();
+    if (defined $archdir and -d $archdir) {
+      $root_config = File::Spec->catdir($archdir, 'root', 'bin', 'root-config');
+      $root_config = undef if not -x $root_config;
+    }
+  }
+
   if (not defined $root_config) {
     return();
   }
