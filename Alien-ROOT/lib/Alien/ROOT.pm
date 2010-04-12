@@ -1,5 +1,5 @@
 package Alien::ROOT;
-
+use 5.008;
 use strict;
 use warnings;
 use Carp ();
@@ -40,16 +40,27 @@ sub new {
   Carp::croak('You must call this as a class method') if ref($class);
 
   my $self = {
-    installed => 0,
+    installed   => 0,
+    root_config => undef,
+    version     => undef,
+    cflags      => undef,
+    ldflags     => undef,
+    features    => undef,
   };
 
   bless($self, $class);
 
-  $self->_try_pkg_config()
-    or $self->_try_liblist()
-    or delete($self->{method});
+  $self->_load_modules();
+  $self->_configure();
 
   return $self;
+}
+
+sub _load_modules {
+  require File::Spec;
+  require Config;
+  require ExtUtils::MakeMaker;
+  require Capture::Tiny;
 }
 
 =head2 $aroot->installed
@@ -73,14 +84,11 @@ sub installed {
 
 =head2 $aroot->version
 
-Determine the installed version of libjio, as a string.
-
-Currently versions are simply floating-point numbers, so you can treat the
-version number as such, but this behaviour is subject to change.
+Determine the installed version of ROOT, as a string.
 
 Example code:
 
-  my $version = $jio->version;
+  my $version = $aroot->version;
 
 =cut
 
@@ -89,214 +97,139 @@ sub version {
 
   Carp::croak('You must call this method as an object') unless ref($self);
 
-  return $self->{version};
+  return $self->_config_get_one_line_param('version', '--version');
 }
 
-=head2 $jio->ldflags
+=head2 $aroot->ldflags
 
-=head2 $jio->linker_flags
+=head2 $aroot->linker_flags
 
 This returns the flags required to link C code with the local installation of
-libjio (typically in the LDFLAGS variable). It is particularly useful for
-building and installing Perl XS modules such as L<IO::Journal>.
-
-In scalar context, it returns an array reference suitable for passing to
-other build systems, particularly L<Module::Build>. In list context, it gives
-a normal array so that C<join> and friends will work as expected.
+ROOT.
 
 Example code:
 
-  my $ldflags = $jio->ldflags;
-  my @ldflags = @{ $jio->ldflags };
-  my $ldstring = join(' ', $jio->ldflags);
-  # or:
-  # my $ldflags = $jio->linker_flags;
+  my $ldflags = $aroot->ldflags;
 
 =cut
 
 sub ldflags {
-  my ($self) = @_;
+  my $self = shift;
 
   Carp::croak('You must call this method as an object') unless ref($self);
 
-  # Return early if called in void context
-  return unless defined wantarray;
-
-  # If calling in array context, dereference and return
-  return @{ $self->{ldflags} } if wantarray;
-
-  return $self->{ldflags};
+  return $self->_config_get_one_line_param('ldflags', qw(--ldflags --glibs --auxlibs));
 }
 
 # Glob to create an alias to ldflags
 *linker_flags = *ldflags;
 
-=head2 $jio->cflags
+=head2 $aroot->cflags
 
-=head2 $jio->compiler_flags
+=head2 $aroot->compiler_flags
 
-This method returns the compiler option flags to compile C code which uses
-the libjio library (typically in the CFLAGS variable). It is particularly
-useful for building and installing Perl XS modules such as L<IO::Journal>.
+This method returns the compiler option flags to compile C++ code which uses
+the ROOT library (typically in the CFLAGS variable).
 
 Example code:
 
-  my $cflags = $jio->cflags;
-  my @cflags = @{ $jio->cflags };
-  my $ccstring = join(' ', $jio->cflags);
-  # or:
-  # my $cflags = $jio->compiler_flags;
+  my $cflags = $aroot->cflags;
 
 =cut
 
 sub cflags {
-  my ($self) = @_;
+  my $self = shift;
 
   Carp::croak('You must call this method as an object') unless ref($self);
 
-  # Return early if called in void context
-  return unless defined wantarray;
-
-  # If calling in array context, dereference and return
-  return @{ $self->{cflags} } if wantarray;
-
-  return $self->{cflags};
+  return $self->_config_get_one_line_param('cflags', qw(--cflags --auxcflags));
 }
 *compiler_flags = *cflags;
 
-=head2 $jio->method
+=head2 $aroot->features
 
-=head2 $jio->how
-
-This method returns the method the module used to find information about
-libjio. The following methods are currently used (in priority order):
-
-=over
-
-=item *
-
-pkg-config: the de-facto package information tool
-
-=item *
-
-ExtUtils::Liblist: a utility module used by ExtUtils::MakeMaker
-
-=back
+This method returns a string of ROOT features that were enabled when ROOT
+was compiled.
 
 Example code:
 
-  if ($jio->installed) {
-    print 'I found this information using: ', $jio->how, "\n";
+  my $features = $aroot->features;
+  if ($features !~ /\bexplicitlink\b/) {
+    warn "ROOT was built without the --explicitlink option";
   }
 
 =cut
 
-sub method {
-  my ($self) = @_;
+sub features {
+  my $self = shift;
 
   Carp::croak('You must call this method as an object') unless ref($self);
 
-  return $self->{method};
+  return $self->_config_get_one_line_param('features', qw(--features));
 }
-*how = *method;
+
 
 # Private methods to find & fill out information
 
-use IPC::Open3 ('open3');
-
-sub _get_pc {
-  my ($key) = @_;
-
-  my $read;
-  my $pid = open3(undef, $read, undef, 'pkg-config', 'libjio', '--' . $key);
-  # We're using blocking wait, so the return value doesn't matter
-  ## no critic(RequireCheckedSyscalls)
-  waitpid($pid, 0);
-
-  # Check the exit status; 0 = success - nonzero = failure
-  if (($? >> 8) == 0) {
-    # The value we got back
-    return <$read>;
+sub _configure {
+  my $self = shift;
+  
+  my $root_config;
+  if (defined $ENV{ROOTSYS}) {
+    $root_config = File::Spec->catfile($ENV{ROOTSYS}, 'bin', 'root-config');
+    $root_config = undef if not -x $root_config;
   }
-  return (undef, <$read>) if wantarray;
+  else {
+    $root_config = $self->_can_run('root-config');
+  }
+    
+  if (not defined $root_config) {
+    return();
+  }
+  $self->{root_config} = $root_config;
+  $self->{installed} = 1;
+}
+
+# From Module::Install::Can
+# check if we can run some command
+sub _can_run {
+  my ($self, $cmd) = @_;
+
+  my $_cmd = $cmd;
+  return $_cmd if (-x $_cmd or $_cmd = MM->maybe_command($_cmd));
+
+  for my $dir ((split /$Config::Config{path_sep}/, $ENV{PATH}), '.') {
+    next if $dir eq '';
+    my $abs = File::Spec->catfile($dir, $_[1]);
+    return $abs if (-x $abs or $abs = MM->maybe_command($abs));
+  }
+
   return;
 }
 
-sub _try_pkg_config {
-  my ($self) = @_;
-
-  my ($value, $err) = _get_pc('cflags');
-  return unless (defined $value && length $value);
-  #if (defined $err && length $err) {
-  #  #warn "Problem with pkg-config; using ExtUtils::Liblist instead\n";
-  #  return;
-  #}
-
-  $self->{installed} = 1;
-  $self->{method} = 'pkg-config';
-
-  # pkg-config returns things with a newline, so remember to remove it
-  $self->{cflags} = [ split(' ', $value) ];
-  $self->{ldflags} = [ split(' ', _get_pc('libs')) ];
-  $self->{version} = _get_pc('modversion');
-
-  return 1;
+sub _config_run_stdio {
+  my $self = shift;
+  my @args = @_;
+  return() if not defined $self->{root_config};
+  my $output = Capture::Tiny::capture_merged(sub {
+    system($self->{root_config}, @args);
+  });
+  return $output;
 }
 
-sub _try_liblist {
-  my ($self) = @_;
+sub _config_get_one_line_param {
+  my $self = shift;
+  my $param = shift;
+  my @opts = @_;
 
-  use ExtUtils::Liblist ();
-  local $SIG{__WARN__} = sub { }; # mask warnings
+  return() if not $self->installed;
+  return $self->{$param} if defined $self->{$param};
 
-  my (undef, undef, $ldflags, $ldpath) = ExtUtils::Liblist->ext('-ljio');
-  return unless (defined($ldflags) && length($ldflags));
-
-  $self->{installed} = 1;
-  $self->{method} = 'ExtUtils::Liblist';
-
-  # Empty out cflags; initialize it
-  $self->{cflags} = [];
-
-  my $read;
-  my $pid = open3(undef, $read, undef, 'getconf', 'LFS_CFLAGS');
-
-  # We're using blocking wait, so the return value doesn't matter
-  ## no critic(RequireCheckedSyscalls)
-  waitpid($pid, 0);
-
-  # Check the status code
-  if (($? >> 8) == 0) {
-    # This only takes the first line
-    push(@{ $self->{cflags} }, split(' ', <$read>));
-  }
-  else {
-    warn 'Problem using getconf: ', <$read>, "\n";
-    push(@{ $self->{cflags} },
-      '-D_LARGEFILE_SOURCE',
-      '-D_FILE_OFFSET_BITS=64',
-    );
-  }
-
-  # Used for resolving the include path, relative to lib
-  use Cwd ();
-  use File::Spec ();
-  push(@{ $self->{cflags} },
-    # The include path is taken as: $libpath/../include
-    '-I' . Cwd::realpath(File::Spec->catfile(
-      $ldpath,
-      File::Spec->updir(),
-      'include'
-    ))
-  );
-
-  push(@{ $self->{ldflags} },
-    '-L' . $ldpath,
-    $ldflags,
-  );
-
-  return 1;
+  my $out = $self->_config_run_stdio(@opts) || '';
+  $self->{$param} = (split /\n/, $out, 2)[0];
+  return $self->{$param};
 }
+
 
 1;
 
