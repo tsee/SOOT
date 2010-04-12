@@ -61,11 +61,11 @@ $builder->notes('build_data' => $build_data);
 use lib 'lib';
 use Alien::ROOT;
 
-my $asoot = Alien::ROOT->new();
+my $aroot = Alien::ROOT->new();
 
-unless ($asoot->installed) {
+unless ($aroot->installed) {
   # Ask the user if they'd like to install this; if not, then exit
-  $builder->y_n('was not found on your system. Install it now?', 'y')
+  $builder->y_n('ROOT was not found on your system. Install it now?', 'y')
     or exit;
 
   $builder->notes(build_ROOT => 1);
@@ -88,7 +88,7 @@ unless ($asoot->installed) {
       }
     }
   }
-  if (not defined $make or not -x $make) {
+  if (not defined $make or not $aroot->_can_run($make)) { # FIXME hack
     $make = $builder->prompt('What is your system "make" command?', $make);
   }
 
