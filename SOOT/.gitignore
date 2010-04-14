@@ -22,7 +22,7 @@ const-xs.inc
 lib/SOOT/Constants.pm
 lib/SOOT/Examples/*
 .soot_hist
-./Build
+Build
 _build
 MYMETA.yml
 lib/SOOT.xs
