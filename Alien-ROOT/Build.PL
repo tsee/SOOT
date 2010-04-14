@@ -9,9 +9,18 @@ use Alien::ROOT::Builder;
 
 use Env '@PATH';
 
+use Getopt::Long qw/GetOptions/;
+Getopt::Long::Configure('pass_through', 'permute', 'no_require_order');
+
 our $USER_CONFIG = {
   archive => 'root_v5.26.00.source.tar.gz',
+  parallel_processes => 1,
 };
+
+GetOptions(
+  'j|parallel=i' => \($USER_CONFIG->{parallel_processes}),
+  'archive=s' => \($USER_CONFIG->{archive}),
+);
 
 
 my $builder = Alien::ROOT::Builder->new(
