@@ -10,7 +10,7 @@ Alien::ROOT - Utility package to install and locate CERN's ROOT library
 
 =cut
 
-our $VERSION = '1.000';
+our $VERSION = '5.26.0';
 $VERSION = eval $VERSION;
 
 =head1 SYNOPSIS
@@ -65,7 +65,7 @@ sub _load_modules {
   require File::Spec;
   require Config;
   require ExtUtils::MakeMaker;
-  require Capture::Tiny;
+  require IPC::Open3;
 }
 
 =head2 $aroot->installed
@@ -380,10 +380,11 @@ sub _config_run_stdio {
   my $self = shift;
   my @args = @_;
   return() if not defined $self->{root_config};
-  my $output = Capture::Tiny::capture_merged(sub {
-    system($self->{root_config}, @args);
-  });
-  return $output;
+  my $read;
+  my $pid = IPC::Open3::open3(undef, $read, undef, $self->{root_config}, @args);
+  waitpid($pid, 0);
+  #if (($? >> 8) == 0)
+  return join '', <$read>;
 }
 
 sub _config_get_one_line_param {
@@ -410,7 +411,8 @@ Steffen Mueller E<lt>smueller@cpan.orgE<gt>
 =head1 ACKNOWLEDGMENTS
 
 This package is based upon Jonathan Yu's L<Alien::libjio>
-which he kindly allowed me to use as a starting point.
+and Mattia Barbon's L<Alien::wxWidgets>.
+They kindly allowed me to use their work as a starting point.
 
 =head1 SUPPORT
 

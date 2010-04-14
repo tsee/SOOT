@@ -27,8 +27,7 @@ sub _load_bundled_modules {
                Module::Load::Conditional
                IPC::Cmd
                Archive::Extract
-               File::Fetch
-               Capture::Tiny);
+               File::Fetch);
 }
 
 sub ACTION_build {

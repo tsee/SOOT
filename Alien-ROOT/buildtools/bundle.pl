@@ -12,8 +12,7 @@ foreach my $module (qw(
                Module::Load::Conditional
                IPC::Cmd
                Archive::Extract
-               File::Fetch
-               Capture::Tiny))
+               File::Fetch))
 {
   inc::latest->bundle_module($module, 'inc');
 }

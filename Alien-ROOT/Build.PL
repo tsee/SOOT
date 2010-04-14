@@ -36,16 +36,16 @@ my $builder = Alien::ROOT::Builder->new(
 
   requires => {
     'perl'                => 5.008,
-    'ExtUtils::MakeMaker' => 0,
-    'File::Spec'          => 0,
-    'File::Path'          => 0,
-    'Capture::Tiny'       => 0, # TODO: bundle somehow? Use IPC::Open2/3?
+    'ExtUtils::MakeMaker' => 0, # core
+    'File::Spec'          => 0, # core
+    'File::Path'          => 0, # core
+    'IPC::Open3'          => 0, # core
   },
   build_requires => {
-    'Test::More'              => 0,
-    'ExtUtils::CBuilder'      => 0,
-    'File::Fetch'             => 0, # TODO: bundle and setup bundling logic
-    'Archive::Extract'        => 0, # TODO: bundle and setup bundling logic
+    'Test::More'              => 0, # core
+    'ExtUtils::CBuilder'      => 0, # core, but might need newer one?
+    'File::Fetch'             => 0,
+    'Archive::Extract'        => 0,
   },
 
   add_to_cleanup => [ 'Alien-ROOT-*' ],
