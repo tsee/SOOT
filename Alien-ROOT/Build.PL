@@ -78,6 +78,7 @@ use lib 'lib';
 use Alien::ROOT;
 
 my $aroot = Alien::ROOT->new();
+$builder->notes(build_ROOT => 0);
 
 unless ($aroot->installed) {
   # Ask the user if they'd like to install this; if not, then exit

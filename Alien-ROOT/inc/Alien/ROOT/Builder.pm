@@ -88,9 +88,11 @@ sub ACTION_clean {
   my ($self) = @_;
 
   my $rc = $self->SUPER::ACTION_clean;
-  chdir($self->notes('build_data')->{directory});
-  $rc = (system($self->notes('make'), 'clean') == 0) ? 1 : 0;
-  chdir($ORIG_DIR);
+  if ($self->notes('build_ROOT')) {
+    chdir($self->notes('build_data')->{directory});
+    $rc = (system($self->notes('make'), 'clean') == 0) ? 1 : 0;
+    chdir($ORIG_DIR);
+  }
 
   return $rc;
 }
