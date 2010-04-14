@@ -81,6 +81,10 @@ my $aroot = Alien::ROOT->new();
 $builder->notes(build_ROOT => 0);
 
 unless ($aroot->installed) {
+  if ($ENV{AUTOMATED_TESTING}) {
+    exit(0); # Do not create pain for CPAN testers...
+  }
+
   # Ask the user if they'd like to install this; if not, then exit
   $builder->y_n('ROOT was not found on your system. Install it now?', 'y')
     or exit;
