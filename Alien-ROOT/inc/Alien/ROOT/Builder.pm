@@ -63,12 +63,26 @@ sub ACTION_build_ROOT {
   $self->build_ROOT;
 }
 
+
 sub ACTION_install {
   my $self = shift;
-  $self->SUPER::ACTION_code;
-  $self->depends_on( 'build_ROOT' );
-  return if not $self->notes( 'build_ROOT' );
-  $self->install_ROOT;
+  $self->depends_on('build');
+  $self->depends_on('code');
+  if ($self->notes('build_ROOT')) {
+    $self->depends_on('build_ROOT');
+    $self->install_ROOT;
+  }
+
+  require ExtUtils::Install;
+  my %install_map = %{$self->install_map};
+  if ($self->notes('build_ROOT')
+      and exists $install_map{'read'}
+      and defined $install_map{'read'}) {
+    # so that EU::Install::install picks up the files installed by ROOT
+    $install_map{'read'} = $self->get_root_packlist_file;
+  }
+  
+  ExtUtils::Install::install(\%install_map, $self->verbose, 0, $self->{args}{uninst}||0);
 }
 
 sub ACTION_clean {
@@ -83,7 +97,6 @@ sub ACTION_clean {
 }
 
 
-#ftp://root.cern.ch/root/root_v5.26.00.source.tar.gz
 sub fetch_ROOT {
   my $self = shift;
 
@@ -134,13 +147,22 @@ sub build_ROOT {
 
   my $dir = $self->notes('build_data')->{directory};
   chdir $dir;
+  $ENV{PWD} = Cwd::cwd();
 
   # do not reconfigure unless necessary
   if (not -f 'config.status') {
     system(@cmd) and die "Build failed while running '@cmd': $?";
   }
   my $make = $self->notes('make');
-  system($make) and die "Build failed while running '$make': $?";
+  
+  my $parallel_procs = $self->notes('build_data')->{parallel_processes};
+  if (defined $parallel_procs and $parallel_procs > 1) {
+    system($make, "-j$parallel_procs")
+      and die "Build failed while running '$make -j$parallel_procs': $?";
+  }
+  else {
+    system($make) and die "Build failed while running '$make': $?";
+  }
   chdir $ORIG_DIR;
 }
 
@@ -148,13 +170,54 @@ sub build_ROOT {
 sub install_ROOT {
   my $self = shift;
 
+  require File::Path;
+  File::Path::mkpath($self->aroot_install_arch_auto_dir('root'));
+
   my $dir = $self->notes('build_data')->{directory};
   chdir $dir;
 
   my $make = $self->notes('make');
   system($make, 'install') and die "Build failed while running '$make install': $?";
+  $self->write_packlist_ROOT;
+
   chdir $ORIG_DIR;
 }
 
+
+sub write_packlist_ROOT {
+  my $self = shift;
+  my $root_dir = $self->aroot_install_arch_auto_dir('root');
+  my $root_plist = $self->get_root_packlist_file;
+
+  open my $fh, '>', $root_plist
+    or die "Could not open file '$root_plist' for writing the ROOT packlist: $!";
+
+  # merge the previous source for .packlist
+  my $from_to = $self->install_map;
+  if (exists $from_to->{'read'}
+      and defined $from_to->{'read'})
+  {
+    my $ih;
+    if (open $ih, '<', $from_to->{'read'}) {
+      print $fh $_ for <$ih>;
+    }
+  }
+  require File::Find;
+  File::Find::find(
+    sub {
+      print $fh $File::Find::name, "\n";
+    },
+    $root_dir
+  );
+  close $fh;
+}
+
+
+sub get_root_packlist_file {
+  my $self = shift;
+  my $root_dir = $self->aroot_install_arch_auto_dir('root');
+  my $root_plist = File::Spec->catdir($root_dir, '.merged_root_packlist');
+  return $root_plist;
+}
 
 1;
