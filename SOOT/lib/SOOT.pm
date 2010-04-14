@@ -6,6 +6,19 @@ use Carp 'croak';
 
 our $VERSION = '0.08';
 
+use Alien::ROOT;
+use vars '$Alien';
+BEGIN {
+  $Alien = Alien::ROOT->new;
+  if ($Alien->features !~ /\bexplicitlink\b/) {
+    Carp::croak(
+      "The version of ROOT that was found was not built with the"
+      . " --explicitlink option, which is required for SOOT"
+    );
+  }
+  $Alien->setup_environment;
+}
+
 use base 'Exporter';
 use SOOT::Constants;
 use TObject; # needs to happen before XSLoader

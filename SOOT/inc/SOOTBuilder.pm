@@ -10,6 +10,20 @@ use inc::latest 'ExtUtils::Typemap';
 use base 'Module::Build';
 use File::Find ();
 
+use Alien::ROOT;
+use vars '$Alien';
+BEGIN {
+  $Alien = Alien::ROOT->new;
+  if ($Alien->features !~ /\bexplicitlink\b/) {
+    Carp::croak(
+      "The version of ROOT that was found was not built with the"
+      . " --explicitlink option, which is required for SOOT"
+    );
+  }
+  $Alien->setup_environment;
+}
+
+
 # utilities...
 ##############
 sub striprun {
