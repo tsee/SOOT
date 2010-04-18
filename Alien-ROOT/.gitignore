@@ -18,3 +18,5 @@ _build
 root
 root_*.source.tar.gz
 configured
+Makefile.PL
+README
