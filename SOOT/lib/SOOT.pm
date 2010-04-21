@@ -10,7 +10,11 @@ use Alien::ROOT;
 use vars '$Alien';
 BEGIN {
   $Alien = Alien::ROOT->new;
-  if ($Alien->features !~ /\bexplicitlink\b/) {
+  if (not $Alien->installed) {
+    Carp::croak(
+      "Alien::ROOT could not detect an installation of the ROOT library"
+    );
+  } elsif ($Alien->features !~ /\bexplicitlink\b/) {
     Carp::croak(
       "The version of ROOT that was found was not built with the"
       . " --explicitlink option, which is required for SOOT"
