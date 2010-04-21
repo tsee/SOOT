@@ -69,6 +69,7 @@ my %keywords = ( const => 1,
                  char => 1,
                  package_static => 1,
                  class_static => 1,
+                 static => 1,
                  public => 1,
                  private => 1,
                  protected => 1,
@@ -140,7 +141,9 @@ sub yylex {
       next unless length $$buf;
 
       if( $$buf =~ s/^([+-]?(?=\d|\.\d)\d*(?:\.\d*)?(?:[Ee](?:[+-]?\d+))?)// ) {
-        return ( 'FLOAT', $1 );
+        my $v = $1;
+        return ( 'INTEGER', $v ) if $v =~ /^[+-]?\d+$/;
+        return ( 'FLOAT', $v );
       } elsif( $$buf =~ s/^\/\/(.*)(?:\r\n|\r|\n)// ) {
         return ( 'COMMENT', [ $1 ] );
       } elsif( $$buf =~ /^\/\*/ ) {
@@ -169,8 +172,6 @@ sub yylex {
         return ( $1, $1 ) if exists $keywords{$1};
 
         return ( 'ID', $1 );
-      } elsif( $$buf =~ s/^(\d+)// ) {
-        return ( 'INTEGER', $1 );
       } elsif( $$buf =~ s/^("[^"]*")// ) {
         return ( 'QUOTED_STRING', $1 );
       } elsif( $$buf =~ s/^(#.*)(?:\r\n|\r|\n)// ) {
@@ -281,6 +282,7 @@ sub add_data_function {
 
   ExtUtils::XSpp::Node::Function->new
       ( cpp_name  => $args{name},
+        perl_name => $args{perl_name},
         class     => $args{class},
         ret_type  => $args{ret_type},
         arguments => $args{arguments},
@@ -300,6 +302,7 @@ sub add_data_method {
       ( cpp_name  => $args{name},
         ret_type  => $args{ret_type},
         arguments => $args{arguments},
+        const     => $args{const},
         code      => $args{code},
         cleanup   => $args{cleanup},
         postcall  => $args{postcall},

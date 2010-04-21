@@ -27,10 +27,8 @@ Creates a new C<ExtUtils::XSpp::Node::Function>.
 Named parameters: C<cpp_name> indicating the C++ name of the function,
 C<perl_name> indicating the Perl name of the function (defaults to the
 same as C<cpp_name>), C<arguments> can be a reference to an
-array of C<ExtUtils::XSpp::Node::Argument> objects,
-C<ret_type> indicates the (C++) return type of the function,
-and finally, C<class>, which can be an L<ExtUtils::XSpp::Node::Class>
-object (FIXME: Should this be part of ::Function, not ::Method?)
+array of C<ExtUtils::XSpp::Node::Argument> objects and finally
+C<ret_type> indicates the (C++) return type of the function.
 
 Additionally, there are several optional decorators for a function
 declaration (see L<ExtUtils::XSpp> for a list). These can be
@@ -405,14 +403,6 @@ Returns the C<%cleanup> decorator if any.
 
 Returns the C<%postcall> decorator if any.
 
-=head2 virtual
-
-Returns whether the method was declared virtual.
-
-=head2 set_virtual
-
-Set whether the method is to be considered virtual.
-
 =head2 catch
 
 Returns the set of exception types that were associated
@@ -428,8 +418,6 @@ sub ret_type { $_[0]->{RET_TYPE} }
 sub code { $_[0]->{CODE} }
 sub cleanup { $_[0]->{CLEANUP} }
 sub postcall { $_[0]->{POSTCALL} }
-sub virtual { $_[0]->{VIRTUAL} }
-sub set_virtual { $_[0]->{VIRTUAL} = $_[1] }
 sub catch { $_[0]->{CATCH} ? $_[0]->{CATCH} : [] }
 
 =head2 set_static
@@ -440,17 +428,22 @@ or C<class_static>.
 
 =head2 package_static
 
-Returns whether the function is package static.
+Returns whether the function is package static.  A package static
+function can be invoked as:
+
+    My::Package::Function( ... );
 
 =head2 class_static
 
-Returns whether the function is class static.
+Returns whether the function is class static. A class static function
+can be invoked as:
+
+    My::Package->Function( ... );
 
 =cut
 
 sub set_static { $_[0]->{STATIC} = $_[1] }
 sub package_static { ( $_[0]->{STATIC} || '' ) eq 'package_static' }
 sub class_static { ( $_[0]->{STATIC} || '' ) eq 'class_static' }
-
 
 1;
