@@ -29,6 +29,15 @@ push(@flags,
   '-Wno-unused', # FIXME is this a gccism?
 );
 
+if ($SOOTBuilder::Alien->private_root) {
+  # FIXME using rpath might be unportable
+  # Add an rpath to the .so to make sure it can find root after install
+  #push @flags, '-Wl,-R' . $SOOTBuilder::Alien->libdir;
+  push @libs, '-Wl,-R' . $SOOTBuilder::Alien->libdir;
+# this is was Alien::QtSmoke does:
+#push(@libs, '-Wl,--rpath,' . Alien::QtSmoke->lib());
+}
+
 my $rootConfig = defined($userRootConfig) ? $userRootConfig : 'root-config';
 if (!SOOTBuilder::can_run($rootConfig)) {
   $rootConfig = File::Spec->catfile($ENV{ROOTSYS}, 'bin', 'root-config');
@@ -54,9 +63,6 @@ push @libs, map { split(' ', $_) }
               SOOTBuilder::striprun($rootConfig, '--ldflags'),
               SOOTBuilder::striprun($rootConfig, '--libs'));
 
-# FIXME understand option
-## Add an rpath to the .so to make sure it can find libsmokeqt after install
-#push(@libs, '-Wl,--rpath,' . Alien::QtSmoke->lib());
 
 my $builder = SOOTBuilder->new(
   module_name           => 'SOOT',
