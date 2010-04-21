@@ -96,9 +96,10 @@ my $builder = SOOTBuilder->new(
     'warnings'              => '0', # core as of 5.008
     'strict'                => '0', # core as of 5.008
   },
-#  configure_requires => {
-#    Module::Build => '0.3605', # bundled!?
-#  },
+  configure_requires => {
+    'Module::Build'         => '0.3605',
+    'Alien::ROOT'           => '5.26.0.1',
+  },
   build_requires => {
     # For the XS build process
     'ExtUtils::XSpp'        => '0.07',
