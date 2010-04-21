@@ -40,17 +40,18 @@ sub new {
   Carp::croak('You must call this as a class method') if ref($class);
 
   my $self = {
-    installed   => 0,
-    root_config => undef,
-    version     => undef,
-    cflags      => undef,
-    ldflags     => undef,
-    features    => undef,
-    libdir      => undef,
-    bindir      => undef,
-    incdir      => undef,
-    etcdir      => undef,
-    archdir     => undef, # internal
+    installed    => 0,
+    root_config  => undef,
+    version      => undef,
+    cflags       => undef,
+    ldflags      => undef,
+    features     => undef,
+    libdir       => undef,
+    bindir       => undef,
+    incdir       => undef,
+    etcdir       => undef,
+    archdir      => undef, # internal
+    private_root => undef,
   };
 
   bless($self, $class);
@@ -113,6 +114,8 @@ sub setup_environment {
     $ENV{PATH} = $self->_add_to_path($ENV{PATH}, $bindir);
   }
   $ENV{LD_LIBRARY_PATH} = $self->_add_to_path($ENV{LD_LIBRARY_PATH}, $libdir);
+  #require DynaLoader;
+  #unshift @DynaLoader::dl_library_path, $libdir; # doesn't help
 }
 
 sub _add_to_path {
@@ -121,7 +124,7 @@ sub _add_to_path {
   my @paths = @_;
 
   my $sep = $Config::Config{path_sep};
-  my @split = split /\Q$sep\E/, $string;
+  my @split = (defined($string) ? split /\Q$sep\E/, $string : ());
 
   my %exists;
   $exists{$_}++ for @split;
@@ -300,6 +303,23 @@ sub etcdir {
 }
 
 
+=head2 $aroot->private_root
+
+This method returns true if the copy of ROOT that is being used
+was installed by C<Alien::ROOT> and is considered private.
+
+Example code:
+
+  my $is_private = $aroot->private_root;
+
+=cut
+
+sub private_root {
+  my $self = shift;
+  return 1 if $self->{private_root};
+  return 0;
+}
+
 
 ########################################
 # Private methods to find & fill out information
@@ -328,17 +348,20 @@ sub _archdir {
   return $self->{archdir};
 }
 
+
 sub _configure {
   my $self = shift;
 
   my $root_config;
   # try to get it from our arch dir
-  if (not defined $root_config) {
-    my $archdir = $self->_archdir();
-    if (defined $archdir and -d $archdir) {
-      $root_config = File::Spec->catdir($archdir, 'root', 'bin', 'root-config');
-      $root_config = undef if not -x $root_config;
-    }
+  my $archdir = $self->_archdir();
+  if (defined $archdir and -d $archdir) {
+    $root_config = File::Spec->catdir($archdir, 'root', 'bin', 'root-config');
+    $root_config = undef if not -x $root_config;
+  }
+
+  if (defined $root_config) {
+    $self->{private_root} = 1;
   }
 
   # try ROOTSYS 
