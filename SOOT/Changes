@@ -1,5 +1,14 @@
 Revision history for Perl extension SOOT.
 
+0.09  Wed Apr 21 18:00 2010
+* New features.
+  - Using Alien::ROOT, on which we now depend at configure time,
+    it's possible to get an entirely working, private copy of ROOT
+    for SOOT. That means on a virgin (Linux!) machine, you can do the
+    following to install SOOT and all of its dependencies:
+    $ cpan SOOT
+  - Now using Alien::ROOT to detect ROOT.
+
 0.08  Sun Apr 11 12:12 2010
 * Bug Fixes:
   - Perl 5.12 compatibility.
