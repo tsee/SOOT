@@ -1,41 +1,68 @@
 %typemap{bool}{simple};
 %typemap{AV*}{simple};
 
-%typemap{TGraphFloatArray}{parsed}{%SV*%}{%
-  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetN());
-%};
+%typemap{TGraphFloatArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::FloatVecToAV<double>(aTHX_ $Call, THIS->GetN());
+  %};
+};
 
-%typemap{TH1FloatArray}{parsed}{%SV*%}{%
-  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetNbinsX());
-%};
-
-
-%typemap{TArrayDoubleArray}{parsed}{%SV*%}{%
-  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetSize());
-%};
-
-%typemap{TArrayFloatArray}{parsed}{%SV*%}{%
-  $$ = SOOT::FloatVecToAV<float>(aTHX_ $1, THIS->GetSize());
-%};
+%typemap{TH1FloatArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::FloatVecToAV<double>(aTHX_ $Call, THIS->GetNbinsX());
+  %};
+};
 
 
-%typemap{TArrayLongArray}{parsed}{%SV*%}{%
-  $$ = SOOT::IntegerVecToAV<long int>(aTHX_ $1, THIS->GetSize());
-%};
+%typemap{TArrayDoubleArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::FloatVecToAV<double>(aTHX_ $Call, THIS->GetSize());
+  %};
+};
 
-%typemap{TArrayIntArray}{parsed}{%SV*%}{%
-  $$ = SOOT::IntegerVecToAV<int>(aTHX_ $1, THIS->GetSize());
-%};
-
-%typemap{TArrayCharArray}{parsed}{%SV*%}{%
-  $$ = SOOT::IntegerVecToAV<char>(aTHX_ $1, THIS->GetSize());
-%};
-
-%typemap{TArrayShortArray}{parsed}{%SV*%}{%
-  $$ = SOOT::IntegerVecToAV<short>(aTHX_ $1, THIS->GetSize());
-%};
+%typemap{TArrayFloatArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::FloatVecToAV<float>(aTHX_ $Call, THIS->GetSize());
+  %};
+};
 
 
-%typemap{TFormulaFloatArray}{parsed}{%SV*%}{%
-  $$ = SOOT::FloatVecToAV<double>(aTHX_ $1, THIS->GetNpar());
-%};
+%typemap{TArrayLongArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::IntegerVecToAV<long int>(aTHX_ $Call, THIS->GetSize());
+  %};
+};
+
+%typemap{TArrayIntArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::IntegerVecToAV<int>(aTHX_ $Call, THIS->GetSize());
+  %};
+};
+
+%typemap{TArrayCharArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::IntegerVecToAV<char>(aTHX_ $Call, THIS->GetSize());
+  %};
+};
+
+%typemap{TArrayShortArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::IntegerVecToAV<short>(aTHX_ $Call, THIS->GetSize());
+  %};
+};
+
+
+%typemap{TFormulaFloatArray}{parsed}{
+  %cpp_type{%SV*%};
+  %call_function_code{%
+    $CVar = SOOT::FloatVecToAV<double>(aTHX_ $Call, THIS->GetNpar());
+  %};
+};

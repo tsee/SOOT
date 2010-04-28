@@ -102,7 +102,7 @@ my $builder = SOOTBuilder->new(
   },
   build_requires => {
     # For the XS build process
-    'ExtUtils::XSpp'        => '0.07',
+    'ExtUtils::XSpp'        => '0.10_02',
     'ExtUtils::CBuilder'    => '0',
     'ExtUtils::ParseXS'     => '0',
     'ExtUtils::Constant'    => '0', # core as of 5.008
