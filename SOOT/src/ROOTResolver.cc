@@ -2,6 +2,7 @@
 #include "ROOTResolver.h"
 #include "SOOTDebug.h"
 #include "SOOTTypes.h"
+#include "SOOTLock.h"
 #include "TObjectEncapsulation.h"
 
 #include "PerlCTypeConversion.h"
@@ -17,7 +18,7 @@ using namespace SOOT;
 using namespace std;
 
 namespace SOOT {
-  void
+  bool
   SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
                      const vector<BasicType>& argTypes, std::vector<void*>& needsCleanup,
                      const unsigned int nSkip = 1)
@@ -64,15 +65,16 @@ namespace SOOT {
           theFunc.SetArg((long)LobotomizeObject(aTHX_ *elem));
           break;
         default:
-          croak("BAD ARGUMENT");
+          return false;
       }
     }
-    return;
+    return true;
   }
 
 
   SV*
-  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr, bool isConstructor, std::vector<void*> needsCleanup)
+  ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr,
+                     bool isConstructor, std::vector<void*> needsCleanup, ScopeLock& sootLock)
   {
     char* typeStrWithoutPtr;
     char* ptr;
@@ -130,6 +132,7 @@ namespace SOOT {
       default:
         for (i = 0; i < needsCleanup.size(); ++i)
           free(needsCleanup[i]);
+        sootLock.Release(aTHX);
         croak("Unhandled return type '%s' (SOOT type '%s')", retTypeStr, gBasicTypeStrings[retType]);
     } // end switch ret type
 
@@ -145,11 +148,16 @@ namespace SOOT {
 #ifdef SOOT_DEBUG
     cout << "CallMethod: " << className << "::" << methName << endl;
 #endif
+    // Lock SOOT so we don't get SEGV's from perl ithreads' *real* concurrency
+    ScopeLock sootLock = gSOOTGlobalLock->GetLock(aTHX);
+
     // Determine the class...
     TClass* c = TClass::GetClass(className);
-    if (c == NULL)
+    if (c == NULL) {
+      sootLock.Release(aTHX);
       croak("Can't locate method \"%s\" via package \"%s\"",
             methName, className);
+    }
 
     vector<BasicType> argTypes;
     vector<string> cproto;
@@ -166,12 +174,15 @@ namespace SOOT {
     else {
       // Fetch the call receiver (object or class name)
       SV** elem = av_fetch(args, 0, 0);
-      if (elem == 0)
+      if (elem == 0) {
+        sootLock.Release(aTHX);
         croak("BAD, elem zero");
+      }
       perlCallReceiver = *elem;
       receiverType = argTypes[0];
       if (receiverType != eTOBJECT
           && (receiverType != eSTRING || !strEQ(SvPV_nolen(perlCallReceiver), className))) {
+        //sootLock.Release(aTHX);
         //croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
         //      methName, gBasicTypeStrings[receiverType]);
         // Assume it's a function
@@ -209,8 +220,10 @@ namespace SOOT {
       // If we have a $obj->Something() or $obj->Something($value), try to find a data member
       if (!constructor && perlCallReceiver != NULL && cproto.size() > 0 && cproto.size() < 3)
         foundDataMember = FindDataMember(aTHX_ c, methName, cproto, nTObjects, retval, perlCallReceiver, args); // FIXME cproto may have been mangled by FindMethodPrototype
-      if (!foundDataMember)
+      if (!foundDataMember) {
+        sootLock.Release(aTHX);
         CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
+      }
       return retval;
     }
 
@@ -235,7 +248,11 @@ namespace SOOT {
     G__CallFunc theFunc;
     theFunc.SetFunc(*mInfo);
 
-    SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup, (perlCallReceiver == NULL ? 0 : 1));
+    bool okay = SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup, (perlCallReceiver == NULL ? 0 : 1));
+    if (!okay) {
+      sootLock.Release(aTHX);
+      croak("Invalid Argument!");
+    }
 
     long addr = 0;
     double addrD = 0;
@@ -247,7 +264,7 @@ namespace SOOT {
     delete mInfo;
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
-    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor, needsCleanup);
+    return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor, needsCleanup, sootLock);
   }
 
 
@@ -406,7 +423,8 @@ namespace SOOT {
 
 
   void
-  CroakOnInvalidCall(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto, bool isFunction = false)
+  CroakOnInvalidCall(pTHX_ const char* className, const char* methName, TClass* c,
+                     const std::vector<std::string>& cproto, bool isFunction = false)
   {
     ostringstream msg;
     char* cprotoStr = JoinCProto(cproto);

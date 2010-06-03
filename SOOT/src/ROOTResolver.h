@@ -30,6 +30,8 @@ extern "C" {
 #endif
 
 namespace SOOT {
+  class ScopeLock;
+
   void FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
                            const char* methName, std::vector<BasicType>& proto,
                            std::vector<std::string>& cproto, long int& offset,
@@ -47,11 +49,12 @@ namespace SOOT {
   void TwiddlePointersAndReferences(std::vector<BasicType>& proto, std::vector<std::string>& cproto,
                                     unsigned int reference_map);
 
-  void SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
+  bool SetMethodArguments(pTHX_ G__CallFunc& theFunc, AV* args,
                           const std::vector<BasicType>& argTypes,
                           std::vector<void*>& needsCleanup, const unsigned int nSkip);
 
-  SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr, bool isConstructor, std::vector<void*> needsCleanup);
+  SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr,
+                         bool isConstructor, std::vector<void*> needsCleanup, ScopeLock& sootLock);
       
   SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
   SV* CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model);

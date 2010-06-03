@@ -1,4 +1,6 @@
 
+#define PERL_NO_GET_CONTEXT
+
 /* must load ROOT stuff veeery early due to pollution */
 #include "ROOTIncludes.h"
 
@@ -12,6 +14,7 @@
 #include "CPerlTypeConversion.h"
 #include "PerlCTypeConversion.h"
 #include "SOOTTypes.h"
+#include "SOOTLock.h"
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
@@ -37,6 +40,7 @@ extern "C" {
 #include <string>
 #include <vector>
 #include <cstring>
+
 
 using namespace SOOT;
 using namespace std;

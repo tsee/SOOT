@@ -9,6 +9,7 @@ BOOT:
   SOOT::gSOOTObjects = new SOOT::PtrTable(aTHX_ (UV)1024, &SOOT::ClearAnnotation);
   SOOT::GenerateClassStubs(aTHX);
   SOOT::InitializePerlGlobals(aTHX);
+  SOOT::gSOOTGlobalLock = new SOOT::GlobalLock(aTHX);
 
 void
 Init(int eval_macros = 0)
