@@ -27,7 +27,10 @@ use overload
 sub AUTOLOAD {
   $AUTOLOAD =~ s/::([^:]+)$//;
   my $method = $1;
-  SOOT::CallMethod($AUTOLOAD, $method, \@_);
+
+  my @args = @_;
+  @_ = ($AUTOLOAD, $method, \@args);
+  goto &SOOT::CallMethod;
 }
 
 1;
