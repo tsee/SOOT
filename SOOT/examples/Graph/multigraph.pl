@@ -19,7 +19,7 @@ my $ey1 = [.8,.7,.6,.5,.4,.4,.5,.6,.7,.8];
 my $gr1 = TGraphErrors->new($n1,$x1,$y1,$ex1,$ey1);
 $gr1->SetMarkerColor(kBlue);
 $gr1->SetMarkerStyle(21);
-$gr1->Fit("pol6","q"); # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID')
+$gr1->Fit("pol6","q");
 $mg->Add($gr1);
 
 # create second graph

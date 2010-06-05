@@ -33,7 +33,7 @@ foreach (0..299) {
   padRefresh($c1) if $_ and $_ % kUPDATE == 0;
 }
 
-$hpx[$_]->Fit("gaus","","") for 0..2; # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID') at /home/tsee/perl/root/soot/SOOT/blib/lib/TObject.pm line 30.
+$hpx[$_]->Fit("gaus","","") for 0..2;
 
 padRefresh($c1);
 
