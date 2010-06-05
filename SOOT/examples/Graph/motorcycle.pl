@@ -3,7 +3,6 @@ use warnings;
 use SOOT ':all';
 use File::Spec;
 
-my @obj; # FIXME hack to keep objects around (remove after fixing object-ownership)
 # Macro to test scatterplot smoothers: ksmooth, lowess, supsmu
 # as described in:
 #    Modern Applied Statistics with S-Plus, 3rd Edition
@@ -14,8 +13,9 @@ my @obj; # FIXME hack to keep objects around (remove after fixing object-ownersh
 # for a simulated motorcycle accident, taken from Silverman (1985).
 
 # data taken from R library MASS: mcycle.txt
-my $inFile = File::Spec->catfile($ENV{ROOTSYS},
-                                 qw(share doc root tutorials graphs motorcycle.dat));
+my $inFile = shift
+             || File::Spec->catfile($ENV{ROOTSYS},
+                                    qw(share doc root tutorials graphs motorcycle.dat));
 
 # read file and add to fit object
 my $x = [];
@@ -70,7 +70,7 @@ DrawSmooth($can,$grin,$grout,6,"Super Smoother: bass = 3","","");
 sub DrawSmooth {
    my ($can, $grin, $grout, $pad, $title, $xt, $yt) = @_;
    $can->cd($pad);
-   my $vFrame = $can->DrawFrame(0,-130,60,70); # FIXME this doesn't return a vFrame but a "G__p2memfunc"
+   my $vFrame = $can->DrawFrame(0,-130,60,70);
    $vFrame->SetTitle($title);
    $vFrame->SetTitleSize(0.2);
    $vFrame->SetXTitle($xt);
@@ -81,7 +81,7 @@ sub DrawSmooth {
    $grout->SetMarkerSize(0.5);
    $grout->DrawClone("P");
    $grout->DrawClone("LPX");
-   push @obj, $vFrame;
+   $vFrame->keep;
 }
 
 $gApplication->Run;
