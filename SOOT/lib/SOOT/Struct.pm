@@ -135,10 +135,10 @@ SOOT::Struct - Perl interface to generate new C-level struct types
   use SOOT::Struct;
   my $struct = SOOT::Struct->new(
     name   => 'person_t',
-    fields => {
+    fields => [
       'name' => 'Char_t[20]',
       'age'  => 'UInt_t',
-    },
+    ],
   );
   
   print $struct->code;
