@@ -43,7 +43,7 @@ isa_ok($tgraph, 'TGraph');
 isa_ok($tgraph, 'TObject');
 
 $n = eval { $tgraph->GetN(); };
-ok(!$@, "No error on TGraph->GetN");
+ok(!$@, "No error on TGraph->GetN") or diag("Error: $@");
 is($n, 3, "GetN works!");
 my $ary = $tgraph->GetX();
 is_deeply($ary, [1.,2.,4.]);
