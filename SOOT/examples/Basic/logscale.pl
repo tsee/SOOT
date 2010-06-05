@@ -87,24 +87,25 @@ my $f5 = TF1->new("f4b","x*cos(x+10)*sin(x+10)+25",1,21);
 $f5->SetLineWidth(1); 
 $f5->Draw("same");
 $f5->SetNpx(200);
-my $a = 20;
-for (my $i=$a; $i>=1; $i--) {
- my $f = TF1->new(sprintf("f4b_%d",$i),"x*sin(x+10)*[0]/[1]+25",1,21);
- $f->SetParameter(0,$i);
- $f->SetParameter(1,$a);
- $f->SetNpx(200);
- $f->SetLineWidth(1); 
- $f->SetLineColor($i+10); 
- $f->Draw("same");
- $f->keep;
- $f = TF1->new(sprintf("f4c_%d",$i),"x*cos(x+10)*sin(x+10)*[0]/[1]+25",1,25);
- $f->SetParameter(0,$i);
- $f->SetParameter(1,$a);
- $f->SetNpx(200);
- $f->SetLineWidth(1); 
- $f->SetLineColor($i+30); 
- $f->Draw("same");
- $f->keep;
+
+my $max = 20;
+for my $i (reverse(1..$max)) {
+  my $f = TF1->new(sprintf("f4b_%d",$i),"x*sin(x+10)*[0]/[1]+25",1,21);
+  $f->SetParameter(0,$i);
+  $f->SetParameter(1,$max);
+  $f->SetNpx(200);
+  $f->SetLineWidth(1); 
+  $f->SetLineColor($i+10); 
+  $f->Draw("same");
+  $f->keep;
+  $f = TF1->new(sprintf("f4c_%d",$i),"x*cos(x+10)*sin(x+10)*[0]/[1]+25",1,25);
+  $f->SetParameter(0,$i);
+  $f->SetParameter(1,$max);
+  $f->SetNpx(200);
+  $f->SetLineWidth(1); 
+  $f->SetLineColor($i+30); 
+  $f->Draw("same");
+  $f->keep;
 }
 my $pave3 = TPaveText->new(1.2,8,9,15);
 $pave3->SetFillColor(42);
