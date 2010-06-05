@@ -56,8 +56,9 @@ my $cl = $l->ComputeLimit($ds, 50000);
 printCL($cl, "Computing limits...");
 
 # Add stat uncertainty
-my $scl = $l->ComputeLimit($ds,50000,1); # FIXME returns int?
+my $scl = $l->ComputeLimit($ds,50000,1);
 printCL($scl, "Computing limits with stat systematics...");
+
 
 # Add some systematics
 my $errorb = TH1D->new("errorb","errors on background",1,0,1);
@@ -73,7 +74,12 @@ $errors->SetBinContent(0,0);    # error source 1: 0%
 $errors->SetBinContent(1,0.01); # error source 2: 1%
 
 my $nds  = TLimitDataSource->new;
-$nds->AddChannel($signal, $background, $data, $errors, $errorb, $names);
+$nds->AddChannel(
+  $signal, $background, $data,
+  TVectorD->new($errors->GetNbinsX(), $errors->GetArray()), # FIXME AddChannel expects a TVectorD argument, but that's really TVectorT<double>, which is templated and not really supported by SOOT...
+  TVectorD->new($errorb->GetNbinsX(), $errorb->GetArray()),
+  $names
+);
 
 my $ncl = $l->ComputeLimit($nds,50000,1);
 printCL($ncl, "Computing limits with systematics...");
