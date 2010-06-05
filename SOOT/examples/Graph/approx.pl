@@ -70,7 +70,7 @@ $gApplication->Run;
 sub DrawSmooth {
    my ($pad, $title, $xt, $yt) = @_;
    $vC1->cd($pad);
-   my $vFrame = $vC1->DrawFrame(0,0,15,150); # FIXME apparently DrawFrame returns "G__p2memfunc"...
+   my $vFrame = $vC1->DrawFrame(0,0,15,150);
    $vFrame->SetTitle($title);
    $vFrame->SetTitleSize(0.2);
    $vFrame->SetXTitle($xt);
