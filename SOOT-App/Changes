@@ -1,5 +1,6 @@
 Revision history for Perl extension SOOT::App.
 
+0.03  Wed Jun  9 21:00:00 2010
   - Automatically open files provided as arguments in the command
     line into @main::files
   - Use threads for asynchroneous gApplication.
