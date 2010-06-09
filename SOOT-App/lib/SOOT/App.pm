@@ -9,7 +9,7 @@ use Capture::Tiny qw/capture/;
 use Time::HiRes 'usleep';
 use vars '%SIG';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 our $AppThread;
 
 sub usage {
