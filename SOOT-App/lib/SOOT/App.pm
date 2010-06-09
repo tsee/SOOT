@@ -23,11 +23,18 @@ HERE
 
 sub run {
   my $class = shift;
+
+  my %opts = @_;
+  my $argv = $opts{argv}||[];
+
   my $nologon = 0;
-  Getopt::Long::GetOptions(
+  Getopt::Long::GetOptionsFromArray(
+    $argv,
     'h|help' => \&usage,
     'n' => \$nologon,
   );
+
+  my @files_to_open = @$argv;
   require Devel::REPL;
   require SOOT;
 
@@ -50,8 +57,26 @@ sub run {
   $repl->formatted_eval("package main;");
   $repl->formatted_eval("no strict 'vars'");
   $repl->formatted_eval("use SOOT qw/:all/");
+  $repl->formatted_eval("use Data::Dumper;");
   SOOT::Init($nologon ? 0 : 1);
+
+  $class->_open_root_files(\@files_to_open);
+
   return $repl->run();
+}
+
+sub _open_root_files {
+  my $class = shift;
+  my $files = shift;
+
+  no strict 'vars';
+  package main;
+  foreach my $file (map {glob $_} @$files) {
+    my $f = TFile->new($file, 'READ');
+    push @files, $f;
+    print "Attached file '$file' as \$main::files[" . $#main::files . "]...\n";
+  }
+  return();
 }
 
 sub create_app_thread {
