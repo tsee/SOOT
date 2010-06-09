@@ -1,5 +1,9 @@
 Revision history for Perl extension SOOT::App.
 
+  - Automatically open files provided as arguments in the command
+    line into @main::files
+  - Use threads for asynchroneous gApplication.
+
 0.02  Fri Feb 26 21:44:00 2010
   - Readline history
   - Load .rootrc/.rootlogon
