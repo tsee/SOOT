@@ -39,7 +39,7 @@ sub run {
   require SOOT;
 
   my $repl = Devel::REPL->new;
-  foreach (qw(FindVariable History LexEnv SOOT)) {
+  foreach (qw(FindVariable History LexEnv Packages SOOT)) {
     $repl->load_plugin($_)
   }
   foreach (qw(Colors Completion DDS Interrupt
