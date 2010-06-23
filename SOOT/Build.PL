@@ -5,37 +5,39 @@ use Getopt::Long;
 use inc::latest 'ExtUtils::Typemap';
 use inc::latest 'ExtUtils::ParseXS';
 use inc::latest 'ExtUtils::XSpp';
+use inc::latest 'ExtUtils::CppGuess';
 use inc::latest 'Module::Build';
 
 use lib 'inc';
 use SOOTBuilder;
 
 my $userRootConfig;
+my $compiler;
 my @flags;
 my @libs;
 
 GetOptions(
   '--with-root-config:s' => \$userRootConfig,
   '--build-debug' => sub {push(@flags, '-DDEBUG')},
+  '--compiler:s' => \$compiler,
+);
+my $guess = ExtUtils::CppGuess->new(
+  (defined($compiler) ? (cc => $compiler) : ()),
 );
 
-# The bindings should be compiled with the flags for libsmokeqt and qt4
 push(@flags,
-  '-std=gnu++98', # FIXME necessary?
+#  '-std=gnu++98', # FIXME necessary?
   '-Wall',
-  '-xc++',
+#  '-xc++',
   '-I.',
   '-Isrc',
-  '-Wno-unused', # FIXME is this a gccism?
+  ($guess->is_gcc ? ('-Wno-unused') : ()),
 );
 
 if ($SOOTBuilder::Alien->private_root) {
   # FIXME using rpath might be unportable
   # Add an rpath to the .so to make sure it can find root after install
-  #push @flags, '-Wl,-R' . $SOOTBuilder::Alien->libdir;
   push @libs, '-Wl,-R' . $SOOTBuilder::Alien->libdir;
-# this is was Alien::QtSmoke does:
-#push(@libs, '-Wl,--rpath,' . Alien::QtSmoke->lib());
 }
 
 my $rootConfig = defined($userRootConfig) ? $userRootConfig : 'root-config';
@@ -63,6 +65,18 @@ push @libs, map { split(' ', $_) }
               SOOTBuilder::striprun($rootConfig, '--ldflags'),
               SOOTBuilder::striprun($rootConfig, '--libs'));
 
+$guess->add_extra_compiler_flags(join(' ', @flags));
+$guess->add_extra_linker_flags(join(' ', @libs));
+
+if ($guess->is_gcc) {
+  print "Detected that we're building for a gcc compiler...\n";
+}
+elsif ($guess->is_msvc) {
+  print "Detected that we're building for an MS compiler...\n";
+}
+else {
+  print "Unknown compiler... Trying regardless.\n";
+}
 
 my $builder = SOOTBuilder->new(
   module_name           => 'SOOT',
@@ -83,8 +97,9 @@ my $builder = SOOTBuilder->new(
     'SOOT.xs' => 'lib/SOOT.xs'
   },
 
-  extra_compiler_flags  => \@flags,
-  extra_linker_flags    => \@libs,
+  #extra_compiler_flags  => \@flags,
+  #extra_linker_flags    => \@libs,
+  $guess->module_build_options(),
 
   requires => {
     'perl'                  => '5.008',
@@ -99,6 +114,7 @@ my $builder = SOOTBuilder->new(
   configure_requires => {
     'Module::Build'         => '0.3605',
     'Alien::ROOT'           => '5.26.0.1',
+    'ExtUtils::CppGuess'    => '0.01',
   },
   build_requires => {
     # For the XS build process
