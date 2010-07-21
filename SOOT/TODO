@@ -36,6 +36,8 @@ Packaging:
   => Works locally, but is really hacky.
   => Problems with how a tree of files can be installed by the same means
      as the rest of ROOT. Need hookable "make install" target.
+- Convert to using Module::Build::WithXSpp
+- Use ExtUtils::Typemap::* instead of shipping perlobject.map, etc
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
