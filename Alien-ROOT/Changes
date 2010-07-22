@@ -1,5 +1,8 @@
 Revision history for Perl extension Alien-ROOT.
 
+5.26.0.2  Thu Jul 22 20:00 2010
+  - Use ROOT 5.26/c
+
 5.26.0  Wed Apr 14 21:44 2010
-  - original version supporint ROOT 5.26/b.
+  - original version supporting ROOT 5.26/b.
 
