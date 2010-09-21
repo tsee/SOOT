@@ -1,7 +1,17 @@
 Revision history for Perl extension SOOT.
 
+0.10  Tue Sep 21 20:00 2010
+* Bug fixes:
+  - Better error reporting (no more false error location
+    in TObject.pm)
+* New features:
+  - Optimized TF1::GetRandom calls
+  - Wrapped TFitResultPtr
+  - Updated examples.
+  - Updated all the bundled modules.
+
 0.09  Wed Apr 21 18:00 2010
-* New features.
+* New features:
   - Using Alien::ROOT, on which we now depend at configure time,
     it's possible to get an entirely working, private copy of ROOT
     for SOOT. That means on a virgin (Linux!) machine, you can do the
