@@ -90,6 +90,16 @@ flags.
 Takes a string as argument that is added to the string of extra linker
 flags.
 
+=head1 AUTHOR
+
+Mattia Barbon <mbarbon@cpan.org>
+
+Steffen Mueller <smueller@cpan.org>
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 
 =cut
 
@@ -97,7 +107,7 @@ use Config ();
 use File::Basename qw();
 use Capture::Tiny 'capture_merged';
 
-our $VERSION = '0.01';
+our $VERSION = '0.04';
 
 sub new {
     my( $class, %args ) = @_;
@@ -117,14 +127,6 @@ sub guess_compiler {
         $self->_guess_win32() or return();
     } else {
         $self->_guess_unix() or return();
-    }
-
-    if (defined $self->{extra_compiler_flags}) {
-        $self->{guess}{extra_cflags} .= ' ' . $self->{extra_compiler_flags};
-    }
-
-    if (defined $self->{extra_linker_flags}) {
-        $self->{guess}{extra_lflags} .= ' ' . $self->{extra_linker_flags};
     }
 
     return $self->{guess};
@@ -218,6 +220,20 @@ sub _capture {
     return $out;
 }
 
+# capture the output of a command that is run with piping
+# to stdin of the command. We immediately close the pipe.
+sub _capture_empty_stdin {
+    my( $cmd ) = @_;
+    my $out = capture_merged {
+        if (open(my $fh, '|-', $cmd)) {
+          close $fh;
+        }
+    };
+    $out = '' if not defined $out;
+    return $out;
+}
+
+
 sub _cc_is_msvc {
     my( $self, $cc ) = @_;
     $self->{is_msvc} = ($^O =~ /MSWin32/ and File::Basename::basename( $cc ) =~ /^cl/i);
@@ -232,7 +248,8 @@ sub _cc_is_gcc {
     if (
             $cc_version =~ m/\bg(?:cc|\+\+)/i # 3.x, some 4.x
          || scalar( _capture( "$cc" ) =~ m/\bgcc\b/i ) # 2.95
-         || $cc_version =~ m/\bcc\b.*Free Software Foundation/si # some 4.x?
+         || scalar(_capture_empty_stdin("$cc -dM -E -") =~ /__GNUC__/) # more or less universal?
+         || scalar($cc_version =~ m/\bcc\b.*Free Software Foundation/si) # some 4.x?
        )
     {
         $self->{is_gcc} = 1;
