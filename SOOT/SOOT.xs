@@ -9,6 +9,7 @@
 // for which there is a ROOT_XSP/...xsp file
 #include "rootclasses.h"
 
+#include "SOOTUtil.h"
 #include "CPerlTypeConversion.h"
 #include "PerlCTypeConversion.h"
 #include "SOOTTypes.h"

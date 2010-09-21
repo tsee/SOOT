@@ -2,6 +2,7 @@
 MODULE = SOOT PACKAGE = SOOT
 BOOT:
   //cout << "BOOTING SOOT" << endl;
+  require_pv("Carp"); // for SOOTcroak
   static TTObjectEncapsulator e;
   gROOT->GetListOfCleanups()->Add( &e );
   gSystem->Load("libMathCore");

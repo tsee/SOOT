@@ -24,9 +24,9 @@ my ($kFALSE, $kTRUE) = (0,1);
 ##//*  ROOTMARKS = 600.9   *  Root3.05/02   20030201/1840
 ##//******************************************************************
 
-my $N = 10000;       #number of events to be processed
+my $N = 1000;       #number of events to be processed
+#my $N = 10000;       #number of events to be processed
 my $timer = TStopwatch->new();
-print $timer, "\n";
 bill();
 
 # write N histograms as keys
@@ -70,13 +70,14 @@ sub billr {
   my $h;
   for my $i (0..$nobj-1) {
     my $name = sprintf("h%d", $i);
-    $h = $f->Get($name);
+    $h = $f->Get($name)->as('TH1');
     $hmean->Fill($h->GetMean(), 1.0);
   }
   $timer->Stop();
   printf("billr%d  : RT=%7.3f s, Cpu=%7.3f s\n", $compress, $timer->RealTime(), 
                                                             $timer->CpuTime());
 }
+
 # write N histograms to a Tree
 sub billtw {
   my $compress = shift;
@@ -89,7 +90,7 @@ sub billtw {
   for my $i (0..$N) {
     my $name = sprintf("h%d",$i);
     $h->SetName($name);
-    $h->Fill(2*$gRandom->Rndm());
+    $h->Fill(2.*$gRandom->Rndm());
     $T->Fill();
   }
   $T->Write();
@@ -101,20 +102,22 @@ sub billtw {
     $f->GetBytesWritten(),
     $f->GetCompressionFactor());
 }
+
 sub billtr {
   my $compress = shift;
 }
+
 sub bill {
    my $totaltimer = TStopwatch->new();
    $totaltimer->Start();
    for my $compress (0..2) {
      billw($compress);
      billr($compress);
-#     billtw($compress);
-#     billtr($compress);
+     billtw($compress);
+     billtr($compress);
    }
-   gSystem->Unlink("/tmp/bill.root");
-   gSystem->Unlink("/tmp/billt.root");
+   $gSystem->Unlink("/tmp/bill.root");
+   $gSystem->Unlink("/tmp/billt.root");
    $totaltimer->Stop();
    my $rtime = $totaltimer->RealTime();
    my $ctime = $totaltimer->CpuTime();

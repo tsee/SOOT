@@ -1,0 +1,20 @@
+%module{SOOT};
+
+class TTree{
+  int Fill(); // optimize
+
+  SV*
+  BranchFromClass(char* name, SV* perlObj,
+                  int bufsize = 32000, int splitlevel = 99)
+    %code{%
+      char* classname;
+      void* obj = (void*)SOOT::LobotomizeObject(aTHX_ perlObj, classname);
+      cout << "OBJ="<<obj<< " " << classname<<endl;
+      cout << THIS << endl;
+      TBranch* rv = THIS->Branch(name, classname, obj, bufsize, splitlevel);
+      cout << THIS << endl;
+      cout << rv << endl;
+      RETVAL = SOOT::RegisterObject(aTHX_ rv, "TBranch");
+    %}; 
+};
+

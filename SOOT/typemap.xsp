@@ -1,5 +1,6 @@
 %typemap{bool}{simple};
 %typemap{AV*}{simple};
+%typemap{SV*}{simple};
 
 %typemap{TGraphFloatArray}{parsed}{
   %cpp_type{%SV*%};
