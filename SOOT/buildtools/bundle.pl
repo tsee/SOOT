@@ -7,9 +7,10 @@ use inc::latest;
 #                        ExtUtils::ParseXS
 #                        ExtUtils::Typemap
 #                        Alien::ROOT
-foreach my $module (qw( ExtUtils::XSpp
-                        ExtUtils::CBuilder
-                        Alien::ROOT
+#                        ExtUtils::XSpp
+#                        ExtUtils::CBuilder
+foreach my $module (qw(
+                        Module::Build
                     ))
 {
   inc::latest->bundle_module($module, 'inc');
