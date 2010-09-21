@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.3605';
+$VERSION = '0.3607';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -169,22 +169,24 @@ This illustrates initial configuration and the running of three
 action), 'test', and 'install'.  Other actions defined so far include:
 
   build                          manpages
-  clean                          pardist
-  code                           patch_blead
-  config_data                    ppd
-  diff                           ppmdist
-  dist                           prereq_data
-  distcheck                      prereq_report
-  distclean                      pure_install
-  distdir                        realclean
-  distmeta                       retest
-  distsign                       skipcheck
-  disttest                       test
-  docs                           testall
-  fakeinstall                    testcover
-  help                           testdb
-  html                           testpod
-  install                        testpodcoverage
+  checkchanges                   pardist
+  checkgit                       patch_blead
+  clean                          ppd
+  code                           ppmdist
+  config_data                    prereq_data
+  diff                           prereq_report
+  dist                           pure_install
+  distcheck                      realclean
+  distclean                      retest
+  distdir                        skipcheck
+  distmeta                       tag_git
+  distsign                       test
+  disttest                       testall
+  docs                           testcover
+  fakeinstall                    testdb
+  help                           testpod
+  html                           testpodcoverage
+  install                        upload
   installdeps                    versioninstall
   manifest
 
