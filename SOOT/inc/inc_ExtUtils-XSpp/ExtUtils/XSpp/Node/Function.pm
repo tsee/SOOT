@@ -51,6 +51,8 @@ sub init {
   $this->{POSTCALL}  = $args{postcall};
   $this->{CLASS}     = $args{class};
   $this->{CATCH}     = $args{catch};
+  $this->{CONDITION} = $args{condition};
+  $this->{EMIT_CONDITION} = $args{emit_condition};
 
   if (ref($this->{CATCH})
       and @{$this->{CATCH}} > 1
@@ -158,22 +160,6 @@ sub add_exception_handlers {
 }
 
 
-=head2 argument_style
-
-Returns either C<ansi> or C<kr>. C<kr> is the default.
-C<ansi> is returned if any one of the arguments uses the XS
-C<length> feature.
-
-=cut
-
-sub argument_style {
-  my $this = shift;
-  foreach my $arg (@{$this->{ARGUMENTS}}) {
-    return 'ansi' if $arg->name =~ /length.*\(/;
-  }
-  return 'kr';
-}
-
 # Depending on argument style, this produces either: (style=kr)
 #
 # return_type
@@ -207,14 +193,15 @@ sub print {
   my $args               = $this->arguments;
   my $ret_type           = $this->ret_type;
   my $ret_typemap        = $this->{TYPEMAPS}{RET_TYPE};
-  my $need_call_function = 0;
+
+  $out .= '#if ' . $this->emit_condition . "\n" if $this->emit_condition;
 
   my( $init, $arg_list, $call_arg_list, $code, $output, $cleanup,
       $postcall, $precall ) =
     ( '', '', '', '', '', '', '', '' );
 
-  my $use_ansi_style = $this->argument_style() eq 'ansi';
-
+  # compute the precall code, XS argument list and C++ argument list using
+  # the typemap information
   if( $args && @$args ) {
     my $has_self = $this->is_method ? 1 : 0;
     my( @arg_list, @call_arg_list );
@@ -224,14 +211,8 @@ sub print {
       my $pc  = $t->precall_code( sprintf( 'ST(%d)', $i + $has_self ),
                                   $arg->name );
 
-      $need_call_function ||=    defined $t->call_parameter_code( '' )
-                              || defined $pc;
-      my $type = $use_ansi_style ? $t->cpp_type . ' ' : '';
-      push @arg_list, $type . $arg->name .
+      push @arg_list, $t->cpp_type . ' ' . $arg->name .
                       ( $arg->has_default ? ' = ' . $arg->default : '' );
-      if (!$use_ansi_style) {
-        $init .= '    ' . $t->cpp_type . ' ' . $arg->name . "\n";
-      }
 
       my $call_code = $t->call_parameter_code( $arg->name );
       push @call_arg_list, defined( $call_code ) ? $call_code : $arg->name;
@@ -241,16 +222,6 @@ sub print {
     $arg_list = ' ' . join( ', ', @arg_list ) . ' ';
     $call_arg_list = ' ' . join( ', ', @call_arg_list ) . ' ';
   }
-
-  # same for return value
-  $need_call_function ||= $ret_typemap &&
-    ( defined $ret_typemap->call_function_code( '', '' ) ||
-      defined $ret_typemap->output_code ||
-      defined $ret_typemap->cleanup_code );
-  # is C++ name != Perl name?
-  $need_call_function ||= $this->cpp_name ne $this->perl_name;
-  # package-static function
-  $need_call_function ||= $this->package_static;
 
   my $retstr = $ret_typemap ? $ret_typemap->cpp_type : 'void';
 
@@ -263,46 +234,49 @@ sub print {
 
   my $has_ret = $ret_typemap && !$ret_typemap->type->is_void;
 
-  # Hardcoded to one because we force the exception handling for now
-  # All the hard work above about determining whether $need_call_function
-  # needs to be enabled is left in as exception handling may be subject
-  # to configuration later. --Steffen
-  $need_call_function = 1;
+  my $ppcode = $has_ret && $ret_typemap->output_list( '' ) ? 1 : 0;
+  my $code_type = $ppcode ? "PPCODE" : "CODE";
+  my $ccode = $this->_call_code( $call_arg_list );
+  if ($this->isa('ExtUtils::XSpp::Node::Destructor')) {
+    $ccode = 'delete THIS';
+    $has_ret = 0;
+  } elsif( $has_ret && defined $ret_typemap->call_function_code( '', '' ) ) {
+    $ccode = $ret_typemap->call_function_code( $ccode, 'RETVAL' );
+  } elsif( $has_ret ) {
+    $ccode = "RETVAL = $ccode";
+  }
 
-  if( $need_call_function ) {
-    my $ccode = $this->_call_code( $call_arg_list );
-    if ($this->isa('ExtUtils::XSpp::Node::Destructor')) {
-      $ccode = 'delete THIS';
-      $has_ret = 0;
-    } elsif( $has_ret && defined $ret_typemap->call_function_code( '', '' ) ) {
-      $ccode = $ret_typemap->call_function_code( $ccode, 'RETVAL' );
-    } elsif( $has_ret ) {
-      $ccode = "RETVAL = $ccode";
-    }
+  $code .= "  $code_type:\n";
+  $code .= "    try {\n";
+  if ($precall) {
+    $code .= '      ' . $precall;
+  }
+  $code .= '      ' . $ccode . ";\n";
+  if( $has_ret && defined $ret_typemap->output_code( '', '' ) ) {
+    my $retcode = $ret_typemap->output_code( 'ST(0)', 'RETVAL' );
+    $code .= '      ' . $retcode . ";\n";
+  }
+  if( $has_ret && defined $ret_typemap->output_list( '' ) ) {
+    my $retcode = $ret_typemap->output_list( 'RETVAL' );
+    $code .= '      ' . $retcode . ";\n";
+  }
+  $code .= "    }\n";
+  my @catchers = @{$this->{EXCEPTIONS}};
+  foreach my $exception_handler (@catchers) {
+    my $handler_code = $exception_handler->handler_code;
+    $code .= $handler_code;
+  }
 
-    $code .= "  CODE:\n";
-    $code .= "    try {\n";
-    $code .= '      ' . $precall if $precall;
-    $code .= '      ' . $ccode . ";\n";
-    if( $has_ret && defined $ret_typemap->output_code ) {
-      $code .= '      ' . $ret_typemap->output_code . ";\n";
-    }
-    $code .= "    }\n";
-    my @catchers = @{$this->{EXCEPTIONS}};
-    foreach my $exception_handler (@catchers) {
-      $code .= $exception_handler->handler_code;
-    }
+  $output = "  OUTPUT: RETVAL\n" if $has_ret;
 
-    $output = "  OUTPUT: RETVAL\n" if $has_ret;
-
-    if( $has_ret && defined $ret_typemap->cleanup_code ) {
-      $cleanup .= "  CLEANUP:\n";
-      $cleanup .= '    ' . $ret_typemap->cleanup_code . ";\n";
-    }
+  if( $has_ret && defined $ret_typemap->cleanup_code( '', '' ) ) {
+    $cleanup .= "  CLEANUP:\n";
+    my $cleanupcode = $ret_typemap->cleanup_code( 'ST(0)', 'RETVAL' );
+    $cleanup .= '    ' . $cleanupcode . ";\n";
   }
 
   if( $this->code ) {
-    $code = "  CODE:\n    " . join( "\n", @{$this->code} ) . "\n";
+    $code = "  $code_type:\n    " . join( "\n", @{$this->code} ) . "\n";
     # cleanup potential multiple newlines because they break XSUBs
     $code =~ s/^\s*\z//m;
     $output = "  OUTPUT: RETVAL\n" if $code =~ m/\bRETVAL\b/;
@@ -316,6 +290,9 @@ sub print {
     my $clcode = join( "\n", @{$this->cleanup} );
     $cleanup .= "    $clcode\n";
   }
+  if( $ppcode ) {
+    $output = '';
+  }
 
   if( !$this->is_method && $fname =~ /^(.*)::(\w+)$/ ) {
     my $pcname = $1;
@@ -327,14 +304,44 @@ $cur_module PACKAGE=$pcname
 EOT
   }
 
-  $out .= "$retstr\n";
-  $out .= "$fname($arg_list)\n";
-  $out .= $init;
-  $out .= $code;
-  $out .= $postcall;
-  $out .= $output;
-  $out .= $cleanup;
-  $out .= "\n";
+  my $head = "$retstr\n"
+             . "$fname($arg_list)\n";
+  my $body = $init . $code . $postcall . $output . $cleanup . "\n";
+  $this->_munge_code(\$body) if $this->has_argument_with_length;
+
+  $out .= $head . $body;
+  $out .= '#endif // ' . $this->emit_condition . "\n" if $this->emit_condition;
+
+  return $out;
+}
+
+# This replaces the use of "length(varname)" with
+# the proper name of the XS variable that is auto-generated in
+# case of the XS length() feature. The Argument's take care of
+# this and do nothing if they're not of the "length" type.
+# Any additional checking "$this->_munge_code(\$code) if $using_length"
+# is just an optimization!
+sub _munge_code {
+  my $this = shift;
+  my $code = shift;
+  
+  foreach my $arg (@{$this->{ARGUMENTS}}) {
+    $$code = $arg->fix_name_in_code($$code);
+  }
+}
+
+=head2 print_declaration
+
+Returns a string with a C++ method declaration for the node.
+
+=cut
+
+sub print_declaration {
+    my( $this ) = @_;
+
+    return $this->ret_type->print . ' ' . $this->cpp_name . '( ' .
+           join( ', ', map $_->print, @{$this->arguments} ) . ')' .
+           ( $this->const ? ' const' : '' );
 }
 
 =head2 perl_function_name
@@ -355,6 +362,22 @@ but overridden in the L<ExtUtils::XSpp::Node::Method> sub-class.
 
 sub is_method { 0 }
 
+=head2 has_argument_with_length
+
+Returns true if the function has any argument that uses the XS length
+feature.
+
+=cut
+
+sub has_argument_with_length {
+  my $this = shift;
+  foreach my $arg (@{$this->{ARGUMENTS}}) {
+    return 1 if $arg->uses_length;
+  }
+  return();
+}
+
+
 =begin documentation
 
 ExtUtils::XSpp::Node::_call_code( argument_string )
@@ -366,7 +389,6 @@ Return something like "foo( $argument_string )".
 =cut
 
 sub _call_code { return $_[0]->cpp_name . '(' . $_[1] . ')'; }
-
 
 =head1 ACCESSORS
 
@@ -395,6 +417,11 @@ Returns the C++ return type.
 
 Returns the C<%code> decorator if any.
 
+=head2 set_code
+
+Sets the implementation for the method call (equivalent to using
+C<%code>); takes the code as an array reference containing the lines.
+
 =head2 cleanup
 
 Returns the C<%cleanup> decorator if any.
@@ -411,11 +438,13 @@ with the function via C<%catch>. (array reference)
 =cut
 
 sub cpp_name { $_[0]->{CPP_NAME} }
+sub set_cpp_name { $_[0]->{CPP_NAME} = $_[1] }
 sub perl_name { $_[0]->{PERL_NAME} }
 sub set_perl_name { $_[0]->{PERL_NAME} = $_[1] }
 sub arguments { $_[0]->{ARGUMENTS} }
 sub ret_type { $_[0]->{RET_TYPE} }
 sub code { $_[0]->{CODE} }
+sub set_code { $_[0]->{CODE} = $_[1] }
 sub cleanup { $_[0]->{CLEANUP} }
 sub postcall { $_[0]->{POSTCALL} }
 sub catch { $_[0]->{CATCH} ? $_[0]->{CATCH} : [] }
@@ -423,8 +452,8 @@ sub catch { $_[0]->{CATCH} ? $_[0]->{CATCH} : [] }
 =head2 set_static
 
 Sets the C<static>-ness attribute of the function.
-Can be either undef (i.e. not static), C<package_static>,
-or C<class_static>.
+Can be either undef (i.e. not static), C<"package_static">,
+or C<"class_static">.
 
 =head2 package_static
 

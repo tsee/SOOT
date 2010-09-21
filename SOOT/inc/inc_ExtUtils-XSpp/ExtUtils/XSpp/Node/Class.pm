@@ -36,6 +36,10 @@ methods in the class handle.
 
 =cut
 
+# internal list of all the non-empty class objects, either defined by the
+# parser or created by plugins; does not include dummy base class objects
+my %all_classes;
+
 sub init {
   my $this = shift;
   my %args = @_;
@@ -45,6 +49,16 @@ sub init {
   $this->{BASE_CLASSES} = $args{base_classes} || [];
   $this->add_methods( @{$args{methods}} ) if $args{methods};
   $this->{CATCH}     = $args{catch};
+  $this->{CONDITION} = $args{condition};
+  $this->{EMIT_CONDITION} = $args{emit_condition};
+
+  $all_classes{$this->cpp_name} = $this unless $this->empty;
+
+  # TODO check the Perl name of the base class?
+  foreach my $base ( @{$this->base_classes} ) {
+    $base = $all_classes{$base->cpp_name}
+        if $all_classes{$base->cpp_name};
+  }
 }
 
 =head2 add_methods
@@ -57,7 +71,7 @@ If an argument is an L<ExtUtils::XSpp::Node::Access>,
 the current method scope is changed accordingly for
 all following methods.
 
-If an argument is an L<ExtUtils::XSpp::Node::Method>,
+If an argument is an L<ExtUtils::XSpp::Node::Method>
 it is added to the list of methods of the class.
 The method's class name is set to the current class
 and its scope is set to the current method scope.
@@ -68,7 +82,7 @@ sub add_methods {
   my $this = shift;
   my $access = 'public'; # good enough for now
   foreach my $meth ( @_ ) {
-      if( $meth->isa( 'ExtUtils::XSpp::Node::Method' ) ) {
+      if( $meth->isa( 'ExtUtils::XSpp::Node::Function' ) ) {
           $meth->{CLASS} = $this;
           $meth->{ACCESS} = $access;
           $meth->add_exception_handlers( @{$this->{CATCH} || []} );
@@ -81,6 +95,15 @@ sub add_methods {
       # FIXME: Should there be else{croak}?
       push @{$this->{METHODS}}, $meth;
   }
+
+  $all_classes{$this->cpp_name} = $this unless $this->empty;
+}
+
+sub delete_methods {
+    my( $this, @methods ) = @_;
+    my %methods = map { $_ => 1 } @methods;
+
+    $this->{METHODS} = [ grep !$methods{$_}, @{$this->{METHODS}} ];
 }
 
 sub print {
@@ -88,7 +111,10 @@ sub print {
   my $state = shift;
   my $out = $this->SUPER::print( $state );
 
+  $out .= '#if ' . $this->emit_condition . "\n" if $this->emit_condition;
+
   foreach my $m ( @{$this->methods} ) {
+    next if $m->can( 'access' ) && $m->access ne 'public';
     $out .= $m->print( $state );
   }
 
@@ -99,6 +125,10 @@ sub print {
       $out .= <<EOT;
 BOOT:
     {
+EOT
+
+      $out .= '#ifdef ' . $this->condition . "\n" if $this->condition;
+      $out .= <<EOT;
         AV* isa = get_av( "${class}::ISA", 1 );
 EOT
 
@@ -111,11 +141,14 @@ EOT
     }
 
       # close block in BOOT
+      $out .= '#endif // ' . $this->condition . "\n" if $this->condition;
       $out .= <<EOT;
     } // blank line here is important
 
 EOT
   }
+
+  $out .= '#endif // ' . $this->emit_condition . "\n" if $this->emit_condition;
 
   return $out;
 }
@@ -132,9 +165,14 @@ Each of the methods is an C<ExtUtils::XSpp::Node::Method>
 Returns the internal reference to the array of base classes of
 this class.
 
+If the base classes have been defined in the same file, these are the
+complete class objects including method definitions, otherwise only
+the C++ and Perl name of the class are available as attributes.
+
 =cut
 
 sub methods { $_[0]->{METHODS} }
 sub base_classes { $_[0]->{BASE_CLASSES} }
+sub empty { !$_[0]->methods || !@{$_[0]->methods} }
 
 1;

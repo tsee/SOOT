@@ -57,6 +57,7 @@ sub output_code { undef }
 sub cleanup_code { undef }
 sub call_parameter_code { undef }
 sub call_function_code { undef }
+sub output_list { undef }
 
 my @typemaps;
 
@@ -87,7 +88,42 @@ sub get_typemap_for_type {
     return ${$t}[1] if $t->[0]->equals( $type );
   }
 
-  Carp::confess( "No typemap for type ", $type->print );
+  # construct verbose error message:
+  my $errmsg = "No typemap for type " . $type->print
+               . "\nThere are typemaps for the following types:\n";
+  my @types;
+  foreach my $t (@typemaps) {
+    push @types, "  - " . $t->[0]->print . "\n";
+  }
+
+  if (@types) {
+    $errmsg .= join('', @types);
+  }
+  else {
+    $errmsg .= "  (none)\n";
+  }
+  $errmsg .= "Did you forget to declare your type in an XS++ typemap?";
+
+  Carp::confess( $errmsg );
+}
+
+# adds default typemaps for C* and C&
+sub add_class_default_typemaps {
+  my( $name ) = @_;
+
+  my $ptr = ExtUtils::XSpp::Node::Type->new
+                ( base    => $name,
+                  pointer => 1,
+                  );
+  my $ref = ExtUtils::XSpp::Node::Type->new
+                ( base      => $name,
+                  reference => 1,
+                  );
+
+  add_weak_typemap_for_type
+      ( $ptr, ExtUtils::XSpp::Typemap::simple->new( type => $ptr ) );
+  add_weak_typemap_for_type
+      ( $ref, ExtUtils::XSpp::Typemap::reference->new( type => $ref ) );
 }
 
 sub add_default_typemaps {
