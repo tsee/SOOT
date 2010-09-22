@@ -1,5 +1,9 @@
 Revision history for Perl extension SOOT.
 
+0.11  Tue Sep 21 21:00 2010
+* Bug fixes:
+  - Compile fix in PtrTable for some gccs.
+
 0.10  Tue Sep 21 20:00 2010
 * Bug fixes:
   - Better error reporting (no more false error location
