@@ -99,7 +99,7 @@ namespace SOOT {
      * This is one of Bob Jenkins' hash functions for 32-bit integers
      * from: http://burtleburtle.net/bob/hash/integer.html
      */
-    static inline U32 PtrTable::hash(PTRV u) {
+    static inline U32 hash(PTRV u) {
         u = (u + 0x7ed55d16) + (u << 12);
         u = (u ^ 0xc761c23c) ^ (u >> 19);
         u = (u + 0x165667b1) + (u << 5);
