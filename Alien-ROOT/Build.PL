@@ -13,7 +13,7 @@ use Getopt::Long qw/GetOptions/;
 Getopt::Long::Configure('pass_through', 'permute', 'no_require_order');
 
 our $USER_CONFIG = {
-  archive => 'root_v5.26.00c.source.tar.gz',
+  archive => 'root_v5.26.00e.source.tar.gz',
   parallel_processes => 1,
 };
 
