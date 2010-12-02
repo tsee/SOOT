@@ -37,7 +37,12 @@ push(@flags,
 if ($SOOTBuilder::Alien->private_root) {
   # FIXME using rpath might be unportable
   # Add an rpath to the .so to make sure it can find root after install
-  push @libs, '-Wl,-R' . $SOOTBuilder::Alien->libdir;
+  if ($^O =~ /darwin/) {
+    push @libs, '-Wl,-rpath,' . $SOOTBuilder::Alien->libdir;
+  }
+  else {
+    push @libs, '-Wl,-R' . $SOOTBuilder::Alien->libdir;
+  }
 }
 
 my $rootConfig = defined($userRootConfig) ? $userRootConfig : 'root-config';
