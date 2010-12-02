@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use Alien::ROOT;
 use vars '$Alien';
