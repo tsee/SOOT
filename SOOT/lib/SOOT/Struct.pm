@@ -31,7 +31,7 @@ sub new {
 
 sub code {
   my $self = shift;
-  my $code = "struct $self->{name} {\n";
+  my $code = "class $self->{name} : public TObject {\n\tpublic:\n";
   my $fields = [@{$self->{fields}}];
   while (@$fields) {
     my $fieldname = shift @$fields;
@@ -42,7 +42,7 @@ sub code {
     }
     $code .= "\t$type\t$fieldname;\n";
   }
-  $code .= "};\n";
+  $code .= "\tClassDef($self->{name}, 1);\n};\n";
   return $code;
 }
 
@@ -175,6 +175,15 @@ The necessary type conversions are only implemented for basic types
 and only for up to one level of arrays. Storing/accessing matrices
 does not work.
 
+The generated code looks something like this:
+
+  class $yourstructname : public TObject {
+    public:
+    $yourfirsttype $yourfirstfield;
+    ...
+    ClassDef($yourstructname, 1);
+  };
+
 =head1 METHODS
 
 =head2 new
@@ -227,7 +236,7 @@ Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by Steffen Mueller
+Copyright (C) 2010-2011 by Steffen Mueller
 
 SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it and/or modify
 it under the same terms as ROOT itself, that is, the GNU Lesser General Public License.

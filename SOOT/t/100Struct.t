@@ -21,9 +21,11 @@ HERE
     }
   );
   is($struct->code, <<'HERE');
-struct strname {
+class strname : public TObject {
+	public:
 	Int_t	Category;
 	Char_t	Division[4];
+	ClassDef(strname, 1);
 };
 HERE
 } # end scope
@@ -46,9 +48,11 @@ HERE
     }
   );
   is($struct->code, <<'HERE');
-struct strname2 {
+class strname2 : public TObject {
+	public:
 	UInt_t	a;
 	Char_t**	b;
+	ClassDef(strname2, 1);
 };
 HERE
 } # end scope
@@ -67,9 +71,11 @@ SCOPE: {
     }
   );
   is($struct->code, <<'HERE');
-struct strname3 {
+class strname3 : public TObject {
+	public:
 	UInt_t	c[5];
 	Double_t*	d;
+	ClassDef(strname3, 1);
 };
 HERE
 } # end scope
