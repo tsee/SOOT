@@ -1,0 +1,14 @@
+%module{SOOT};
+
+class TTree {
+
+// WARNING: hack alert...
+  SV* StructBranch(char* branchname, SV* structobj)
+    %code{%
+      char* structClass;
+      TObject* theStruct = SOOT::LobotomizeObject(aTHX_ structobj, structClass);
+      TBranch* branch = THIS->Branch(branchname, structClass, theStruct);
+      RETVAL = RegisterObject(aTHX_ (TObject*)branch, "TBranch");
+    %};
+};
+
