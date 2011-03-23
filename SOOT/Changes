@@ -1,6 +1,12 @@
 Revision history for Perl extension SOOT.
 
-0.12  The Dec  2 22:35 2010
+0.13  Wed Mar 23 20:50 2011
+* New features:
+  - SOOT can export a convenience Run() function.
+  - SOOT::Struct now generates TObject subclasses. This is
+    subject to change.
+
+0.12  Thu Dec  2 22:35 2010
 * Bug fixes:
   - They gave me a Mac and now I have to support the OS...
 
