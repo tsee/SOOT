@@ -166,6 +166,7 @@ The list of currently exported functions:
 
   Load(className, className2,...)
   UpdateClasses()
+  Run()
 
 =head1 JUMP-START FOR C++-ROOT USERS
 
@@ -341,6 +342,11 @@ Loads one or more ROOT classes and their base classes into Perl.
 Virtually all ROOT classes should be loaded out of the box.
 This function is only necessary if you load additional
 shared libraries.
+
+=head2 Run
+
+Simple shortcut for C<<$SOOT::gApplication->Run()>>.
+can be called as function or class method.
 
 =head2 UpdateClasses
 
