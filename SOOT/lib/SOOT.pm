@@ -36,7 +36,7 @@ our %EXPORT_TAGS = (
     $gHistImagePalette $gWebImagePalette
   ) ],
   'constants' => \@SOOT::Constants::Names,
-  'functions' => [qw( Load UpdateClasses )],
+  'functions' => [qw( Load UpdateClasses Run )],
 );
 use vars @{$EXPORT_TAGS{globals}};
 
@@ -70,6 +70,8 @@ sub AUTOLOAD {
     }
     goto &$AUTOLOAD;
 }
+
+sub Run { $SOOT::gApplication->Run() }
 
 sub Load {
   shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
