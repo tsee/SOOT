@@ -412,7 +412,7 @@ Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by Steffen Mueller
+Copyright (C) 2010-2011 by Steffen Mueller
 
 SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it and/or modify
 it under the same terms as ROOT itself, that is, the GNU Lesser General Public License.
