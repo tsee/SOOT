@@ -55,6 +55,7 @@ DESCRIPTION
 
       Load(className, className2,...)
       UpdateClasses()
+      Run()
 
 JUMP-START FOR C++-ROOT USERS
     This section outlines the differences between using ROOT from C++ or
@@ -68,9 +69,8 @@ JUMP-START FOR C++-ROOT USERS
 
   Memory Management
     ROOT has a fairly complex idea of object ownership which is documented
-    in its own section of the Users Manual
-    <http://root.cern.ch/drupal/content/users-guide>. SOOT tries to
-    implement a relatively simple and consistent memory management:
+    in its own section of the <Users Manual>. SOOT tries to implement a
+    relatively simple and consistent memory management:
 
     Any object that was created with a constructor is SOOT's responsibility
     to clean up. All other objects are, by default, not freed by SOOT. That
@@ -220,6 +220,10 @@ FUNCTIONS
     Virtually all ROOT classes should be loaded out of the box. This
     function is only necessary if you load additional shared libraries.
 
+  Run
+    Simple shortcut for "<$SOOT::gApplication-"Run()>>. can be called as
+    function or class method.
+
   UpdateClasses
     After loading non-standard shared libraries that provide ROOT-based
     classes, it may be necessary to update the Perl-bindings for those
@@ -278,7 +282,7 @@ AUTHOR
     Steffen Mueller, <smueller@cpan.org>
 
 COPYRIGHT AND LICENSE
-    Copyright (C) 2010 by Steffen Mueller
+    Copyright (C) 2010-2011 by Steffen Mueller
 
     SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it
     and/or modify it under the same terms as ROOT itself, that is, the GNU
