@@ -226,6 +226,11 @@ C<SOOT::SQL2Tree> implements a very simple minded interface
 to databases in which you can generate a ROOT C<TTree> from
 a SQL C<SELECT> statement.
 
+The main interface is object-oriented, but there is a convenience
+function for quick hacks and command line usage (see below).
+It can be exported on demand and will be export by default
+if the module is loaded in a one-liner.
+
 =head1 METHODS
 
 =head2 new
@@ -252,14 +257,14 @@ return value of the callback in the output.
 
 Example:
 
-  $sql2root->new(
+  my $sql2tree = SOOT::SQL2Tree->new(
     dbh => ...,
     colmaps => {
       distance => sub { $_[0]/1000 }, # convert from km to m
       ...
     }
   );
-  my $tree = $sql2root->make_tree("SELECT distance, ... FROM foo");
+  my $tree = $sql2tree->make_tree("SELECT distance, ... FROM foo");
 
 Any unmapped columns will be inserted into the tree without
 modification.
@@ -293,6 +298,36 @@ Getter/setter for the C<TTree> name.
 
 Getter/setter for the C<TTree> title. Defaults to the C<TTree> name
 or nothing if there is no name.
+
+=head1 FUNCTIONS
+
+=head2 sql2tree
+
+Alternative non-OO interface for quick hacks. Take positional parameters.
+Returns a C<TTree> object.
+
+Parameters:
+
+=over 2
+
+=item database handle
+
+Either a DBI object, an array ref containing the arguments to the
+DBI C<connect()> method, or just the dsn string.
+
+=item SQL SELECT statement
+
+The SQL to run. Nuff said.
+
+=item binds (optional)
+
+Optional array reference containing bind parameters for
+the SQL.
+
+=item attributes (optional)
+
+Optional hash reference containing attributes to pass to the
+statement handler C<execute()> call.
 
 =head1 KNOWN SQL TYPES
 
