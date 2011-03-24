@@ -22,6 +22,7 @@ our @EXPORT_TAGS = (
 );
 our @EXPORT;
 if (caller() and (caller())[1] eq '-e') {
+  SOOT::Init(1);
   push @EXPORT, @EXPORT_OK;
   SOOT->export_to_level(1, ':all');
 }
@@ -123,6 +124,10 @@ sub make_tree {
   foreach my $i (0 .. $#{ $type }) {
     if (exists $coltypes->{ $name->[$i] }) {
       push @root_types, $self->_find_root_type($coltypes->{ $name->[$i] });
+    }
+    elsif (not ref($type->[$i]) and $type->[$i] =~ /^\d+$/) {
+      my $typeinfo = $self->dbh->type_info($type->[$i]);
+      push @root_types, $self->_find_root_type($typeinfo->{TYPE_NAME});
     }
     else {
       push @root_types, $self->_find_root_type($type->[$i]);
