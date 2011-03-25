@@ -208,7 +208,7 @@ access_struct_Float_t(self, ...)
     SOOT_RTXS_CALCADDRESS
     if (items > 1) {
       SV* src = ST(1);
-      *((Float_t*)dataAddr) = (Float_t)SvUV(src);
+      *((Float_t*)dataAddr) = (Float_t)SvNV(src);
     } else {
       XPUSHs(sv_2mortal(
         newSVnv((NV) *((Float_t*)dataAddr))
@@ -225,7 +225,7 @@ access_struct_Double_t(self, ...)
     SOOT_RTXS_CALCADDRESS
     if (items > 1) {
       SV* src = ST(1);
-      *((Double_t*)dataAddr) = (Double_t)SvUV(src);
+      *((Double_t*)dataAddr) = (Double_t)SvNV(src);
     } else {
       XPUSHs(sv_2mortal(
         newSVnv((NV) *((Double_t*)dataAddr))
