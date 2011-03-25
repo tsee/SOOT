@@ -1,3 +1,12 @@
+%typemap{Short_t}{simple};
+%typemap{UShort_t}{simple};
+%typemap{Int_t}{simple};
+%typemap{UInt_t}{simple};
+%typemap{Double_t}{simple};
+%typemap{Float_t}{simple};
+%typemap{Long64_t}{simple};
+%typemap{ULong64_t}{simple};
+
 %typemap{bool}{simple};
 %typemap{AV*}{simple};
 %typemap{SV*}{simple};

@@ -120,6 +120,7 @@ our @Typemaps = qw(
   perlobject.map
   custom.map
   rootclasses.map
+  root_simple_types.map
 );
 
 sub ACTION_merge_typemaps {
