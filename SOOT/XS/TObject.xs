@@ -21,18 +21,23 @@ as(self, newType)
 SV*
 Clone(self, ...)
     SV* self
+  ALIAS:
+    TObject::DrawClone = 1
   PREINIT:
     TObject *newObj, *selfObj;
     char* selfClass;
   CODE:
     selfObj = SOOT::LobotomizeObject(aTHX_ self, selfClass);
-    if (items >= 2)
-      newObj = selfObj->Clone(SvPV_nolen(ST(1)));
-    else
-      newObj = selfObj->Clone();
+    if (ix == 0) {
+      if (items >= 2) newObj = selfObj->Clone(SvPV_nolen(ST(1)));
+      else            newObj = selfObj->Clone();
+    }
+    else {
+      if (items >= 2) newObj = selfObj->DrawClone(SvPV_nolen(ST(1)));
+      else            newObj = selfObj->DrawClone();
+    }
     RETVAL = SOOT::RegisterObject(aTHX_ newObj, selfClass);
   OUTPUT: RETVAL
-
 
 SV*
 keep(self)
