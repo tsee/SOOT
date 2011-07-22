@@ -128,7 +128,7 @@ namespace SOOT {
         /* retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr); */
 
         // If we're not creating a TObject via a constructor, it's likely not ours to delete
-        if (!isConstructor)
+        if (!isConstructor && retval != &PL_sv_undef)
           SOOT::PreventDestruction(aTHX_ (TObject*)addr);
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';
