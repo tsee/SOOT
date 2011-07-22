@@ -14,6 +14,7 @@ Revision history for Perl extension SOOT.
     you can now get away with
       $clone = $th1d->Clone;
       $clone->Draw();
+  - More examples
 
 * Bug fixes:
   - When the ->Fit method of, say, TGraph returned a TFitResultPtr,
