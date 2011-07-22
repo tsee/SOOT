@@ -37,6 +37,9 @@ namespace SOOT {
   SV*
   RegisterObject(pTHX_ TObject* theROOTObject, const char* className, SV* theReference)
   {
+    if (theROOTObject == NULL)
+      return &PL_sv_undef;
+
     if (className == NULL)
       className = theROOTObject->ClassName();
 
