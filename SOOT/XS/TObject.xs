@@ -23,32 +23,27 @@ Clone(self, ...)
     SV* self
   ALIAS:
     TObject::DrawClone = 1
-    TObject::FindObject = 2
   PREINIT:
     TObject *newObj, *selfObj;
   CODE:
     selfObj = SOOT::LobotomizeObject(aTHX_ self);
+    /* Wrapping Clone/DrawClone may also fix a leak due to
+     * object ownership assumptions in ProcessReturnValue of
+     * ROOTResolver: It assumes that anything that is not a
+     * constructor but returns an object will clean up the
+     * object.
+     */
     /* Clone */
     if (ix == 0) {
       if (items >= 2) newObj = selfObj->Clone(SvPV_nolen(ST(1)));
       else            newObj = selfObj->Clone();
     }
     /* DrawClone */
-    else if (ix == 1) {
+    else {
       if (items >= 2) newObj = selfObj->DrawClone(SvPV_nolen(ST(1)));
       else            newObj = selfObj->DrawClone();
     }
-    /* FindObject */
-    else {
-      SV* param;
-      if (items < 2) croak("Need char* name or TObject* obj as parameters to FindObject");
-      param = ST(1);
-      if (sv_derived_from(param, "TObject"))
-        newObj = selfObj->FindObject(SOOT::LobotomizeObject(aTHX_ param));
-      else
-        newObj = selfObj->FindObject(SvPV_nolen(param));
-    }
-    RETVAL = SOOT::RegisterObject(aTHX_ newObj);
+    RETVAL = SOOT::RegisterObject(aTHX_ newObj); /* autocast */
   OUTPUT: RETVAL
 
 SV*
