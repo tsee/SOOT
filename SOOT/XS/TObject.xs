@@ -19,6 +19,22 @@ as(self, newType)
 
 
 SV*
+Clone(self, ...)
+    SV* self
+  PREINIT:
+    TObject *newObj, *selfObj;
+    char* selfClass;
+  CODE:
+    selfObj = SOOT::LobotomizeObject(aTHX_ self, selfClass);
+    if (items >= 2)
+      newObj = selfObj->Clone(SvPV_nolen(ST(1)));
+    else
+      newObj = selfObj->Clone();
+    RETVAL = SOOT::RegisterObject(aTHX_ newObj, selfClass);
+  OUTPUT: RETVAL
+
+
+SV*
 keep(self)
     SV* self
   CODE:
