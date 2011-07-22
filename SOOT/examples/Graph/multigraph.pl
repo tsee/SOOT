@@ -39,8 +39,8 @@ $mg->Draw("ap");
 
  #force drawing of canvas to generate the fit TPaveStats
 $c1->Update();
-my $stats1 = $gr1->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
-my $stats2 = $gr2->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
+my $stats1 = $gr1->GetListOfFunctions()->FindObject("stats");
+my $stats2 = $gr2->GetListOfFunctions()->FindObject("stats");
 $stats1->SetTextColor(kBlue); 
 $stats2->SetTextColor(kRed); 
 $stats1->SetX1NDC(0.12); $stats1->SetX2NDC(0.32); $stats1->SetY1NDC(0.75);
