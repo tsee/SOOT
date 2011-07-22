@@ -367,12 +367,15 @@ DEFAULT:
       type = eUNDEF; // FIXME check validity
     else if (!strncmp(ptr-4, "bool", 4))
       type = eINTEGER; // FIXME Do we need a eBOOL type?
-    else if (ptr_level)
+    else
+      type = eTOBJECT;
+    /*else if (ptr_level)
       type = eTOBJECT; // FIXME, umm, really?
     else if (!strncmp(ptr-13, "TFitResultPtr", 13))
       type = eTOBJECT;
     else
       type = eINVALID;
+    */
 
     free(typestr);
 

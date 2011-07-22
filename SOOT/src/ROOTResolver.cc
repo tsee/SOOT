@@ -117,6 +117,9 @@ namespace SOOT {
           *(ptr - ptr_level) = '\0';
 
         //cout << "Registering object '" << (void*)addr << "' of type '" << typeStrWithoutPtr << "'" << endl;
+        if (ptr-typeStrWithoutPtr >= 13 && strncmp(ptr-14, "TFitResultPtr", 13)) {
+          addr = (long int) ((TFitResultPtr*)addr)->Get();
+        }
         retval = SOOT::RegisterObject(aTHX_ (TObject*)addr);
         /* This used to be the following line, but since RegisterObject can ask the object
          * about its classname, we're doing the cleverer thing that way instead of relying

@@ -33,6 +33,7 @@
 #include <TVirtualPad.h>
 #include <TPad.h>
 #include <TAttImage.h>
+#include <TFitResultPtr.h>
 
 #undef Copy
 #undef Move
