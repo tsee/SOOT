@@ -1,14 +1,19 @@
 Revision history for Perl extension SOOT.
 
 * New features:
-  - Limited autocasting: In C++ TObject::Clone returns a TObject
-    even if it's really a TH1. C++ is silly like that. But we can
-    do better. Calling ->Clone or ->DrawClone on a SOOT object
-    will return the appropriately casted Perl-level object just
-    as if you would previously do
+  - Autocasting.
+    Some methods like Clone() or FindObject() return a TObject*
+    according to ROOT. In practice, these objects will be of types
+    that inherit from TObject but seldomly JUST a TObject.
+    From now in, when returning a ROOT object, SOOT will attempt
+    to auto-cast into the right class instead of relying on the ROOT
+    interface definition to return the correct type.
+    If you would previously do
       $clone = $th1d->Clone()->as('TH1D');
+      $clone->Draw();
     you can now get away with
       $clone = $th1d->Clone;
+      $clone->Draw();
 
 0.13  Wed Mar 23 20:50 2011
 * New features:
