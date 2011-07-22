@@ -250,7 +250,7 @@ manually mark objects as being owned by ROOT or SOOT:
   draw_histogram($histogram);
   # $cv is gone, but the TCanvas is held by ROOT.
   # If necessary, you can get it again via $gROOT:
-  my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
+  my $same_cv = $gROOT->FindObject('cv');
   # ...
   # Later, you can manually delete an object:
   $same_cv->delete; # deletes the UNDERLYING ROOT object, too!
@@ -269,11 +269,13 @@ C<TObject*>. In C++, you would cast it into a C<TCanvas*>:
 
   TCanvas* same_cv = (TCanvas*)gROOT->FindObject('cv');
 
-In the context of SOOT, explicit casting is done with the C<as('Typename')> method:
+In the context of SOOT, explicit casting is usually not necessary. In the
+rare case where it is, it is done with the C<as('Typename')> method:
 
   my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
 
-C<as('Typename')> returns a copy of the SOOT object it is called on with a new type.
+C<as('Typename')> returns a copy of the SOOT object it is called on with a new type
+(not a copy of the ROOT object, just of the SOOT wrapper).
 Finally, the C<delete()> method forcefully deletes a ROOT object and all of
 its SOOT wrappers. It is possible to use this to crash the program, so beware and
 use it sparingly.
