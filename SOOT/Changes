@@ -15,6 +15,12 @@ Revision history for Perl extension SOOT.
       $clone = $th1d->Clone;
       $clone->Draw();
 
+* Bug fixes:
+  - When the ->Fit method of, say, TGraph returned a TFitResultPtr,
+    SOOT didn't really know how to handle it properly. TFitResultPtr's
+    are now automatically dereferenced into TFitResult objects or
+    become a Perl undef. 
+
 0.13  Wed Mar 23 20:50 2011
 * New features:
   - SOOT can export a convenience Run() function.
