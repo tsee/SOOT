@@ -18,7 +18,7 @@ if (-e $file) {
 } else {
   $gal = TFile::Open("http://root.cern.ch/files/$file");
 }
-my $img = $gal->Get("n4254")->as('TImage'); # FIXME maybe override some TFile/similar methods to return objects of the true type as opposed to returning TObjects?
+my $img = $gal->Get("n4254");
 $img->Draw();
 
 # open the color editor
