@@ -23,20 +23,32 @@ Clone(self, ...)
     SV* self
   ALIAS:
     TObject::DrawClone = 1
+    TObject::FindObject = 2
   PREINIT:
     TObject *newObj, *selfObj;
-    char* selfClass;
   CODE:
-    selfObj = SOOT::LobotomizeObject(aTHX_ self, selfClass);
+    selfObj = SOOT::LobotomizeObject(aTHX_ self);
+    /* Clone */
     if (ix == 0) {
       if (items >= 2) newObj = selfObj->Clone(SvPV_nolen(ST(1)));
       else            newObj = selfObj->Clone();
     }
-    else {
+    /* DrawClone */
+    else if (ix == 1) {
       if (items >= 2) newObj = selfObj->DrawClone(SvPV_nolen(ST(1)));
       else            newObj = selfObj->DrawClone();
     }
-    RETVAL = SOOT::RegisterObject(aTHX_ newObj, selfClass);
+    /* FindObject */
+    else {
+      SV* param;
+      if (items < 2) croak("Need char* name or TObject* obj as parameters to FindObject");
+      param = ST(1);
+      if (sv_derived_from(param, "TObject"))
+        newObj = selfObj->FindObject(SOOT::LobotomizeObject(aTHX_ param));
+      else
+        newObj = selfObj->FindObject(SvPV_nolen(param));
+    }
+    RETVAL = SOOT::RegisterObject(aTHX_ newObj);
   OUTPUT: RETVAL
 
 SV*
