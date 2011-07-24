@@ -13,13 +13,15 @@ use Getopt::Long qw/GetOptions/;
 Getopt::Long::Configure('pass_through', 'permute', 'no_require_order');
 
 our $USER_CONFIG = {
-  archive => 'root_v5.28.00.source.tar.gz',
+  archive => 'root_v5.30.00.source.tar.gz',
   parallel_processes => 1,
+  force_recompile => 0,
 };
 
 GetOptions(
   'j|parallel=i' => \($USER_CONFIG->{parallel_processes}),
   'archive=s' => \($USER_CONFIG->{archive}),
+  'recompile' => \($USER_CONFIG->{force_recompile}),
 );
 
 
@@ -54,7 +56,7 @@ my $builder = Alien::ROOT::Builder->new(
   meta_merge => {
     resources => {
       Ratings      => 'http://cpanratings.perl.org/d/Alien-ROOT',
-      repository   => 'git://github.com/tsee/ROOT.git',
+      repository   => 'git://github.com/tsee/SOOT.git',
       bugtracker   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Alien-ROOT',
       license      => 'http://www.opensource.org/licenses/gpl-2.0.php',
     },
@@ -80,13 +82,13 @@ use Alien::ROOT;
 my $aroot = Alien::ROOT->new();
 $builder->notes(build_ROOT => 0);
 
-unless ($aroot->installed) {
+if (not $aroot->installed or $USER_CONFIG->{force_recompile}) {
   if ($ENV{AUTOMATED_TESTING}) {
     exit(0); # Do not create pain for CPAN testers...
   }
 
   # Ask the user if they'd like to install this; if not, then exit
-  $builder->y_n('ROOT was not found on your system. Install it now?', 'y')
+  $builder->y_n('ROOT was not found on your system or you forced a recompile. Build and install it now?', 'y')
     or exit;
 
   $builder->notes(build_ROOT => 1);

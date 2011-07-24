@@ -10,7 +10,7 @@ Alien::ROOT - Utility package to install and locate CERN's ROOT library
 
 =cut
 
-our $VERSION = '5.28.0.1';
+our $VERSION = '5.30.0.1';
 $VERSION = eval $VERSION;
 
 =head1 SYNOPSIS
@@ -24,7 +24,7 @@ $VERSION = eval $VERSION;
 Installs or detects CERN's ROOT library.
 
 This version of C<Alien::ROOT> will download and install
-C<ROOT v5.28.0> B<if necessary>. If an existing (and
+C<ROOT v5.30.0> B<if necessary>. If an existing (and
 compatible) installation of ROOT was detected, the
 module will not download/compile/install a new version
 of ROOT.
