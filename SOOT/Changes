@@ -14,6 +14,9 @@ Revision history for Perl extension SOOT.
     you can now get away with
       $clone = $th1d->Clone;
       $clone->Draw();
+  - TExec was wrapped to allow CINT and Perl callbacks:
+      my $texec = TExec->new("name", sub { do_something() });
+      $texec->Exec();
   - More examples
 
 * Bug fixes:
