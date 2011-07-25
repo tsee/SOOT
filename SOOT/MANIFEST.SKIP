@@ -1,3 +1,5 @@
+\bsrc/SOOTDictionary\..*$
+
 # Avoid archives of this distribution
 \bSOOT-\d+\.\d+(?:_\d+)?\.tar\.gz$
 
