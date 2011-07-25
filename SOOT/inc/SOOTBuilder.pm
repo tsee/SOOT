@@ -57,6 +57,31 @@ sub ACTION_code {
   $self->SUPER::ACTION_code(@_);
 }
 
+sub _build_dictionaries {
+  my $self = shift;
+
+  my $bindir = $Alien->bindir;
+  my $rootcint = File::Spec->catfile($bindir, 'rootcint');
+  if (not -x $rootcint) {
+    die "Can't find or exec rootcint at $rootcint";
+  }
+
+  #my @dictfiles = glob(File::Spec->catfile('src', 'SOOTDictionary.*'));
+  #unlink($_) for @dictfiles;
+
+  print "Generating ROOT dictionary...\n";
+  my @cmd = (
+    $rootcint,
+    '-f',
+    File::Spec->catfile('src', 'SOOTDictionary.cc'),
+    '-c',
+    File::Spec->catfile('src', 'TExecImpl.h'),
+    File::Spec->catfile('src', 'LinkDef.h'),
+  );
+  system(@cmd)
+    and die "Failed to run '@cmd'. Exit value: " . ($?>>8);
+}
+
 sub ACTION_build_soot {
   my $self = shift;
   $self->depends_on('gen_constants');
@@ -69,6 +94,9 @@ sub ACTION_build_soot {
   #  '-Itools/puic',
   #  '-Itools/puic/perl',
   #];
+
+  $self->_build_dictionaries;
+
   my @objects;
   my $files = $self->_find_file_by_type('cc', 'src');
   foreach my $file (keys %$files) {

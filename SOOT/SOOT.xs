@@ -17,6 +17,8 @@
 #include "ROOTResolver.h"
 #include "ClassIterator.h"
 #include "PtrTable.h"
+#include "TExecImpl.h"
+#include "PerlCallback.h"
 
 #ifdef __cplusplus
 extern "C" {
