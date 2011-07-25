@@ -132,7 +132,7 @@ my $builder = SOOTBuilder->new(
     'File::Path'            => '0', # core as of 5.008
   },
 
-  add_to_cleanup => [ qw(rootclasses.xsinclude rootclasses.h rootclasses.map) ],
+  add_to_cleanup => [ qw(rootclasses.xsinclude rootclasses.h rootclasses.map src/SOOTDictionary.cc src/SOOTDictionary.h) ],
   script_files => [],
 
   meta_merge => {
