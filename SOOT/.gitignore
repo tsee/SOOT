@@ -26,6 +26,7 @@ lib/SOOT/Examples/*
 Build
 _build
 MYMETA.yml
+MYMETA.json
 lib/SOOT.xs
 typemap
 META.yml
