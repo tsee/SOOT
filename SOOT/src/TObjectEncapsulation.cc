@@ -62,28 +62,28 @@ namespace SOOT {
   }
 
 
-  void
+  bool
   UnregisterObject(pTHX_ SV* thePerlObject, bool mustNotClearRefPad)
   {
     if (!SvROK(thePerlObject))
-      return;
+      return false;
     SV* inner = (SV*)SvRV(thePerlObject);
     if (!SvIOK(inner))
-      return;
+      return false;
     //DoDelayedInit(aTHX_ thePerlObject); // FIXME not necessary?
     TObject* obj = INT2PTR(TObject*, SvIV(inner));
     if (obj == NULL)
-      return;
+      return false;
     
     // It's global destruction
     if (SOOT::gSOOTObjects == NULL) {
-      return;
+      return false;
     }
 
     // Fetch the reference pad for this TObject
     PtrAnnotation* refPad = gSOOTObjects->Fetch(obj);
     if (!refPad)
-      return;
+      return false;
 
     --(refPad->fNReferences);
     (refPad->fPerlObjects).erase(thePerlObject); // nuke the SV* in the set
@@ -92,6 +92,7 @@ namespace SOOT {
     // FIXME doesn't work / isn't necessary?
     //sv_setsv_nomg(thePerlObject, &PL_sv_undef);
 
+    bool was_freed = false;
     if (refPad->fNReferences == 0) {
       bool doNotDestroyTObj = refPad->fDoNotDestroy;
       gSOOTObjects->Delete(obj); // also frees refPad if necessary!
@@ -110,10 +111,11 @@ namespace SOOT {
         func.Exec((void*)((long)obj+offset));
         func.Init(); // FIXME is this needed?
         //delete (void*)obj;
+        was_freed = true;
       }
     }
 
-    return;
+    return was_freed;
   }
 
 
