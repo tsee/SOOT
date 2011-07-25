@@ -2,7 +2,6 @@ use strict;
 use warnings;
 use Test::More tests => 9;
 use SOOT qw/:all/;
-SOOT::Init(0);
 
 my $name = "foo";
 sub foo {
