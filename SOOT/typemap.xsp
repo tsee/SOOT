@@ -6,6 +6,7 @@
 %typemap{Float_t}{simple};
 %typemap{Long64_t}{simple};
 %typemap{ULong64_t}{simple};
+%typemap{Bool_t}{simple};
 
 %typemap{bool}{simple};
 %typemap{AV*}{simple};

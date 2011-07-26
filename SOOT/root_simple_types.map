@@ -14,6 +14,8 @@ Long64_t		T_IV
 const Long64_t		T_IV
 ULong64_t		T_UV
 const ULong64_t		T_UV
+Bool_t			T_IV
+const Bool_t		T_IV
 
 INPUT
 
