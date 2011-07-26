@@ -49,6 +49,7 @@ DESCRIPTION
       $gApplication $gSystem $gRandom $gROOT
       $gDirectory   $gStyle  $gPad    $gBenchmark
       $gEnv
+      $gVirtualX
       $gHistImagePalette $gWebImagePalette
 
     The list of currently exported functions:
@@ -132,7 +133,7 @@ JUMP-START FOR C++-ROOT USERS
       draw_histogram($histogram);
       # $cv is gone, but the TCanvas is held by ROOT.
       # If necessary, you can get it again via $gROOT:
-      my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
+      my $same_cv = $gROOT->FindObject('cv');
       # ...
       # Later, you can manually delete an object:
       $same_cv->delete; # deletes the UNDERLYING ROOT object, too!
@@ -151,15 +152,16 @@ JUMP-START FOR C++-ROOT USERS
 
       TCanvas* same_cv = (TCanvas*)gROOT->FindObject('cv');
 
-    In the context of SOOT, explicit casting is done with the
-    "as('Typename')" method:
+    In the context of SOOT, explicit casting is usually not necessary. In
+    the rare case where it is, it is done with the "as('Typename')" method:
 
       my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
 
     "as('Typename')" returns a copy of the SOOT object it is called on with
-    a new type. Finally, the "delete()" method forcefully deletes a ROOT
-    object and all of its SOOT wrappers. It is possible to use this to crash
-    the program, so beware and use it sparingly.
+    a new type (not a copy of the ROOT object, just of the SOOT wrapper).
+    Finally, the "delete()" method forcefully deletes a ROOT object and all
+    of its SOOT wrappers. It is possible to use this to crash the program,
+    so beware and use it sparingly.
 
   Object Behaviour
     Some operations are overloaded for all SOOT objects. Currently, you can
@@ -213,6 +215,35 @@ JUMP-START FOR C++-ROOT USERS
 
     "LoadNUpdate()" will bind any new classes if the library was loaded
     successfully and wasn't loaded before.
+
+  Assorted Differences
+    A few ROOT classes have been wrapped explicitly in a way that makes them
+    more useful from a Perl point of view than simply providing the exact
+    same interface as in C++. These are briefly laid out here:
+
+   TArrayD, TArrayF, etc.
+    The constructors of the "TArrayX" classes take an array reference of
+    values as parameter that is copied into the "TArray"-object. The
+    "GetArray()" method returns the data as a new array reference:
+
+      my $ary = TArrayD->new([1.3, 2.5]);
+      my $copy = $ary->GetArray(); # $copy is now [1.3, 2.5]
+
+   TRandom
+    "TRandom::Rannor()" is called without arguments from Perl and returns
+    two random numbers instead of using references.
+
+   TExec
+    "TExec" callbacks can handle both CINT callbacks and Perl callbacks:
+
+      my $te = TExec->new("name", "Some::CINT::Callback()");
+      $te->Exec();
+      my $te2 = TExec->new("name2", sub {print "Perl says hi\n"});
+      $te->Exec();
+
+    The same applies to the "TPad::AddExec()" method, but in that case, for
+    each "AddExec" call, we currently leak one "SV*" pointing to the Perl
+    callback function.
 
 FUNCTIONS
   Load
@@ -282,7 +313,7 @@ AUTHOR
     Steffen Mueller, <smueller@cpan.org>
 
 COPYRIGHT AND LICENSE
-    Copyright (C) 2010-2011 by Steffen Mueller
+    Copyright (C) 2010, 2011 by Steffen Mueller
 
     SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it
     and/or modify it under the same terms as ROOT itself, that is, the GNU
