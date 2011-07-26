@@ -33,6 +33,7 @@ our %EXPORT_TAGS = (
     $gApplication $gSystem $gRandom $gROOT
     $gDirectory $gStyle $gPad $gBenchmark
     $gEnv
+    $gVirtualX
     $gHistImagePalette $gWebImagePalette
   ) ],
   'constants' => \@SOOT::Constants::Names,
@@ -160,6 +161,7 @@ The list of currently supported globals is:
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
   $gEnv
+  $gVirtualX
   $gHistImagePalette $gWebImagePalette
 
 The list of currently exported functions:

@@ -139,6 +139,7 @@ namespace SOOT {
     SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
     SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
     SetPerlGlobal(aTHX_ "SOOT::gEnv", gEnv);
+    SetPerlGlobal(aTHX_ "SOOT::gVirtualX", gVirtualX);
     SetPerlGlobal(aTHX_ "SOOT::gDirectory", gDirectory);
     SetPerlGlobal(aTHX_ "SOOT::gHistImagePalette", gHistImagePalette);
     SetPerlGlobal(aTHX_ "SOOT::gWebImagePalette", gWebImagePalette);
