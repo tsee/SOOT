@@ -10,6 +10,9 @@ use overload
       return();
     }
     return SOOT::API::is_same_object($_[0], $_[1]);
+  },
+  'bool' => sub {
+    return defined($_[1]);
   };
 #  '&{}' => sub {
 #    my $obj = shift;
