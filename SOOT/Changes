@@ -1,5 +1,6 @@
 Revision history for Perl extension SOOT.
 
+0.14  Tue Jul 26 18:30 2011
 * New features:
   - Autocasting.
     Some methods like Clone() or FindObject() return a TObject*
