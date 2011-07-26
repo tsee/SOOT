@@ -338,6 +338,39 @@ which is not part of the normal ROOT interface:
 C<LoadNUpdate()> will bind any new classes B<if> the library was loaded
 successfully and wasn't loaded before.
 
+=head2 Assorted Differences
+
+A few ROOT classes have been wrapped explicitly in a way that makes them more
+useful from a Perl point of view than simply providing the exact same interface
+as in C++. These are briefly laid out here:
+
+=head3 TArrayD, TArrayF, etc.
+
+The constructors of the C<TArrayX> classes take an array reference
+of values as parameter that is copied into the C<TArray>-object.
+The C<GetArray()> method returns the data as a new array reference:
+
+  my $ary = TArrayD->new([1.3, 2.5]);
+  my $copy = $ary->GetArray(); # $copy is now [1.3, 2.5]
+
+=head3 TRandom
+
+C<TRandom::Rannor()> is called without arguments from Perl and returns two
+random numbers instead of using references.
+
+=head3 TExec
+
+C<TExec> callbacks can handle both CINT callbacks and Perl callbacks:
+
+  my $te = TExec->new("name", "Some::CINT::Callback()");
+  $te->Exec();
+  my $te2 = TExec->new("name2", sub {print "Perl says hi\n"});
+  $te->Exec();
+
+The same applies to the C<TPad::AddExec()> method, but in that case,
+for each C<AddExec> call, we currently leak one C<SV*> pointing to
+the Perl callback function.
+
 =head1 FUNCTIONS
 
 =head2 Load
