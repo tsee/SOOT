@@ -1,5 +1,9 @@
 Revision history for Perl extension SOOT.
 
+0.15  Tue Jul 26 18:40 2011
+* Bug fixes:
+  - 0.14 was missing files.
+
 0.14  Tue Jul 26 18:30 2011
 * New features:
   - Autocasting.
