@@ -1,0 +1,21 @@
+%module{SOOT};
+
+class TRandom {
+
+%{
+
+void
+Rannor(self)
+    TRandom* self
+  PREINIT:
+    Double_t x, y;
+  PPCODE:
+    self->Rannor(x, y);
+    mXPUSHn(x);
+    mXPUSHn(y);
+    XSRETURN(2);
+
+%}
+
+};
+
