@@ -1,4 +1,5 @@
 \bsrc/SOOTDictionary\..*$
+\bt\.root$
 
 # Avoid archives of this distribution
 \bSOOT-\d+\.\d+(?:_\d+)?\.tar\.gz$
@@ -71,3 +72,4 @@ pm_to_blib
 \btypemap$
 \blib/SOOT.xs$
 ^MYMETA.yml$
+^MYMETA\.json$
