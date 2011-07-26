@@ -28,19 +28,16 @@ extern "C" {
 
 using namespace std;
 
-namespace SOOT {
+void
+TExecImpl::TestAlive() {
+  cout << "# Test: Alive" << endl;
+}
 
-  void
-  TExecImpl::TestAlive() {
-    cout << "# Test: Alive" << endl;
-  }
+void
+TExecImpl::RunPerlCallback(const unsigned long id)
+{
+  dTHX;
+  SOOT::ExecStoredPerlCallback(aTHX_ id);
+}
 
-  void
-  TExecImpl::RunPerlCallback(const unsigned long id)
-  {
-    dTHX;
-    ExecStoredPerlCallback(aTHX_ id);
-  }
-
-} // end namespace SOOT
 

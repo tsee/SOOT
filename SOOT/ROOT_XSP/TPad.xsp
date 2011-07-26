@@ -1,0 +1,31 @@
+%module{SOOT};
+
+%{
+#include <sstream>
+%}
+
+class TPad {
+
+  void AddExec(const char* name, SV* command)
+    %code{%
+      SV* tmpsv;
+      if (SvROK(command)
+          && (tmpsv = SvRV(command))
+          && SvTYPE(tmpsv) == SVt_PVCV)
+      {
+        THIS->AddExec(name, "");
+        TList* execs = THIS->GetListOfExecs();
+        TExec* exec = (TExec*)execs->At(execs->GetLast());
+        const unsigned long int id = (unsigned long int)exec;
+        // FIXME this callback is never cleaned up...
+        SOOT::StorePerlCallback(aTHX_ id, command);
+        std::stringstream cmd;
+        cmd << "TExecImpl::RunPerlCallback(" << id << ")";
+        exec->SetAction(cmd.str().c_str());
+      }
+      else {
+        THIS->AddExec(name, SvPV_nolen(command));
+      }
+    %};
+};
+

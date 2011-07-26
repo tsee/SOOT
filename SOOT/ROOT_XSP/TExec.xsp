@@ -16,7 +16,7 @@ class TExec {
         const unsigned long int id = (unsigned long int)RETVAL;
         SOOT::StorePerlCallback(aTHX_ id, command);
         std::stringstream cmd;
-        cmd << "SOOT::TExecImpl::RunPerlCallback(" << id << ")";
+        cmd << "TExecImpl::RunPerlCallback(" << id << ")";
         RETVAL->SetAction(cmd.str().c_str());
       }
       else {
@@ -73,7 +73,7 @@ TExec::DESTROY(self)
         const unsigned long int id = (unsigned long int)THIS;
         SOOT::StorePerlCallback(aTHX_ id, command);
         std::stringstream cmd;
-        cmd << "SOOT::TExecImpl::RunPerlCallback(" << id << ")";
+        cmd << "TExecImpl::RunPerlCallback(" << id << ")";
         THIS->SetAction(cmd.str().c_str());
       }
       else {
