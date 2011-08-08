@@ -37,17 +37,19 @@ sub run {
   my @files_to_open = @$argv;
   require Devel::REPL;
   require SOOT;
+  require Devel::REPL::Plugin::CompletionDriver::SOOT;
 
   my $repl = Devel::REPL->new;
   foreach (qw(FindVariable History LexEnv Packages SOOT)) {
     $repl->load_plugin($_)
   }
-  foreach (qw(Colors Completion DDS Interrupt
+  foreach (qw(Colors CompletionDriver::SOOT Completion DDS Interrupt
               MultiLine::PPI OutputCache PPI)) {
     my @discard = capture {
       eval {
-        $repl->load_plugin($_)
-      }
+        $repl->load_plugin($_);
+        1;
+      } or die $@;
     };
   }
   create_app_thread();
