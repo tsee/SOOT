@@ -1,6 +1,7 @@
 Revision history for Perl extension SOOT::App.
 
   - Method autocompletion for lexical objects.
+  - Now uses the Package plugin for Devel::REPL.
 
 0.03  Wed Jun  9 21:00:00 2010
   - Automatically open files provided as arguments in the command
