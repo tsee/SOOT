@@ -1,5 +1,15 @@
 Revision history for Perl extension SOOT.
 
+* New features:
+  - (currently private) Additional interface for TClass to make
+    method-related information such as "which methods of this object
+    start with Foo?" and full method prototypes available conveniently
+    to Perl. Will become public after documentation.
+  - Some operations (such as filling histograms) are faster because
+    they were explicitly wrapped instead of relying on the slow
+    dynamic wrapping.
+  - More examples.
+
 0.15  Tue Jul 26 18:40 2011
 * Bug fixes:
   - 0.14 was missing files.
