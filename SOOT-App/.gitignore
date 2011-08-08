@@ -11,3 +11,7 @@ blib
 MANIFEST
 .root_hist
 .soot_hist
+META.yml
+MYMETA.yml
+META.json
+MYMETA.json
