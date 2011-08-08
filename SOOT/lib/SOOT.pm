@@ -27,6 +27,7 @@ use base 'Exporter';
 use SOOT::Constants;
 use TObject; # needs to happen before XSLoader
 use TArray;
+use TClass;
 
 our %EXPORT_TAGS = (
   'globals' => [ qw(
