@@ -1,4 +1,5 @@
-package TArray;
+package # Hide from PAUSE
+  TArray;
 use strict;
 use warnings;
 use vars qw/$AUTOLOAD $isROOT/;

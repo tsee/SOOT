@@ -1,4 +1,5 @@
-package TClass;
+package # hide from PAUSE
+  TClass;
 use strict;
 use warnings;
 

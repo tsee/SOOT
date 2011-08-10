@@ -1,4 +1,5 @@
-package TObject;
+package # Hide from PAUSE
+  TObject;
 use strict;
 use warnings;
 use vars qw/$AUTOLOAD $isROOT/;
