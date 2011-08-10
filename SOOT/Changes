@@ -1,5 +1,6 @@
 Revision history for Perl extension SOOT.
 
+0.16  Wed Aug 10 18:00 2011
 * New features:
   - Additional interface for TClass to make method-related information
     such as "which methods of this object start with Foo?" and full
