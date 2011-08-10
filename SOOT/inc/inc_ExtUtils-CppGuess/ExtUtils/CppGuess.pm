@@ -96,7 +96,11 @@ Mattia Barbon <mbarbon@cpan.org>
 
 Steffen Mueller <smueller@cpan.org>
 
-=head1 LICENSE
+Tobias Leich <froggs@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2010, 2011 by Mattia Barbon.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -107,7 +111,7 @@ use Config ();
 use File::Basename qw();
 use Capture::Tiny 'capture_merged';
 
-our $VERSION = '0.04';
+our $VERSION = '0.07';
 
 sub new {
     my( $class, %args ) = @_;
@@ -204,6 +208,8 @@ sub _guess_unix {
     $self->{guess} = { extra_cflags => ' -xc++ ',
                        extra_lflags => ' -lstdc++ ',
                        };
+    $self->{guess}{extra_cflags} .= ' -D_FILE_OFFSET_BITS=64' if $Config::Config{ccflags} =~ /-D_FILE_OFFSET_BITS=64/;
+    $self->{guess}{extra_lflags} .= ' -lgcc_s' if $^O eq 'netbsd' && $self->{guess}{extra_lflags} !~ /-lgcc_s/;
     return 1;
 }
 
