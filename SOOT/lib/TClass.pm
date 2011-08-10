@@ -27,7 +27,9 @@ sub soot_method_complete {
     my @ps = split /,/, $cand;
     my $params = $struct->{parameters};
     foreach my $p (@ps) {
-      my ($t, $n) = split /\s+/, $p, 2;
+      $p =~ /^(.*\S)\s+(\S+)$/
+        or die "Invalid parameter spec (or faulty parse attempt): '$p'";
+      my ($t, $n) = ($1, $2);
       ($n, my $def) = split /=/, $n, 2;
       push @$params, [$t, $n, defined($def) ? ($def) : () ];
     }
