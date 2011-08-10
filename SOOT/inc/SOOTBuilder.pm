@@ -6,7 +6,8 @@ use Carp;
 use Config;
 
 use inc::latest 'Module::Build';
-use inc::latest 'ExtUtils::Typemap';
+use inc::latest 'ExtUtils::ParseXS';
+use ExtUtils::Typemaps;
 use base 'Module::Build';
 use File::Find ();
 
@@ -127,7 +128,7 @@ sub ACTION_gen_xsp_include {
   open my $oh_xs, '>', 'rootclasses.xsinclude' or die $!;
   open my $oh_h, '>', 'rootclasses.h' or die $!;
   unlink('rootclasses.map');
-  my $typemap = ExtUtils::Typemap->new(file => 'rootclasses.map');
+  my $typemap = ExtUtils::Typemaps->new(file => 'rootclasses.map');
 
   while(defined(my $file = shift @infiles)) {
     next if $file !~ /^(.+)\.xsp$/i;
@@ -190,10 +191,10 @@ sub ACTION_merge_typemaps {
 
   print "Merging custom typemaps...\n";
   sleep 1;
-  my $outmap = ExtUtils::Typemap->new(file => 'typemap');
+  my $outmap = ExtUtils::Typemaps->new(file => 'typemap');
   foreach my $typemap_file (@Typemaps) {
     print "... merging $typemap_file\n";
-    $outmap->merge(typemap => ExtUtils::Typemap->new(file => $typemap_file));
+    $outmap->merge(typemap => ExtUtils::Typemaps->new(file => $typemap_file));
   }
   print "Done merging typemaps.\n";
   $outmap->write();

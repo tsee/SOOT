@@ -2,7 +2,6 @@ use strict;
 use warnings;
 
 use Getopt::Long;
-use inc::latest 'ExtUtils::Typemap';
 use inc::latest 'ExtUtils::ParseXS';
 use inc::latest 'ExtUtils::XSpp';
 use inc::latest 'ExtUtils::CppGuess';
@@ -125,9 +124,8 @@ my $builder = SOOTBuilder->new(
     # For the XS build process
     'ExtUtils::XSpp'        => '0.10_02',
     'ExtUtils::CBuilder'    => '0',
-    'ExtUtils::ParseXS'     => '0',
+    'ExtUtils::ParseXS'     => '3.02', # actually, we have this in inc/, so we don't *really* need to list it here
     'ExtUtils::Constant'    => '0', # core as of 5.008
-    'ExtUtils::Typemap'     => '0.04',
     'File::Spec'            => '0', # core as of 5.008
     'File::Path'            => '0', # core as of 5.008
   },
