@@ -125,7 +125,7 @@ sub make_tree {
     if (exists $coltypes->{ $name->[$i] }) {
       push @root_types, $self->_find_root_type($coltypes->{ $name->[$i] });
     }
-    elsif (not ref($type->[$i]) and $type->[$i] =~ /^\d+$/) {
+    elsif (not ref($type->[$i]) and $type->[$i] =~ /^-?\d+$/) {
       my $typeinfo = $self->dbh->type_info($type->[$i]);
       push @root_types, $self->_find_root_type($typeinfo->{TYPE_NAME});
     }
