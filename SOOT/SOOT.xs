@@ -2,6 +2,13 @@
 /* must load ROOT stuff veeery early due to pollution */
 #include "ROOTIncludes.h"
 
+/* For versions of ExtUtils::ParseXS > 3.04_02, we need to
+ * explicitly enforce exporting of XSUBs since we want to
+ * refer to them using XS(). This isn't strictly necessary,
+ * but it's by far the simplest way to be backwards-compatible.
+ */
+#define PERL_EUPXS_ALWAYS_EXPORT
+
 #include "SOOTDebug.h"
 
 // manually include headers for classes with explicit wrappers
