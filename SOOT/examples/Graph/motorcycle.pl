@@ -13,8 +13,9 @@ use File::Spec;
 # for a simulated motorcycle accident, taken from Silverman (1985).
 
 # data taken from R library MASS: mcycle.txt
+my $rootlib = Alien::ROOT->new->libdir;
 my $inFile = shift
-             || File::Spec->catfile($ENV{ROOTSYS},
+             || File::Spec->catfile($rootlib, '..', '..',
                                     qw(share doc root tutorials graphs motorcycle.dat));
 
 # read file and add to fit object
