@@ -11,8 +11,8 @@ blib
 MANIFEST
 .root_hist
 .soot_hist
-MYMETA.yml
-META.yml
+MYMETA.*
+META.*
 Build
 _build
 root
