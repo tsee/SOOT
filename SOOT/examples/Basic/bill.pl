@@ -113,8 +113,8 @@ sub bill {
 #     billtw($compress);
 #     billtr($compress);
    }
-   gSystem->Unlink("/tmp/bill.root");
-   gSystem->Unlink("/tmp/billt.root");
+   $gSystem->Unlink("/tmp/bill.root");
+   $gSystem->Unlink("/tmp/billt.root");
    $totaltimer->Stop();
    my $rtime = $totaltimer->RealTime();
    my $ctime = $totaltimer->CpuTime();
