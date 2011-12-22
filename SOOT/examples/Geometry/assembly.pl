@@ -23,7 +23,7 @@ my $top = $geom->MakeBox("TOP", $Vacuum, 1000., 1000., 100.);
 $geom->SetTopVolume($top);
 
 # Make the elementary assembly of the whole structure
-my $tplate = TGeoVolumeAssembly->new("TOOTHPLATE");
+my $tplate = TGeoVolumeAssembly->new("TOOTHPLATE"); # FIXME This segfaults!?
 
 my $ntooth = 5;
 my $xplate = 25.0;
