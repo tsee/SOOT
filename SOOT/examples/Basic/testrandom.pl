@@ -177,7 +177,7 @@ sub testAll {
   printf(" %8.3f\n",$sw->CpuTime()*$cpn);
 
   my $f1 = TF1->new("f1","gaus",-4,4);
-  $f1->SetParameters(new array::Array('d',[1,0,1]));
+  $f1->SetParameters(1,0.,1.);
 
   $gRandom->($r1);
   $sw->Start();
