@@ -115,9 +115,8 @@ namespace SOOT {
         //       char* const* where the *'s aren't all at the end
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
-
         //cout << "Registering object '" << (void*)addr << "' of type '" << typeStrWithoutPtr << "'" << endl;
-        if (ptr-typeStrWithoutPtr >= 13 && strncmp(ptr-14, "TFitResultPtr", 13)) {
+        if (ptr-typeStrWithoutPtr >= 13 && !strncmp(ptr-13, "TFitResultPtr", 13)) {
           addr = (long int) ((TFitResultPtr*)addr)->Get();
         }
         retval = SOOT::RegisterObject(aTHX_ (TObject*)addr);
