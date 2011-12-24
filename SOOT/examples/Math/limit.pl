@@ -50,7 +50,7 @@ $gSystem->ProcessEvents;
 
 # Compute the limits
 my $ds = TLimitDataSource->new($signal, $background, $data);
-my $l  = TLimit->new();
+my $l  = TLimit->new(); # FIXME SEGV?
 
 my $cl = $l->ComputeLimit($ds, 50000);
 printCL($cl, "Computing limits...");
