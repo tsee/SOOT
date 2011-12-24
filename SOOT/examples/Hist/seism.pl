@@ -29,7 +29,7 @@ $ht->GetYaxis()->SetNdivisions(520);
 $ht->Draw();
    
 my $thr = threads->new(sub {$gApplication->Run()}); #canvas can be edited during the loop
-usleep(5000); # FIXME find better way to fix this
+usleep(100000); # FIXME find better way to fix this
 $gApplication->SetReturnFromRun(1);
 
 for my $i (1..2299) {
@@ -38,7 +38,7 @@ for my $i (1..2299) {
   $noise += $signal*sin(($i-700.)*6.28/30)*exp((700.-$i)/300.) if $i > 700;
   $ht->SetBinContent($i,$noise);
   $c1->Modified();
-  $c1->Update();
+  $c1->Update(); # FIXME this seems to be blocking somehow?
 }
 print sprintf("Real Time = %8.3fs, Cpu Time = %8.3fs\n",$sw->RealTime(),$sw->CpuTime());
 
