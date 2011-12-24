@@ -70,8 +70,9 @@ JUMP-START FOR C++-ROOT USERS
 
   Memory Management
     ROOT has a fairly complex idea of object ownership which is documented
-    in its own section of the <Users Manual>. SOOT tries to implement a
-    relatively simple and consistent memory management:
+    in its own section of the Users Manual
+    <http://root.cern.ch/drupal/content/users-guide>. SOOT tries to
+    implement a relatively simple and consistent memory management:
 
     Any object that was created with a constructor is SOOT's responsibility
     to clean up. All other objects are, by default, not freed by SOOT. That
