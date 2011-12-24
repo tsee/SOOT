@@ -11,6 +11,8 @@ WriteMakefile(
       'Devel::REPL'      => '1.003000',
       'Capture::Tiny'    => '0',
       'Term::ANSIColor'  => '0',
+      'Term::ReadLine'  => '0',
+      'Term::ReadLine::Gnu'  => '0',
     }, # e.g., Module::Name => 1.1
     ABSTRACT_FROM     => 'lib/SOOT/App.pm', # retrieve abstract from module
     AUTHOR            => 'Steffen Mueller <smueller@cpan.org>',
