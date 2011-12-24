@@ -1,5 +1,18 @@
 Revision history for Perl extension SOOT.
 
+0.17  Sat Dec 24 15:15 2011
+* New features
+  - Yay, birthday and Christmas release!
+
+* Bug fixes:
+  - Autocasting and TFitResultPtr code could collide and produce
+    ouchy segfaults. This is fixed now.
+
+* Maintenance:
+  - Compatibility with recent versions of ExtUtils::ParseXS.
+  - Author test for examples.
+  - A gazillion little fixes in the example.
+
 0.16  Wed Aug 10 18:00 2011
 * New features:
   - Additional interface for TClass to make method-related information
