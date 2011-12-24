@@ -1,0 +1,9 @@
+%module{SOOT};
+
+class TNamed {
+  void SetName(const char* name);
+  void SetNameTitle(const char* name, const char* title);
+  void SetTitle(const char* title = "");
+  Int_t Sizeof();
+};
+
