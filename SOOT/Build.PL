@@ -12,14 +12,17 @@ use SOOTBuilder;
 
 my $userRootConfig;
 my $compiler;
+my $debugmode = 0;
 my @flags;
 my @libs;
 
 GetOptions(
   '--with-root-config:s' => \$userRootConfig,
-  '--build-debug' => sub {push(@flags, '-DDEBUG')},
+  '--build-debug' => \$debugmode,
   '--compiler:s' => \$compiler,
 );
+push @flags, '-DDEBUG', '-Wall' if $debugmode;
+
 my $guess = ExtUtils::CppGuess->new(
   (defined($compiler) ? (cc => $compiler) : ()),
 );
@@ -69,6 +72,10 @@ push @libs, map { split(' ', $_) }
               SOOTBuilder::striprun($rootConfig, '--ldflags'),
               SOOTBuilder::striprun($rootConfig, '--libs'));
 
+if ($debugmode) {
+  @flags = ('-O0', grep !/^-O\d$/, @flags);
+}
+
 $guess->add_extra_compiler_flags(join(' ', @flags));
 $guess->add_extra_linker_flags(join(' ', @libs));
 
@@ -82,7 +89,7 @@ else {
   print "Unknown compiler... Trying regardless.\n";
 }
 
-my $builder = SOOTBuilder->new(
+my %build_args = (
   module_name           => 'SOOT',
   license               => 'gpl',
   dist_author           => 'Steffen Mueller <smueller@cpan.org>',
@@ -148,5 +155,9 @@ my $builder = SOOTBuilder->new(
   },
 );
 
+if ($debugmode) {
+  $build_args{extra_linker_flags} =~ s/-O\d//g; # REALLY?
+}
+my $builder = SOOTBuilder->new(%build_args);
 $builder->create_build_script();
 
