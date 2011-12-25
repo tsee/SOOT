@@ -24,7 +24,8 @@ namespace SOOT {
   }
 
   std::vector<TString>
-  MakeClassStub(pTHX_ const char* className, TClass* theClass) {
+  MakeClassStub(pTHX_ const char* className, TClass* theClass)
+  {
     vector<TString> retval;
     if (strEQ(className, "TObject"))
       return retval;
