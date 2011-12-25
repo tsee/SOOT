@@ -1,3 +1,26 @@
+Conceptual issues:
+- Since we set up the inheritance at the Perl side,
+  explicitly materialized methods of superclasses will
+  take precedence over overridden (virtual) methods in
+  subclasses that need to go through the AUTOLOAD
+  mechanism. If we didn't set up the inheritance that way
+  we'd lose out on optimizing one Fill() method explicitly
+  in TH1 and would have to explicitly propagate that to the
+  subclasses. Alternatively, we could ditch the Perl-side
+  inheritance and entirely rely on the method dispatch in
+  C++/ROOT's RTTI. This would almost certainly require some
+  automatic materialization in order to avoid having to alias
+  lots of manual method implementations all over the place.
+  Unfortunately, I don't currently feel confident that I
+  remember all issues related to the current inheritance
+  setup. On the upside, the class generation code that sets
+  up inheritance now by setting @ISA can already handle
+  method generation. Things to consider:
+  - Automatic materialization
+  - Inheriting (in Perl) from a ROOT class?
+  - $foo->can("bar") which isn't implemented at all right now
+  - ...
+
 Wrapper / guts:
 - Refactor global function wrapping
 - Implement method caching
