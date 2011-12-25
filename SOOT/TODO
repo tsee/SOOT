@@ -1,5 +1,10 @@
 Conceptual issues:
-- Since we set up the inheritance at the Perl side,
+- This was changed to use ROOT-level inheritance for ROOT
+  classes. But the problem of not being able to inject methods
+  into ROOT classes from Perl and having them inherited remains
+  to be solved, so the text is left in here as a reference:
+
+  Since we set up the inheritance at the Perl side,
   explicitly materialized methods of superclasses will
   take precedence over overridden (virtual) methods in
   subclasses that need to go through the AUTOLOAD
