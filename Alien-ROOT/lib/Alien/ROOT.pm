@@ -94,6 +94,19 @@ sub installed {
   return $self->{installed};
 }
 
+=head2 $aroot->run
+
+Sets up the ROOT environment (see C<setup_environment>) and then invokes
+the ROOT shell by simply calling C<root>.
+
+=cut
+
+sub run {
+  my $self = shift;
+  $self->setup_environment;
+  system('root');
+}
+
 =head2 $aroot->setup_environment
 
 Sets up the C<PATH> and C<LD_LIBRARY_PATH> environment
