@@ -104,7 +104,7 @@ the ROOT shell by simply calling C<root>.
 sub run {
   my $self = shift;
   $self->setup_environment;
-  system('root');
+  system {'root'} 'root', @_;
 }
 
 =head2 $aroot->setup_environment
