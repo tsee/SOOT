@@ -51,9 +51,10 @@ namespace SOOT {
                           const std::vector<BasicType>& argTypes,
                           std::vector<void*>& needsCleanup, const unsigned int nSkip);
 
-  SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD, const char* retTypeStr, bool isConstructor, std::vector<void*> needsCleanup);
+  SV* ProcessReturnValue(pTHX_ const BasicType& retType, long addr, double addrD,
+                         const char* retTypeStr, bool isConstructor, std::vector<void*> needsCleanup);
       
-  SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
+  SV* CallMethod(pTHX_ const char* className, char* methName, AV* args, bool force_constructor = false);
   SV* CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model);
 
   void CroakOnInvalidCall(pTHX_ const char* className, const char* methName,

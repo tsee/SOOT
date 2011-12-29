@@ -149,7 +149,7 @@ namespace SOOT {
 
 
   SV*
-  CallMethod(pTHX_ const char* className, char* methName, AV* args)
+  CallMethod(pTHX_ const char* className, char* methName, AV* args, bool force_constructor)
   {
 #ifdef SOOT_DEBUG
     cout << "CallMethod: " << className << "::" << methName << endl;
@@ -192,7 +192,7 @@ namespace SOOT {
     G__ClassInfo theClass(className);
     G__MethodInfo* mInfo = NULL;
     long offset;
-    bool constructor = false;
+    bool constructor = force_constructor; // defaults to false
 
     if (perlCallReceiver == NULL) { // function
       receiver = 0;
@@ -403,12 +403,15 @@ namespace SOOT {
   SV*
   CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model)
   {
+    if (!IsROOTGlobal(aTHX_ receiver)) {
+      croak("lvalue in emulated assignment operator (via function dereference) must be a ROOT global variable");
+    }
     AV* argAV = newAV();
     av_extend(argAV, 1);
     av_store(argAV, 0, receiver); // FIXME check reference counts?
     av_store(argAV, 1, model);
-    SV* retval = CallMethod(aTHX_ className, (char*)className, argAV);
-    Safefree(argAV); // FIXME check for memory leaks?
+    SV* retval = CallMethod(aTHX_ className, (char*)className, argAV, true);
+    //Safefree(argAV); // FIXME check for memory leaks?
     return retval;
     //return receiver;
   }

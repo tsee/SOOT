@@ -14,19 +14,22 @@ use overload
   },
   'bool' => sub {
     return defined($_[1]);
+  },
+  '&{}' => sub {
+    my $obj = shift;
+    my $invocant_class = ref($obj);
+    return sub {
+      if (@_ >= 1 and ref($_[0]) and $_[0]->isa($invocant_class)) {
+        return SOOT::CallAssignmentOperator($invocant_class, $obj, $_[0]->as($invocant_class));
+      }
+      elsif (not @_) {
+        Carp::croak("Trying to call assignment operator without an object to copy");
+      }
+      else {
+        Carp::croak("Trying to call assignment operator, but object types aren't identical");
+      }
+    };
   };
-#  '&{}' => sub {
-#    my $obj = shift;
-#    my $class = ref($obj);
-#    return sub {
-#      if (@_ == 1 and ref($_[0]) and ref($_[0])->isa($class)) {
-#        return SOOT::CallAssignmentOperator($class, $obj, $_[0]);
-#      }
-#      else {
-#        Carp::croak("Trying to call assignment operator without an object to copy");
-#      }
-#    };
-#  };
 
 sub AUTOLOAD {
   $AUTOLOAD =~ s/::([^:]+)$//;

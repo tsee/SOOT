@@ -139,7 +139,6 @@ CallAssignmentOperator(className, receiver, model)
     SV* receiver
     SV* model
   CODE:
-    croak("CallAssignmentOperator not implemented correctly");
     RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
   OUTPUT: RETVAL
 

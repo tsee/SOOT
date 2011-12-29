@@ -146,7 +146,7 @@ namespace SOOT {
       gApplication = new TApplication("SOOT App", NULL, NULL);
     SetPerlGlobal(aTHX_ "SOOT::gApplication", gApplication);
     SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem);
-    SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom);
+    SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom, "TRandom");
     SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
     SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
     SetPerlGlobal(aTHX_ "SOOT::gEnv", gEnv);
