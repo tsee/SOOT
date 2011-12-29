@@ -26,10 +26,14 @@ extern "C" {
 
 namespace SOOT {
 
+#ifndef SOOTf_DoNotDestroy
+#  define SOOTf_DoNotDestroy 1
+#endif
+
   typedef struct PtrAnnotation {
     unsigned int fNReferences;
     std::set<SV*> fPerlObjects;
-    bool fDoNotDestroy;
+    U32 fFlags;
   } PtrAnnotation;
 
   void ClearAnnotation(pTHX_ PtrAnnotation* pa);

@@ -120,7 +120,7 @@ PtrAnnotation* PtrTable::FetchOrCreate(const TObject* key)
 #endif
     PtrAnnotation* annotation = new PtrAnnotation();
     annotation->fNReferences = 0;
-    annotation->fDoNotDestroy = false;
+    annotation->fFlags = 0;
     Store(key, annotation);
     return annotation;
   }
@@ -289,7 +289,7 @@ PtrTable::PrintStats()
       cout << "  PtrAnnotation* is '" << (void*)temp->value <<"'"<<endl;
       PtrAnnotation* ann = temp->value;
       cout << "    NReferences="<<ann->fNReferences<<endl;
-      cout << "    Must " << (ann->fDoNotDestroy ? "NOT " : "") << "be destroyed by SOOT\n";
+      cout << "    Must " << (ann->fFlags & SOOTf_DoNotDestroy ? "NOT " : "") << "be destroyed by SOOT\n";
       for (std::set<SV*>::iterator it = (ann->fPerlObjects).begin();
            it != (ann->fPerlObjects).end(); ++it)
         cout << "    SV* " << (void*)(*it) << endl;

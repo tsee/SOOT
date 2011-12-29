@@ -94,10 +94,10 @@ namespace SOOT {
 
     bool was_freed = false;
     if (refPad->fNReferences == 0) {
-      bool doNotDestroyTObj = refPad->fDoNotDestroy;
+      const bool doNotDestroyTObj = refPad->fFlags & SOOTf_DoNotDestroy;
       gSOOTObjects->Delete(obj); // also frees refPad if necessary!
       if (!doNotDestroyTObj) {
-      //if (!refPad->fDoNotDestroy && obj->TestBit(kCanDelete)) {
+      //if ((!refPad->fFlags & SOOTf_DoNotDestroy) && obj->TestBit(kCanDelete)) {
         //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
         //obj->SetBit(kMustCleanup);
         //cout << "Deleting TObject '" << (void*) obj << "'" << endl;
@@ -139,7 +139,7 @@ namespace SOOT {
       }
       else {
         // Normal encapsulated TObject
-        refPad->fDoNotDestroy = true;
+        refPad->fFlags |= SOOTf_DoNotDestroy;
       }
     } // end if it's a good object
     else
@@ -159,7 +159,7 @@ namespace SOOT {
       }
       else {
         // Normal encapsulated TObject
-        refPad->fDoNotDestroy = false;
+        refPad->fFlags &= ~(SOOTf_DoNotDestroy);
       }
     } // end if it's a good object
     else
@@ -197,7 +197,7 @@ namespace SOOT {
             // This was done for std::list
             //(refPad->fPerlObjects).push_back(thePerlObj);
             (refPad->fPerlObjects).insert(thePerlObj);
-            refPad->fDoNotDestroy = true; // can't destroy late init objects
+            refPad->fFlags |= SOOTf_DoNotDestroy; // can't destroy late init objects
           }
           break;
         } // end is PERL_MAGIC_ext magic

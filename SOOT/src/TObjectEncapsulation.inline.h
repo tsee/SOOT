@@ -32,7 +32,7 @@ namespace SOOT {
       PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
       // late intialization always prevents destruction => skip
       if (refPad != NULL) // Normal encapsulated TObject
-        refPad->fDoNotDestroy = true;
+        refPad->fFlags |= SOOTf_DoNotDestroy;
     }
   }
 
@@ -64,7 +64,7 @@ namespace SOOT {
       PtrAnnotation* refPad = gSOOTObjects->Fetch(LobotomizeObject(aTHX_ thePerlObject));
       if (!refPad)
         croak("SOOT::IsIndestructible: Not an encapsulated ROOT object!");
-      return refPad->fDoNotDestroy;
+      return refPad->fFlags & SOOTf_DoNotDestroy;
     }
     else
       croak("BAD");
@@ -77,7 +77,7 @@ namespace SOOT {
     PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
     if (!refPad)
       croak("SOOT::IsIndestructible: Not an encapsulated ROOT object!");
-    return refPad->fDoNotDestroy;
+    return refPad->fFlags & SOOTf_DoNotDestroy;
   }
 
 
