@@ -60,18 +60,30 @@ namespace SOOT {
   /// Same as the other LobotomizeObject but ignoring the class name
   TObject* LobotomizeObject(pTHX_ SV* thePerlObject);
 
-  /** Free the underlying TObject, set pointer to zero.
-   *  This is to be considered INTERNAL TO SOOT only. => See UnregisterObject instead
-   */
-  void ClearObject(pTHX_ SV* thePerlObject);
-
   /// Marks a given object as destructible by Perl
   void MarkForDestruction(pTHX_ SV* thePerlObject);
 
   /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT (SV* variant ==> slow)
   bool IsIndestructible(pTHX_ SV* thePerlObject);
-  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT (TObject* variant ==> fast)
+  /// Returns whether the TObject may be freed by SOOT (TObject* variant ==> fast)
   bool IsIndestructible(pTHX_ TObject* theROOTObject);
+  
+  /// Returns whether the TObject encapsulated in the given Perl object is a ROOT global (SV* variant ==> slow)
+  bool IsROOTGlobal(pTHX_ SV* thePerlObject);
+  /// Returns whether the TObject is a ROOT global (TObject* variant ==> fast)
+  bool IsROOTGlobal(pTHX_ TObject* theROOTObject);
+
+  /// Marks the PtrAnnotation for the given Perl-side object as related to a ROOT global
+  /// and thus also as non-destructible by Perl. SV version (slow)
+  void SetROOTGlobal(pTHX_ SV* thePerlObject);
+  /// Marks the PtrAnnotation for the given Perl-side object as related to a ROOT global
+  /// and thus also as non-destructible by Perl. TObject version (fast)
+  void SetROOTGlobal(pTHX_ TObject* theROOTObject);
+
+  /// Prevents destruction of an object by noting the fact in the object table (SV* variant ==> slow)
+  void PreventDestruction(pTHX_ SV* thePerlObject);
+  /// Prevents destruction of an object by noting the fact in the object table (TObject variant ==> fast)
+  void PreventDestruction(pTHX_ TObject* theROOTObject);
 
   /// Creates a new Perl TObject wrapper (as with RegisterObject) that dereferences itself on first access
   SV* MakeDelayedInitObject(pTHX_ TObject** cobj, const char* className);
@@ -81,6 +93,11 @@ namespace SOOT {
 
   /// Compares to Perl objects by comparing their underlying TObjects
   bool IsSameTObject(pTHX_ SV* perlObj1, SV* perlObj2);
+
+  /** Free the underlying TObject, set pointer to zero.
+   *  This is to be considered INTERNAL TO SOOT only. => See UnregisterObject instead
+   */
+  void ClearObject(pTHX_ SV* thePerlObject);
 
   /// Private! Sets flags on PtrAnnotation for thePerlObject
   void _SetFlags_internal_SV(pTHX_ SV* thePerlObject, U32 flags);

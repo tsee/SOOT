@@ -60,7 +60,6 @@ namespace SOOT {
       croak("BAD");
   }
 
-
   inline bool
   IsIndestructible(pTHX_ TObject* theROOTObject)
   {
@@ -69,6 +68,29 @@ namespace SOOT {
       croak("SOOT::IsIndestructible: Not an encapsulated ROOT object!");
     return refPad->fFlags & SOOTf_DoNotDestroy;
   }
+
+  inline bool
+  IsROOTGlobal(pTHX_ SV* thePerlObject)
+  {
+    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
+      PtrAnnotation* refPad = gSOOTObjects->Fetch(LobotomizeObject(aTHX_ thePerlObject));
+      if (!refPad)
+        croak("SOOT::IsROOTGlobal: Not an encapsulated ROOT object!");
+      return refPad->fFlags & SOOTf_IsROOTGlobal;
+    }
+    else
+      croak("BAD");
+  }
+
+  inline bool
+  IsROOTGlobal(pTHX_ TObject* theROOTObject)
+  {
+    PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
+    if (!refPad)
+      croak("SOOT::IsROOTGlobal: Not an encapsulated ROOT object!");
+    return refPad->fFlags & SOOTf_IsROOTGlobal;
+  }
+
 
   inline void
   _SetFlags_internal_ROOT(pTHX_ TObject* theROOTObject, U32 flags) {
@@ -80,21 +102,16 @@ namespace SOOT {
     }
   }
 
-  /// Marks the PtrAnnotation for the given Perl-side object as related to a ROOT global
-  /// and thus also as non-destructible by Perl. SV version (slow)
   inline void
   SetROOTGlobal(pTHX_ SV* thePerlObject) {
     _SetFlags_internal_SV(aTHX_ thePerlObject, (SOOTf_DoNotDestroy|SOOTf_IsROOTGlobal));
   }
 
-  /// Marks the PtrAnnotation for the given Perl-side object as related to a ROOT global
-  /// and thus also as non-destructible by Perl.
   inline void
   SetROOTGlobal(pTHX_ TObject* theROOTObject) {
     _SetFlags_internal_ROOT(aTHX_ theROOTObject, (SOOTf_DoNotDestroy|SOOTf_IsROOTGlobal));
   }
 
-  /// Prevents destruction of an object by noting the fact in the object table (SV* variant ==> slow)
   inline void
   PreventDestruction(pTHX_ SV* thePerlObject) {
     _SetFlags_internal_SV(aTHX_ thePerlObject, SOOTf_DoNotDestroy);
