@@ -64,11 +64,6 @@ namespace SOOT {
    *  This is to be considered INTERNAL TO SOOT only. => See UnregisterObject instead
    */
   void ClearObject(pTHX_ SV* thePerlObject);
-  
-  /// Prevents destruction of an object by noting the fact in the object table (SV* variant ==> slow)
-  void PreventDestruction(pTHX_ SV* thePerlObject);
-  /// Prevents destruction of an object by noting the fact in the object table (TObject variant ==> fast)
-  void PreventDestruction(pTHX_ TObject* theROOTObject);
 
   /// Marks a given object as destructible by Perl
   void MarkForDestruction(pTHX_ SV* thePerlObject);
@@ -86,6 +81,9 @@ namespace SOOT {
 
   /// Compares to Perl objects by comparing their underlying TObjects
   bool IsSameTObject(pTHX_ SV* perlObj1, SV* perlObj2);
+
+  /// Private! Sets flags on PtrAnnotation for thePerlObject
+  void _SetFlags_internal_SV(pTHX_ SV* thePerlObject, U32 flags);
 } // end namespace SOOT
 
 #include "TObjectEncapsulation.inline.h"

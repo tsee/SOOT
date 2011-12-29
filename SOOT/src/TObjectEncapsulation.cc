@@ -118,9 +118,8 @@ namespace SOOT {
     return was_freed;
   }
 
-
   void
-  PreventDestruction(pTHX_ SV* thePerlObject) {
+  _SetFlags_internal_SV(pTHX_ SV* thePerlObject, U32 flags) {
     // We accept either a reference (i.e. the blessed object)
     // or the already dereferenced object which is really just an
     // SvIOK with the pointer to the TObject.
@@ -139,7 +138,7 @@ namespace SOOT {
       }
       else {
         // Normal encapsulated TObject
-        refPad->fFlags |= SOOTf_DoNotDestroy;
+        refPad->fFlags |= flags;
       }
     } // end if it's a good object
     else
@@ -198,6 +197,7 @@ namespace SOOT {
             //(refPad->fPerlObjects).push_back(thePerlObj);
             (refPad->fPerlObjects).insert(thePerlObj);
             refPad->fFlags |= SOOTf_DoNotDestroy; // can't destroy late init objects
+            refPad->fFlags |= SOOTf_IsROOTGlobal; // and in fact, they're always ROOT globals
           }
           break;
         } // end is PERL_MAGIC_ext magic

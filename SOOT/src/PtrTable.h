@@ -27,7 +27,13 @@ extern "C" {
 namespace SOOT {
 
 #ifndef SOOTf_DoNotDestroy
+   /* If set, then the ROOT object shouldn't be destroyed when the PtrAnnotation is
+    * no longer referenced from Perl */
 #  define SOOTf_DoNotDestroy 1
+   /* If set, the PtrAnnotation represents a ROOT global. In practice, there's a lot
+    * of overlap between SOOTf_IsROOTGlobal and SOOTf_DoNotDestroy, but they're not
+    * conceptually the same. */
+#  define SOOTf_IsROOTGlobal 2
 #endif
 
   typedef struct PtrAnnotation {

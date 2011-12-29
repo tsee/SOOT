@@ -168,7 +168,7 @@ namespace SOOT {
                          (className==NULL ? cobj->ClassName() : className),
                          global);
     global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
-    SOOT::PreventDestruction(aTHX_ cobj);
+    SOOT::SetROOTGlobal(aTHX_ cobj);
   }
 
   void
