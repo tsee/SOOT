@@ -63,19 +63,6 @@ delete(self)
     SOOT::MarkForDestruction(aTHX_ self);
     SvREFCNT_dec(self);
 
-bool
-isa(self, classname)
-    SV* self;
-    SV* classname;
-  PREINIT:
-    TObject *selfObj;
-    TClass *classObj;
-  CODE:
-    selfObj = SOOT::LobotomizeObject(aTHX_ self);
-    classObj = selfObj->IsA();
-    RETVAL = classObj->InheritsFrom(SvPV_nolen(classname));
-  OUTPUT: RETVAL
-
 
 
 ####### FIXME The following is a super-evil workaround for the "type enum" bug, so that users can at least do GetXaxis()->as("TAxis")!
@@ -115,15 +102,3 @@ delete(self)
     SOOT::MarkForDestruction(aTHX_ self);
     SvREFCNT_dec(self);
 
-bool
-isa(self, classname)
-    SV* self;
-    SV* classname;
-  PREINIT:
-    TObject *selfObj;
-    TClass *classObj;
-  CODE:
-    selfObj = SOOT::LobotomizeObject(aTHX_ self);
-    classObj = selfObj->IsA();
-    RETVAL = classObj->InheritsFrom(SvPV_nolen(classname));
-  OUTPUT: RETVAL

@@ -10,9 +10,7 @@
 
 using namespace std;
 
-
 namespace SOOT {
-
   void
   GenerateClassStubs(pTHX)
   {
@@ -94,16 +92,8 @@ namespace SOOT {
       if (theClass == NULL)
         return retval;
     }
-
-    // FIXME: Testing without setting up ISA entirely in Perl
-    AV* isa;
-    if (strncmp(className, "TArray", 6)) { // truth == DOESNT match
-      // Matching against TArray because TArray.* cannot inherit from TObject
-      isa = get_av((string(className)+string("::ISA")).c_str(), 1);
-      av_clear(isa);
-      av_push(isa, newSVpv("TObject", 7));
-    }
-
+    AV* isa = get_av((string(className)+string("::ISA")).c_str(), 1);
+    av_clear(isa);
     TIter next(theClass->GetListOfBases());
     TBaseClass* base;
     bool isTH1 = theClass->InheritsFrom("TH1");
@@ -115,7 +105,7 @@ namespace SOOT {
         vector<TString> sub = MakeClassStub(aTHX_ name.Data(), NULL);
         retval.reserve(retval.size()+sub.size());
         retval.insert(retval.end(), sub.begin(), sub.end());
-        //av_push(isa, newSVpv(base->GetName(), 0));
+        av_push(isa, newSVpv(base->GetName(), 0));
       }
     }
 
