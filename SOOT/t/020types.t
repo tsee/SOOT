@@ -66,7 +66,7 @@ SCOPE: {
 
 # does this do something utterly evil? (SEGV?)
   $obj = bless([] => 'TH1D');
-  ok(UNIVERSAL::isa(bless($obj => 'TH2'), 'TH2'));
+  isa_ok(bless($obj => 'TH2'), 'TH2');
 } # end SCOPE
 
 pass("REACHED END");

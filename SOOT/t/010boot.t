@@ -3,10 +3,7 @@ use warnings;
 use Test::More tests => 19;
 use SOOT;
 pass();
-
-# FIXME this is because we're trying to use the RTTI to do resolution
-is_deeply(\@TH1D::ISA, ["TObject"]);
-#is_deeply(\@TH1D::ISA, ["TH1"]);
+is_deeply(\@TH1D::ISA, ["TH1"]);
 
 eval { TObject->new(qw(a b c)); };
 ok($@ && "$@" =~ /Can't locate method/, "Can't locate method...");
