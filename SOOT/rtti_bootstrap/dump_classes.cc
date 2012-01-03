@@ -1,3 +1,5 @@
+#include "dump_classes.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -29,114 +31,49 @@ const unsigned int SOOTbootstrapDebug =
 #endif
 
 using namespace std;
+using namespace SOOTbootstrap;
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ClassIterator::ClassIterator()
+  : fClassNo(0)
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 namespace SOOTbootstrap {
   // FIXME "Warning in <TClass::TClass>: no dictionary for class iterator<bidirectional_iterator_tag,TObject*,long,const TObject**,const TObject*&> is available"
   static TPRegexp gBadClassRegexp("T(?:Btree|List|Map|ObjArray|OrdCollection|RefArray)Iter");
-
-  class ClassIterator {
-  public:
-    ClassIterator()
-      : fClassNo(0)
-    {}
-
-    /// Return next class name or NULL when none left
-    const char*
-    next()
-    {
-      if ((int)fClassNo < gClassTable->Classes()) {
-        const char* name = gClassTable->At(fClassNo++);
-        TString cn(name);
-        if (cn.Contains("<") || cn.Contains("::") || gBadClassRegexp.MatchB(cn)) {// FIXME optimize
-          if (SOOTbootstrapDebug >= 2)
-            cout << "Class deemed invalid, skipping: '" << cn << "'\n";
-          return next();
-        }
-        return name;
-      }
-      return NULL;
+}
+const char*
+ClassIterator::next()
+{
+  if ((int)fClassNo < gClassTable->Classes()) {
+    const char* name = gClassTable->At(fClassNo++);
+    TString cn(name);
+    if (cn.Contains("<") || cn.Contains("::") || SOOTbootstrap::gBadClassRegexp.MatchB(cn)) {// FIXME optimize
+      if (SOOTbootstrapDebug >= 2)
+        cout << "Class deemed invalid, skipping: '" << cn << "'\n";
+      return next();
     }
-  private:
-    unsigned int fClassNo;
-  };
+    return name;
+  }
+  return NULL;
+}
 
-  class SOOTClass;
-  class SOOTMethod;
-  class SOOTMethodArg;
-  class SOOTCppType;
 
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  class SOOTCppType {
-  public:
-    string fTypeName;
-    bool fIsClass;
-    bool fIsStruct;
-    bool fIsPointer; // foo *
-    bool fIsConstant; // const foo
-    bool fIsConstPointer; // foo const *
-    bool fIsReference; // foo&
-
-    SOOTCppType() {};
-    SOOTCppType(const string& typeName, const Long_t props)
-      : fTypeName(typeName)
-    {
-      fIsClass = props & kIsClass;
-      fIsStruct = props & kIsStruct;
-      fIsPointer = props & kIsPointer;
-      fIsConstant = props & kIsConstant;
-      fIsConstPointer = props & kIsConstPointer;
-      fIsReference = props & kIsReference;
-      // default is not part of the type
-      //fHasDefault = props & kIsDefault;
-    }
-  };
-
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  class SOOTMethodArg {
-  public:
-    SOOTMethodArg() {}
-
-    string fDefaultValue;
-    SOOTCppType fType;
-  };
-
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  // Sadly, we'll have handle static methods from the get-go: they can collide in name!
-  // TODO how do functions tie in?
-  class SOOTMethod {
-  public:
-    SOOTMethod() {}
-
-    string fName;
-    SOOTClass* fClass; // backref, so ptr
-    bool fIsStatic;
-    unsigned int fNArgsTotal;
-    unsigned int fNArgsOpt;
-    string fReturnType;
-    vector<SOOTMethodArg> fMethodArgs;
-    // parameters
-    // TMethod* fROOTMethod ?
-  };
-
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  class SOOTClass {
-  public:
-    SOOTClass() {}
-
-    string fName;
-    // list<SOOTClass*> fSuperClasses;
-    // list<SOOTClass*> fInheritingClasses;
-    map<string, SOOTMethod> fMethods;
-    // TClass* fROOTClass ?
-  };
-  
-
-} // end namespace SOOTbootstrap
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+SOOTCppType::SOOTCppType(const string& typeName, const Long_t props)
+  : fTypeName(typeName)
+{
+  fIsClass = props & kIsClass;
+  fIsStruct = props & kIsStruct;
+  fIsPointer = props & kIsPointer;
+  fIsConstant = props & kIsConstant;
+  fIsConstPointer = props & kIsConstPointer;
+  fIsReference = props & kIsReference;
+  // default is not part of the type
+  //fHasDefault = props & kIsDefault;
+}
 
-
-
-using namespace SOOTbootstrap;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SOOTMethodArg
@@ -226,12 +163,6 @@ ExtractClass(TClass* theClass)
 
   return cl;
 }
-
-typedef struct SOOTMethodDisambiguator {
-  SOOTClass* fClass;
-  string fMethodName;
-  vector< vector<SOOTMethod*> > fMethodsByNArgsActual;
-} SOOTMethodDisambiguator;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 int
