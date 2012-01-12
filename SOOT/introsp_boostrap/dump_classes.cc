@@ -194,7 +194,7 @@ ExtractMethod(TMethod* m)
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-SOOTClass
+SOOTClass*
 ExtractClass(TClass* theClass)
 {
   if (SOOTbootstrapDebug >= 2)
@@ -203,8 +203,8 @@ ExtractClass(TClass* theClass)
   TList *allMethods = theClass->GetListOfAllPublicMethods();
   //TList *allMethods = theClass->GetListOfMethods();
 
-  SOOTClass cl;
-  cl.fName = string(theClass->GetName());
+  SOOTClass *cl = new SOOTClass();
+  cl->fName = string(theClass->GetName());
 
   TIter nextMethod(allMethods);
   TMethod *m;
@@ -213,7 +213,8 @@ ExtractClass(TClass* theClass)
       continue;
 
     SOOTMethod sm = ExtractMethod(m);
-    cl.fMethods[sm.fName].push_back(sm); // there can be many methods of the same name in C++, yay
+    sm.fClass = cl;
+    cl->fMethods[sm.fName].push_back(sm); // there can be many methods of the same name in C++, yay
   } // end iterating over methods
 
   return cl;
@@ -240,7 +241,7 @@ main(int argc, char** argv)
   if (SOOTbootstrapDebug)
     cout << "Starting to scan classes and methods..." << endl;
 
-  map<string, SOOTClass> classMap;
+  map<string, SOOTClass *> classMap;
 
   // Iterate over all classes and do the class=>methods=>methargs conversion
   ClassIterator citer;
@@ -249,7 +250,7 @@ main(int argc, char** argv)
     if (className == NULL)
       break;
     TClass *theClass = TClass::GetClass(className);
-    
+
     classMap[string(className)] = ExtractClass(theClass);
   }
 
@@ -261,12 +262,12 @@ main(int argc, char** argv)
   // Now iterate over all classes again to create a class/methodname lookup
   map< pair<string, string>, SOOTMethodDisambiguator > disambiguators;
 
-  map<string, SOOTClass>::iterator clEnd = classMap.end(); 
-  for (map<string, SOOTClass>::iterator clIt = classMap.begin(); clIt != clEnd; ++clIt) {
+  map<string, SOOTClass *>::iterator clEnd = classMap.end();
+  for (map<string, SOOTClass *>::iterator clIt = classMap.begin(); clIt != clEnd; ++clIt) {
     const string& className = clIt->first;
-    SOOTClass& sclass = clIt->second;
+    SOOTClass& sclass = *(clIt->second);
 
-    map<string, vector<SOOTMethod> >::iterator meEnd = sclass.fMethods.end(); 
+    map<string, vector<SOOTMethod> >::iterator meEnd = sclass.fMethods.end();
     for (map<string, vector<SOOTMethod> >::iterator meIt = sclass.fMethods.begin(); meIt != meEnd; ++meIt) {
       const string& methodName = meIt->first;
       vector<SOOTMethod>& methodsWithThisName = meIt->second;
@@ -274,7 +275,9 @@ main(int argc, char** argv)
       SOOTMethodDisambiguator& disamb = disambiguators[pair<string, string>(className, methodName)];
       for (unsigned int imeth = 0; imeth < methodsWithThisName.size(); ++ imeth) {
         SOOTMethod& smethod = methodsWithThisName[imeth];
-      
+        if (methodsWithThisName.size() == 1)
+          smethod.GenerateUnambiguousXSUB(); // FIXME testing
+
         const unsigned int maxNArgs = smethod.fNArgsTotal;
         const unsigned int minNArgs = maxNArgs - smethod.fNArgsOpt;
         if (disamb.fMethodName == string("")) { // need init

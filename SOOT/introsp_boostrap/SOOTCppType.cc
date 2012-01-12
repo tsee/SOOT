@@ -91,3 +91,18 @@ SOOTCppType::ToString()
   return s.str();
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+std::string
+SOOTCppType::ToStringForTypemap()
+  const
+{
+  ostringstream s;
+  //if (fIsConstant)
+  //  s << "const ";
+  s << fTypeName;
+  //if (fIsConstPointer)
+  //  s << " const";
+  if (fIsPointer || fIsReference)
+    s << " *";
+  return s.str();
+}

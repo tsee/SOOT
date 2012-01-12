@@ -33,6 +33,8 @@ namespace SOOTbootstrap {
     std::vector<SOOTMethodArg> fMethodArgs;
     // parameters
     // TMethod* fROOTMethod ?
+
+    std::string GenerateUnambiguousXSUB() const;
   };
 } // end namespace SOOTbootstrap
 

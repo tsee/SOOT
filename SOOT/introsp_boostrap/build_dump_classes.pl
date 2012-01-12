@@ -11,6 +11,7 @@ use constant MAXDEBUGLEVEL => 3;
 
 GetOptions(
   'debug|d:i' => \(my $debuglevel),
+  'gdb' => \(my $gdb),
 );
 $debuglevel = 1 if defined $debuglevel and $debuglevel < 1;
 $debuglevel = 3 if defined $debuglevel and $debuglevel > 3;
@@ -56,6 +57,11 @@ $builder->link_executable(
 );
 
 my @args = (File::Spec->catdir(cwd(), 'dump_classes'), @libs);
+if ($gdb) {
+  #splice @args, 1, 0, '--args';
+  unshift @args, 'gdb', '--args';
+}
+
 print "Running: @args\n";
 system(@args);
 

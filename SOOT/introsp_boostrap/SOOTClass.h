@@ -11,6 +11,7 @@ namespace SOOTbootstrap {
   class SOOTClass {
   public:
     SOOTClass() {}
+    inline const std::string& PerlName() const { return fName; };
 
     std::string fName;
     // list<SOOTClass*> fSuperClasses;
