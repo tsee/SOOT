@@ -90,7 +90,7 @@ namespace SOOTbootstrap {
     std::string fName;
     // list<SOOTClass*> fSuperClasses;
     // list<SOOTClass*> fInheritingClasses;
-    std::map<std::string, SOOTMethod> fMethods;
+    std::map<std::string, std::vector<SOOTMethod> > fMethods;
     // TClass* fROOTClass ?
   };
   

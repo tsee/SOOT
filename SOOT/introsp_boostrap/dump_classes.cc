@@ -113,10 +113,13 @@ SOOTCppType::IntuitSOOTBasicTypes()
   if (! fSOOTTypes.empty())
     return;
 
-  // detect basic string types first since they require the ptr to be set
-  if (TClass::GetClass(fTypeName.c_str()) != NULL) {
+  // A TObject always goes first as such.
+  // FIXME includes some plain structs, curiously
+  TClass *cl = TClass::GetClass(fTypeName.c_str());
+  if (cl != NULL) {
     fSOOTTypes.insert(SOOT::eTOBJECT);
   }
+  // detect basic string types before other basics since they require the ptr to be set
   else if (fIsPointer && SOOTbootstrap::gStringType.MatchB(fTypeName)) {
     fSOOTTypes.insert(SOOT::eSTRING);
   }
@@ -294,7 +297,7 @@ ExtractClass(TClass* theClass)
       continue;
 
     SOOTMethod sm = ExtractMethod(m);
-    cl.fMethods[sm.fName] = sm;
+    cl.fMethods[sm.fName].push_back(sm); // there can be many methods of the same name in C++, yay
   } // end iterating over methods
 
   return cl;
@@ -346,31 +349,35 @@ main(int argc, char** argv)
   for (map<string, SOOTClass>::iterator clIt = classMap.begin(); clIt != clEnd; ++clIt) {
     const string& className = clIt->first;
     SOOTClass& sclass = clIt->second;
-    
-    map<string, SOOTMethod>::iterator meEnd = sclass.fMethods.end(); 
-    for (map<string, SOOTMethod>::iterator meIt = sclass.fMethods.begin(); meIt != meEnd; ++meIt) {
+
+    map<string, vector<SOOTMethod> >::iterator meEnd = sclass.fMethods.end(); 
+    for (map<string, vector<SOOTMethod> >::iterator meIt = sclass.fMethods.begin(); meIt != meEnd; ++meIt) {
       const string& methodName = meIt->first;
-      SOOTMethod& smethod= meIt->second;
+      vector<SOOTMethod>& methodsWithThisName = meIt->second;
 
       SOOTMethodDisambiguator& disamb = disambiguators[pair<string, string>(className, methodName)];
+      for (unsigned int imeth = 0; imeth < methodsWithThisName.size(); ++ imeth) {
+        SOOTMethod& smethod = methodsWithThisName[imeth];
       
-      const unsigned int maxNArgs = smethod.fNArgsTotal;
-      const unsigned int minNArgs = maxNArgs - smethod.fNArgsOpt;
-      if (disamb.fMethodName == string("")) { // need init
-        disamb.fMethodName = methodName;
-        disamb.fClass = &sclass;
-      }
+        const unsigned int maxNArgs = smethod.fNArgsTotal;
+        const unsigned int minNArgs = maxNArgs - smethod.fNArgsOpt;
+        if (disamb.fMethodName == string("")) { // need init
+          disamb.fMethodName = methodName;
+          disamb.fClass = &sclass;
+        }
 
-      vector< vector<SOOTMethod*> >& methsByNArgsActual = disamb.fMethodsByNArgsActual;
-      if (methsByNArgsActual.size() <= maxNArgs)
-        methsByNArgsActual.resize(maxNArgs+1);
+        vector< vector<SOOTMethod*> >& methsByNArgsActual = disamb.fMethodsByNArgsActual;
+        if (methsByNArgsActual.size() <= maxNArgs)
+          methsByNArgsActual.resize(maxNArgs+1);
 
-      for (unsigned int nargs = minNArgs; nargs <= maxNArgs; ++nargs) {
-        methsByNArgsActual[nargs].push_back(&smethod);
-      }
-      disamb.Dump();
-    } // end foreach method
-
+        for (unsigned int nargs = minNArgs; nargs <= maxNArgs; ++nargs) {
+          methsByNArgsActual[nargs].push_back(&smethod);
+        }
+        //if (sclass.fName == string("TGraphErrors")) {
+        //  disamb.Dump();
+        //}
+      } // end foreach method with the same name
+    } // end foreach method name
   } // end foreach class
 
 }
