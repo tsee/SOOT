@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <cmath>
@@ -113,7 +114,10 @@ SOOTCppType::IntuitSOOTBasicTypes()
     return;
 
   // detect basic string types first since they require the ptr to be set
-  if (fIsPointer && SOOTbootstrap::gStringType.MatchB(fTypeName)) {
+  if (TClass::GetClass(fTypeName) != NULL) {
+    fSOOTTypes.insert(SOOT::eSTRING);
+  }
+  else if (fIsPointer && SOOTbootstrap::gStringType.MatchB(fTypeName)) {
     fSOOTTypes.insert(SOOT::eSTRING);
   }
   else if (   SOOTbootstrap::gCIntegerType.MatchB(fTypeName)
@@ -125,8 +129,86 @@ SOOTCppType::IntuitSOOTBasicTypes()
   {
     fSOOTTypes.insert(SOOT::eFLOAT);
   }
+  // FIXME should all integers have an .insert(eFLOAT), too?
 
   return;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+std::string
+SOOTCppType::ToString()
+  const
+{
+  ostringstream s;
+  if (fIsConstant)
+    s << "const ";
+  s << fTypeName;
+  if (fIsConstPointer)
+    s << " const";
+  if (fIsPointer)
+    s << " *";
+  if (fIsReference)
+    s << "&";
+  return s.str();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void
+SOOTMethodDisambiguator::Dump()
+  const
+{
+  // FIXME inlined to avoid having to compile ../src
+  const char* basicTypeStrings[13] = {
+    "UNDEF",
+    "INTEGER",
+    "FLOAT",
+    "STRING",
+    "INTEGER_ARRAY",
+    "FLOAT_ARRAY",
+    "STRING_ARRAY",
+    "INVALID_ARRAY",
+    "HASH",
+    "CODE",
+    "REF",
+    "TOBJECT",
+    "INVALID",
+  };
+
+  cout << "  Class:  " << fClass->fName << " Method: " << fMethodName << endl;
+  for (unsigned int i = 0; i < fMethodsByNArgsActual.size(); ++i) {
+    const vector<SOOTMethod*>& methods = fMethodsByNArgsActual[i];
+    if (methods.size() == 0)
+      continue;
+    cout << "  Candidates for " << i << " arguments:" << "\n";
+    for (unsigned int j = 0; j < methods.size(); ++j) {
+      SOOTMethod *meth = methods[j];
+      cout << "  - NArgsTotal: " << meth->fNArgsTotal << " NArgsOpt: " << meth->fNArgsOpt << "\n"
+           << "    RetType: " << meth->fReturnType << "\n";
+
+      const vector<SOOTMethodArg>& args = meth->fMethodArgs;
+      if (args.size() != 0) {
+        cout << "    Args: ";
+      }
+      for (unsigned int k = 0; k < args.size(); ++k) {
+        const SOOTMethodArg& ma = args[k];
+        const SOOTCppType& type = ma.fType;
+        cout << k << ") " << type.ToString();
+        if (ma.fDefaultValue != string("")) {
+          cout << "(="<<ma.fDefaultValue<<")";
+        }
+        const set<SOOT::BasicType>& btypes = type.fSOOTTypes;
+        set<SOOT::BasicType>::iterator it;
+        cout << " [";
+        for (it = btypes.begin(); it != btypes.end(); it++) {
+          cout << basicTypeStrings[*it];// FIXME
+          cout << "|";
+        }
+        cout << "]\n";
+        if (k != args.size()-1)
+          cout << "    ";
+      }
+    }
+  }
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -286,6 +368,7 @@ main(int argc, char** argv)
       for (unsigned int nargs = minNArgs; nargs <= maxNArgs; ++nargs) {
         methsByNArgsActual[nargs].push_back(&smethod);
       }
+      disamb.Dump();
     } // end foreach method
 
   } // end foreach class

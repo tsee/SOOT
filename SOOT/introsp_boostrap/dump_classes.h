@@ -45,6 +45,7 @@ namespace SOOTbootstrap {
     inline bool IsPerlBasicType() {
       return !fSOOTTypes.empty();
     }
+    std::string ToString() const;
 
   private:
     void IntuitSOOTBasicTypes();
@@ -103,6 +104,7 @@ namespace SOOTbootstrap {
       : fClass(cl), fMethodName(methname)
     {}
     SOOTMethodDisambiguator() {}
+    void Dump() const;
   };
 
 
