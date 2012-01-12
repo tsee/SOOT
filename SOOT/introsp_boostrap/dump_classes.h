@@ -31,25 +31,6 @@ namespace SOOTbootstrap {
     SOOTCppType() {};
     SOOTCppType(const std::string& typeName, const Long_t props);
 
-    inline bool IsPerlBasicType() {
-      return(
-           fTypeName == std::string("int")
-        || fTypeName == std::string("char")
-        || fTypeName == std::string("double")
-        || fTypeName == std::string("float")
-        || fTypeName == std::string("short")
-        || fTypeName == std::string("long")
-        || ( fTypeName.substr(0, 8) == std::string("unsigned")
-             && (    fTypeName.length() == 8
-                  || fTypeName.substr(8) == std::string(" int")
-                  || fTypeName.substr(8) == std::string(" long")
-                  || fTypeName.substr(8) == std::string(" short")
-                  || fTypeName.substr(8) == std::string(" char") )
-           )
-        || fTypeName == std::string("long long")
-      );
-    }
-
     std::string fTypeName;
     bool fIsClass;
     bool fIsStruct;
@@ -60,7 +41,11 @@ namespace SOOTbootstrap {
 
     // the following are just derived members for caching
     std::set<SOOT::BasicType> fSOOTTypes;
-    
+
+    inline bool IsPerlBasicType() {
+      return !fSOOTTypes.empty();
+    }
+
   private:
     void IntuitSOOTBasicTypes();
   };
@@ -108,11 +93,17 @@ namespace SOOTbootstrap {
     // TClass* fROOTClass ?
   };
   
-  typedef struct SOOTMethodDisambiguator {
+  class SOOTMethodDisambiguator {
+  public:
     SOOTClass* fClass;
     std::string fMethodName;
     std::vector< std::vector<SOOTMethod*> > fMethodsByNArgsActual;
-  } SOOTMethodDisambiguator;
+
+    SOOTMethodDisambiguator(SOOTClass * cl, const std::string& methname)
+      : fClass(cl), fMethodName(methname)
+    {}
+    SOOTMethodDisambiguator() {}
+  };
 
 
 } // end namespace SOOTbootstrap
