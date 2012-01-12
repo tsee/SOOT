@@ -19,6 +19,10 @@
 #include <TPRegexp.h>
 #include <TList.h>
 
+#include <SOOTCppType.h>
+#include <SOOTMethodArg.h>
+#include <SOOTMethod.h>
+#include <SOOTClass.h>
 
 const unsigned int SOOTbootstrapDebug =
 #ifdef DEBUG3
@@ -66,94 +70,6 @@ ClassIterator::next()
   return NULL;
 }
 
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-bool
-SOOTMethod::cmp(const SOOTMethod& l, const SOOTMethod& r)
-{
-  // returns true if l is less than r, that is, return true if
-  // l is preferred over r
-
-  // Note that we're always sorting methods that are valid for a
-  // given number of input parameters.
-
-  // The method with the highest number of required parameters is
-  // preferred. FIXME think about this some more
-  if (l.GetNRequiredArgs() > r.GetNRequiredArgs())
-    return true;
-
-  // Then, we prefer the method that has the least no. of total
-  // parameters. FIXME think about this some more
-  if (l.fNArgsTotal < r.fNArgsTotal)
-    return true;
-
-  // FIXME this will probably go away again, it's a dead-end
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-SOOTCppType::SOOTCppType(const string& typeName, const Long_t props)
-  : fTypeName(typeName)
-{
-  fIsClass = props & kIsClass;
-  fIsStruct = props & kIsStruct;
-  fIsPointer = props & kIsPointer;
-  fIsConstant = props & kIsConstant;
-  fIsConstPointer = props & kIsConstPointer;
-  fIsReference = props & kIsReference;
-  // default is not part of the type
-  //fHasDefault = props & kIsDefault;
-
-  IntuitSOOTBasicTypes();
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void
-SOOTCppType::IntuitSOOTBasicTypes()
-{
-  if (! fSOOTTypes.empty())
-    return;
-
-  // A TObject always goes first as such.
-  // FIXME includes some plain structs, curiously
-  TClass *cl = TClass::GetClass(fTypeName.c_str());
-  if (cl != NULL) {
-    fSOOTTypes.insert(SOOT::eTOBJECT);
-  }
-  // detect basic string types before other basics since they require the ptr to be set
-  else if (fIsPointer && SOOTbootstrap::gStringType.MatchB(fTypeName)) {
-    fSOOTTypes.insert(SOOT::eSTRING);
-  }
-  else if (   SOOTbootstrap::gCIntegerType.MatchB(fTypeName)
-      || SOOTbootstrap::gROOTIntegerType.MatchB(fTypeName))
-  {
-    fSOOTTypes.insert(SOOT::eINTEGER);
-  }
-  else if (SOOTbootstrap::gFloatType.MatchB(fTypeName))
-  {
-    fSOOTTypes.insert(SOOT::eFLOAT);
-  }
-  // FIXME should all integers have an .insert(eFLOAT), too?
-
-  return;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-std::string
-SOOTCppType::ToString()
-  const
-{
-  ostringstream s;
-  if (fIsConstant)
-    s << "const ";
-  s << fTypeName;
-  if (fIsConstPointer)
-    s << " const";
-  if (fIsPointer)
-    s << " *";
-  if (fIsReference)
-    s << "&";
-  return s.str();
-}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void

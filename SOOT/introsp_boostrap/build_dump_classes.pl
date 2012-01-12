@@ -41,15 +41,17 @@ if (defined $debuglevel) {
   $opts{extra_compiler_flags} .= " -DDEBUG";
 }
 
+my @ccfiles = ('dump_classes.cc', grep !/\bdump_classes\.cc$/, glob('*.cc'));
 my $builder = ExtUtils::CBuilder->new;
-my $object = $builder->compile(
-  source =>'dump_classes.cc',
-  'C++' => 1,
-  extra_compiler_flags => $opts{extra_compiler_flags} . ' -I.. -I../src',
-);
+
+my @objects = map $builder->compile(
+    source => $_,
+    'C++' => 1,
+    extra_compiler_flags => $opts{extra_compiler_flags} . ' -I. -I.. -I../src',
+  ), @ccfiles;
 
 $builder->link_executable(
-  objects => [$object],
+  objects => \@objects,
   extra_linker_flags => $opts{extra_linker_flags} . " " . join(" ", map "-I$_", map {s/^lib//; $_} @libs),
 );
 
