@@ -42,7 +42,13 @@ ClassIterator::ClassIterator()
 namespace SOOTbootstrap {
   // FIXME "Warning in <TClass::TClass>: no dictionary for class iterator<bidirectional_iterator_tag,TObject*,long,const TObject**,const TObject*&> is available"
   static TPRegexp gBadClassRegexp("T(?:Btree|List|Map|ObjArray|OrdCollection|RefArray)Iter");
+  static TPRegexp gCIntegerType("^(?:unsigned|(?:unsigned )?(?:short|int|char|long(?: long)?))$"); // char, too?
+  static TPRegexp gStringType("^(?:char|U?(?:Byte|Char)_t)$");
+  static TPRegexp gROOTIntegerType("^(?:Bool_t|U?(?:Short|Int|Long64|Long|Char|Seek|Byte|Font|Style|Marker|Width|Color|SCoord|SSiz|Version|Option)_t)$");
+  static TPRegexp gFloatType("^(?:double|float|(?:(?:Float|Double)(?:16|32|64)?|Real|Axis|Stat|Coord|Angle|Size)_t)$"); // FIXME Size_t a float, really? According to Rtypes.h, yes.
+
 }
+
 const char*
 ClassIterator::next()
 {
@@ -61,6 +67,29 @@ ClassIterator::next()
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+bool
+SOOTMethod::cmp(const SOOTMethod& l, const SOOTMethod& r)
+{
+  // returns true if l is less than r, that is, return true if
+  // l is preferred over r
+
+  // Note that we're always sorting methods that are valid for a
+  // given number of input parameters.
+
+  // The method with the highest number of required parameters is
+  // preferred. FIXME think about this some more
+  if (l.GetNRequiredArgs() > r.GetNRequiredArgs())
+    return true;
+
+  // Then, we prefer the method that has the least no. of total
+  // parameters. FIXME think about this some more
+  if (l.fNArgsTotal < r.fNArgsTotal)
+    return true;
+
+  // FIXME this will probably go away again, it's a dead-end
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SOOTCppType::SOOTCppType(const string& typeName, const Long_t props)
   : fTypeName(typeName)
 {
@@ -72,8 +101,33 @@ SOOTCppType::SOOTCppType(const string& typeName, const Long_t props)
   fIsReference = props & kIsReference;
   // default is not part of the type
   //fHasDefault = props & kIsDefault;
+
+  IntuitSOOTBasicTypes();
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+void
+SOOTCppType::IntuitSOOTBasicTypes()
+{
+  if (! fSOOTTypes.empty())
+    return;
+
+  // detect basic string types first since they require the ptr to be set
+  if (fIsPointer && SOOTbootstrap::gStringType.MatchB(fTypeName)) {
+    fSOOTTypes.insert(SOOT::eSTRING);
+  }
+  else if (   SOOTbootstrap::gCIntegerType.MatchB(fTypeName)
+      || SOOTbootstrap::gROOTIntegerType.MatchB(fTypeName))
+  {
+    fSOOTTypes.insert(SOOT::eINTEGER);
+  }
+  else if (SOOTbootstrap::gFloatType.MatchB(fTypeName))
+  {
+    fSOOTTypes.insert(SOOT::eFLOAT);
+  }
+
+  return;
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 SOOTMethodArg

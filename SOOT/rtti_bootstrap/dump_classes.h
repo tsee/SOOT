@@ -2,10 +2,13 @@
 #define dump_classes_h_
 
 #include <map>
+#include <set>
 #include <vector>
 #include <string>
 
 #include <TROOT.h>
+#include "../ROOTIncludes.h"
+#include <SOOTTypes.h>
 
 namespace SOOTbootstrap {
   class ClassIterator {
@@ -25,6 +28,28 @@ namespace SOOTbootstrap {
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   class SOOTCppType {
   public:
+    SOOTCppType() {};
+    SOOTCppType(const std::string& typeName, const Long_t props);
+
+    inline bool IsPerlBasicType() {
+      return(
+           fTypeName == std::string("int")
+        || fTypeName == std::string("char")
+        || fTypeName == std::string("double")
+        || fTypeName == std::string("float")
+        || fTypeName == std::string("short")
+        || fTypeName == std::string("long")
+        || ( fTypeName.substr(0, 8) == std::string("unsigned")
+             && (    fTypeName.length() == 8
+                  || fTypeName.substr(8) == std::string(" int")
+                  || fTypeName.substr(8) == std::string(" long")
+                  || fTypeName.substr(8) == std::string(" short")
+                  || fTypeName.substr(8) == std::string(" char") )
+           )
+        || fTypeName == std::string("long long")
+      );
+    }
+
     std::string fTypeName;
     bool fIsClass;
     bool fIsStruct;
@@ -33,8 +58,11 @@ namespace SOOTbootstrap {
     bool fIsConstPointer; // foo const *
     bool fIsReference; // foo&
 
-    SOOTCppType() {};
-    SOOTCppType(const std::string& typeName, const Long_t props);
+    // the following are just derived members for caching
+    std::set<SOOT::BasicType> fSOOTTypes;
+    
+  private:
+    void IntuitSOOTBasicTypes();
   };
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,6 +80,10 @@ namespace SOOTbootstrap {
   class SOOTMethod {
   public:
     SOOTMethod() {}
+    inline unsigned int GetNRequiredArgs() const {return fNArgsTotal - fNArgsOpt;}
+    /// Comparison function to sort a set of methods of the same name
+    /// in order of resolution preference (ascending order == descending preference)
+    static bool cmp(const SOOTMethod& l, const SOOTMethod& r);
 
     std::string fName;
     SOOTClass* fClass; // backref, so ptr

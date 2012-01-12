@@ -45,7 +45,7 @@ my $builder = ExtUtils::CBuilder->new;
 my $object = $builder->compile(
   source =>'dump_classes.cc',
   'C++' => 1,
-  extra_compiler_flags => $opts{extra_compiler_flags},
+  extra_compiler_flags => $opts{extra_compiler_flags} . ' -I.. -I../src',
 );
 
 $builder->link_executable(
