@@ -44,7 +44,7 @@ S_MakeArgumentNameList(vector< pair< SOOTMethodArg, string > >& args, bool withT
   for (unsigned int i = 0; i < n; ++i) {
     pair< SOOTMethodArg, string>& arg = args[i];
     if (withType)
-      s << arg.first.fType.ToString() << " ";
+      s << arg.first.fType.ToStringForTypemap() << " ";
     s << arg.second;
     if (i < n-1)
       s << ", ";
@@ -92,8 +92,20 @@ SOOTMethod::GenerateUnambiguousXSUB()
          << (argListWithTypes == "" ? string("") : string(", ")+argListWithTypes)
          << ")\");\n";
 
+  // Generate parameter declarations
+  for (unsigned int ip = 0; ip < fNArgsTotal; ++ip) {
+    pair<SOOTMethodArg, string>& argN = argNames[ip];
+    preInit << "    " << argN.first.fType.ToStringForTypemap() << " " << argN.second;
+    if (argN.first.fDefaultValue != "")
+      preInit << " = " << argN.first.fDefaultValue;
+    preInit << ";\n";
+  }
+
+  // Assemble sections
   s << "  PREINIT:\n" << preInit.str();
   s << "  PPCODE:\n" << ppCode.str();
+
+// FIXME debug output
 cout <<"\n";
 cout << s.str();
 cout <<"\n";
