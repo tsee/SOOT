@@ -36,6 +36,7 @@ SOOTMethod::cmp(const SOOTMethod& l, const SOOTMethod& r)
   // FIXME this will probably go away again, it's a dead-end
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 static string
 S_MakeArgumentNameList(vector< pair< SOOTMethodArg, string > >& args, bool withType = false)
 {
@@ -112,6 +113,7 @@ cout <<"\n";
   return s.str();
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // This is the code to generate
 // void
 // Foo(arg1, arg2, arg2, ...)
