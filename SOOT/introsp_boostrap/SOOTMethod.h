@@ -18,7 +18,9 @@ namespace SOOTbootstrap {
   // TODO how do functions tie in?
   class SOOTMethod {
   public:
-    SOOTMethod() {}
+    SOOTMethod()
+      : fName(""), fClass(NULL), fIsStatic(false), fNArgsTotal(0), fNArgsOpt(0)
+    {}
     inline unsigned int GetNRequiredArgs() const {return fNArgsTotal - fNArgsOpt;}
     /// Comparison function to sort a set of methods of the same name
     /// in order of resolution preference (ascending order == descending preference)

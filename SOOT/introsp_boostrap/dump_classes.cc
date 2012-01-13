@@ -183,6 +183,7 @@ ExtractMethod(TMethod* m)
   sm.fNArgsTotal = m->GetNargs();
   sm.fNArgsOpt = m->GetNargsOpt();
   sm.fReturnType = string(m->GetReturnTypeName());
+  sm.fIsStatic = m->Property() & kIsStatic;
 
   TIter nextMethodArg(m->GetListOfMethodArgs());
   TMethodArg *ma;
