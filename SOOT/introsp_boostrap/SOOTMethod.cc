@@ -21,7 +21,11 @@ SOOTMethod::PerlName()
   const
 {
   // TODO cache this
-  if (fName.length() >= 9 && fName.length() <= 11
+  if (fIsDestructor)
+    return "DESTROY";
+  else if (fIsConstructor)
+    return "new";
+  else if (fName.length() >= 9 && fName.length() <= 11
       && fName.substr(0, 8) == "operator") {
     string op = fName.substr(8);
     if (op.length() == 1) {
@@ -330,6 +334,8 @@ SOOTMethod::GenerateUnambiguousXSUB()
     ppCode << indent << "XS_RETURN_EMPTY;\n";
   }
   else {
+    if (fNArgsTotal == 0)
+      ppCode << indent << "EXTEND(SP, 1);\n";
     ppCode << GetOutputTypemapStringFor(fReturnType, "retval", "ST(0)", indent, returnsReference)
            << indent << "XS_RETURN(1);\n";
   }
