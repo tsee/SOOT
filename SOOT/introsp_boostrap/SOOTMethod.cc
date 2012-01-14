@@ -32,12 +32,7 @@ SOOTMethod::GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarn
   ostringstream s;
 
   if (type.fSOOTTypes.count(SOOT::eTOBJECT) > 0) {
-    s << indent << "if( sv_isobject(" << inputvarstr << ") && (SvTYPE(SvRV(" << inputvarstr << ")) == SVt_PVMG) )\n"
-      << indent << "  " << cvarname << " = (" << type.ToStringForTypemap() << ")SvIV((SV*)SvRV( " << inputvarstr << " ));\n"
-      << indent << "else {\n"
-      << indent << "  warn( \"" << FullyQualifiedPerlName() << "() -- " << cvarname << " is not a blessed SV reference\" );\n"
-      << indent << "  XSRETURN_UNDEF;\n"
-      << indent << "}\n";
+    s << indent << cvarname << " = (" << type.ToStringForTypemap() << ")SOOT::LobotomizeObject(aTHX_ " << inputvarstr << ");\n";
   }
   else if (type.fSOOTTypes.count(SOOT::eSTRING) > 0) {
     s << indent << cvarname << " = (" << type.ToStringForTypemap() << ")SvPV_nolen(" << inputvarstr << ");\n";
@@ -98,16 +93,12 @@ SOOTMethod::GenerateUnambiguousXSUB()
   const string fullFuncName = FullyQualifiedPerlName();
 
   ostringstream s;
-  s << "void\n" << fullFuncName << "(invocant, ...)\n";
-  if (fIsStatic) {
-    s << "    " << "char * CLASS;\n";
-  }
-  else {
-    s << "    " << className << " * THIS;\n";
-  }
+  s << "void\n" << fullFuncName << "(arg0, ...)\n";
 
   ostringstream preInit;
   ostringstream ppCode;
+
+  string indent(4, ' ');
 
   const unsigned int nArgsFixed = GetNRequiredArgs();
   vector< pair< SOOTMethodArg*, string > > argNames;
@@ -118,18 +109,24 @@ SOOTMethod::GenerateUnambiguousXSUB()
   }
 
   // generate code to check the number of parameters
-  ppCode << "    ";
+  ppCode << indent;
   if (fNArgsOpt == 0)
-    ppCode << "if (items != " << fNArgsTotal << ")\n";
+    ppCode << "if (items != " << fNArgsTotal+1 << ")\n"; // +1 for invocant
   else
-    ppCode << "if (items < " << nArgsFixed << " || items > fNArgsTotal)\n";
+    ppCode << "if (items < " << nArgsFixed+1 << " || items > " << fNArgsTotal+1 << ")\n";
   string argListWithTypes = S_MakeArgumentNameList(argNames, true);
-  ppCode << "      croak(\"Usage: " << fullFuncName
+  ppCode << indent << "  croak(\"Usage: " << fullFuncName
          << "(" << className << "* object"
          << (argListWithTypes == "" ? string("") : string(", ")+argListWithTypes)
          << ")\");\n";
 
   // Generate parameter declarations
+  // Invocant first
+  if (fIsStatic)
+    preInit << indent << "char * arg0;\n";
+  else
+    preInit << indent << className << " * arg0;\n";
+
   for (unsigned int ip = 0; ip < fNArgsTotal; ++ip) {
     pair<SOOTMethodArg*, string>& argN = argNames[ip];
     preInit << "    " << argN.first->fType.ToStringForTypemap() << " " << argN.second;
@@ -138,9 +135,12 @@ SOOTMethod::GenerateUnambiguousXSUB()
     preInit << ";\n";
   }
 
+  // declare retval
+  preInit << "    " << fReturnType << " retval;\n";
+
   // Generate input type mapping
   // invocant first
-  string indent = string(6, ' ');
+  indent = string(4, ' ');
   SOOTCppType classType = fClass->MakeType();
   ppCode << GetInputTypemapStringFor( classType, string("arg0"), (unsigned int)0, indent );
   // ordinary req parameters later
@@ -174,6 +174,26 @@ SOOTMethod::GenerateUnambiguousXSUB()
              << indent << "}\n";
     }
   } // end if any parameters
+
+  // Now, generate the actual call
+  ppCode << indent << "try {\n";
+  {
+    string indent(8, ' ');
+    // FIXME needs if()else for static/instance
+    ppCode << indent << "retval = arg0->" << fName << "(" << S_MakeArgumentNameList(argNames) << ");\n";
+  }
+
+  // FIXME free memory on exception?
+  ppCode << indent << "}\n"
+         << indent << "catch (std::exception& e) {\n"
+         << indent << "  croak(\"Caught C++ exception of type or derived from 'std::exception': %s\", e.what());\n"
+         << indent << "}\n"
+         << indent << "catch (...) {\n"
+         << indent << "  croak(\"Caught C++ exception of unknown type\");\n"
+         << indent << "}\n";
+
+  // FIXME free memory?
+
 
 
   // Assemble sections
