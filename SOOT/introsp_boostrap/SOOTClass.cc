@@ -12,6 +12,10 @@
 using namespace std;
 using namespace SOOTbootstrap;
 
+namespace SOOTbootstrap {
+  std::set<std::string> gEnumRegistry;
+}
+
 SOOTCppType
 SOOTClass::MakeType(const bool isPtr, const bool isConst)
   const

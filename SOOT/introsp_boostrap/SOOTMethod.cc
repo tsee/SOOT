@@ -39,6 +39,21 @@ SOOTMethod::GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarn
       << indent << "  XSRETURN_UNDEF;\n"
       << indent << "}\n";
   }
+  else if (type.fSOOTTypes.count(SOOT::eSTRING) > 0) {
+    s << indent << cvarname << " = (" << type.ToStringForTypemap() << ")SvPV_nolen(" << inputvarstr << ");\n";
+  }
+  else if (type.fSOOTTypes.count(SOOT::eINTEGER) > 0) {
+    if (type.fTypeName.substr(0,1) == "U"
+        || (type.fTypeName.length() >= 8 && type.fTypeName.substr(0, 8) == "unsigned")) {
+      s << indent << cvarname << " = (" << type.ToStringForTypemap() << ")SvUV(" << inputvarstr << ");\n";
+    }
+    else {
+      s << indent << cvarname << " = (" << type.ToStringForTypemap() << ")SvIV(" << inputvarstr << ");\n";
+    }
+  }
+  else if (type.fSOOTTypes.count(SOOT::eFLOAT) > 0) {
+    s << indent << cvarname << " = (" << type.ToStringForTypemap() << ")SvNV(" << inputvarstr << ");\n";
+  }
   else {
     cout << "WEEEH UNHANDLED TYPE IN GetInputTypemapStringFor()!" << endl;
     s << "WEEEH UNHANDLED TYPE IN GetInputTypemapStringFor()!" << endl;

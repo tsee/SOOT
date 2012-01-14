@@ -2,6 +2,7 @@
 #define sb_SOOTClass_h_
 
 #include <map>
+#include <set>
 #include <vector>
 #include <string>
 
@@ -9,6 +10,8 @@
 #include <SOOTCppType.h>
 
 namespace SOOTbootstrap {
+  extern std::set<std::string> gEnumRegistry;
+
   class SOOTClass {
   public:
     SOOTClass() {}

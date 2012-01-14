@@ -243,19 +243,53 @@ main(int argc, char** argv)
     cout << "Starting to scan classes and methods..." << endl;
 
   map<string, SOOTClass *> classMap;
+  set<string> enumMap;
 
   // Iterate over all classes and do the class=>methods=>methargs conversion
-  ClassIterator citer;
+  ClassIterator *citer = new ClassIterator();
   while (1) {
-    const char *className = citer.next();
+    const char *className = citer->next();
+    if (className == NULL)
+      break;
+    TClass *theClass = TClass::GetClass(className);
+
+    // Populate lookup of all enum types FIXME this junk gives me nausea
+    TIter next(theClass->GetListOfAllPublicDataMembers());
+    TObject* o;
+    while ((o = next())) {
+      TDataMember *m = (TDataMember *)o;
+      if (m->IsEnum()) {
+        string type = m->GetFullTypeName();
+        gEnumRegistry.insert(type);
+        if (type.length() > 6 && type.substr(0, 6) == "const ")
+          gEnumRegistry.insert(type.substr(6));
+      }
+    }
+  } // end foreach class
+
+  delete citer;
+  citer = new ClassIterator();
+  while (1) {
+    const char *className = citer->next();
     if (className == NULL)
       break;
     TClass *theClass = TClass::GetClass(className);
 
     classMap[string(className)] = ExtractClass(theClass);
+  } // end foreach class
+
+
+/*  TCollection* tc = gROOT->GetListOfTypes(true);
+  TIterator* tcIter = tc->MakeIterator();
+  TObject* el;
+  while (NULL != (el = tcIter->Next())) {
+    if (string(el->ClassName()) != string("TDataType")) {
+      cout << "meh" << endl;
+      exit(2);
+    }
+    cout << ((TDataType*)el)->GetType() << " '" << ((TDataType*)el)->GetTypeName() << "' '" << ((TDataType*)el)->GetFullTypeName() << "'" <<endl;
   }
-
-
+*/
 
   if (SOOTbootstrapDebug)
     cout << "Starting to build lookup tables for classes and methods..." << endl;
