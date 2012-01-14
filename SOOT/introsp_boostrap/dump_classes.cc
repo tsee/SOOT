@@ -163,12 +163,8 @@ ExtractMethod(TMethod* m)
          << "' nargs=" << m->GetNargs() << " nargsopt=" << m->GetNargsOpt() << "\n";
   }
 
-  SOOTMethod sm;
-  sm.fName = m->GetName();
-  sm.fNArgsTotal = m->GetNargs();
-  sm.fNArgsOpt = m->GetNargsOpt();
-  sm.fReturnType = string(m->GetReturnTypeName());
-  sm.fIsStatic = m->Property() & kIsStatic;
+  SOOTMethod sm(m->GetName(), m->GetNargs(), m->GetNargsOpt(), string(m->GetReturnTypeName()),
+                m->Property() & kIsStatic);
 
   TIter nextMethodArg(m->GetListOfMethodArgs());
   TMethodArg *ma;
@@ -200,6 +196,9 @@ ExtractClass(TClass* theClass)
 
     SOOTMethod sm = ExtractMethod(m);
     sm.fClass = cl;
+    sm.fIsConstructor = (sm.fName == cl->fName);
+    sm.fIsDestructor = (sm.fName == string("~") + cl->fName);
+
     cl->fMethods[sm.fName].push_back(sm); // there can be many methods of the same name in C++, yay
   } // end iterating over methods
 
@@ -297,7 +296,7 @@ main(int argc, char** argv)
         SOOTMethod& smethod = methodsWithThisName[imeth];
         if (methodsWithThisName.size() == 1)
           smethod.GenerateUnambiguousXSUB(); // FIXME testing
-
+cout << "METHOD CARDINALITY: " << methodsWithThisName.size() << " (" << smethod.FullyQualifiedPerlName() << ", " << smethod.fNArgsTotal << ", " << smethod.fNArgsOpt << ")\n";
         const unsigned int maxNArgs = smethod.fNArgsTotal;
         const unsigned int minNArgs = maxNArgs - smethod.fNArgsOpt;
         if (disamb.fMethodName == string("")) { // need init

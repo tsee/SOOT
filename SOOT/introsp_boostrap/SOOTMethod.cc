@@ -17,10 +17,83 @@ using namespace SOOTbootstrap;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 std::string
+SOOTMethod::PerlName()
+  const
+{
+  // TODO cache this
+  if (fName.length() >= 9 && fName.length() <= 11
+      && fName.substr(0, 8) == "operator") {
+    string op = fName.substr(8);
+    if (op.length() == 1) {
+      switch (op[0]) {
+      case '=': return "operatorAssign";
+      case '*': return "operatorMultiply";
+      case '+': return "operatorAdd";
+      case '/': return "operatorDivide";
+      case '-': return "operatorSubtract";
+      case '<': return "operatorLessThan";
+      case '>': return "operatorGreaterThan";
+      case '!': return "operatorNot";
+      case '&': return "operatorBitwiseAnd";
+      case '|': return "operatorBitwiseOr";
+      case '~': return "operatorBitwiseNegate";
+      case '^': return "operatorBitwiseXor";
+      default:
+        cout << "Unknown operator overload: " << fName << endl;
+        return fName;
+      }
+    }
+    else if (op.length() == 2) { // len = 2
+      if (op[1] == '=') {
+        switch (op[0]) {
+        case '=': return "operatorEquals";
+        case '<': return "operatorLessThanOrEquals";
+        case '>': return "operatorGreaterThanOrEquals";
+        case '*': return "operatorMultiplyAssign";
+        case '+': return "operatorAddAssign";
+        case '/': return "operatorDivideAssign";
+        case '-': return "operatorSubtractAssign";
+        case '!': return "operatorNotAssign";
+        case '&': return "operatorBitwiseAndAssign";
+        case '|': return "operatorBitwiseOrAssign";
+        case '~': return "operatorBitwiseNegateAssign";
+        case '^': return "operatorBitwiseXorAssign";
+        default:
+          cout << "Unknown operator overload: " << fName << endl;
+          return fName;
+        }
+      }
+      else if (op == "++")
+        return "operatorIncrement";
+      else if (op == "--")
+        return "operatorDecrement";
+      else if (op == "<<")
+        return "operatorLeftShift";
+      else if (op == ">>")
+        return "operatorRightShift";
+      else if (op == "[]")
+        return "operatorElem";
+      else if (op == "()")
+        return "operatorCall";
+      else if (op == "->")
+        return "operatorDeref";
+    }
+    else { // len == 3
+      if (op == "<<=")
+        return "operatorLeftShiftAssign";
+      else if (op == ">>=")
+        return "operatorRightShiftAssign";
+    }
+    // can fall through
+  } // end if operatorX
+  return fName;
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+std::string
 SOOTMethod::FullyQualifiedPerlName()
   const
 {
-  return fClass->PerlName() + "::" + fName;
+  return fClass->PerlName() + "::" + PerlName();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -52,6 +125,51 @@ SOOTMethod::GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarn
   else {
     cout << "WEEEH UNHANDLED TYPE IN GetInputTypemapStringFor()!" << endl;
     s << "WEEEH UNHANDLED TYPE IN GetInputTypemapStringFor()!" << endl;
+  }
+
+  return s.str();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+std::string
+SOOTMethod::GetOutputTypemapStringFor(const std::string& rettype, const std::string& cvarname,
+                                      const std::string& outputvarstr, const std::string& indent,
+                                      bool returnsReference)
+  const
+{
+  ostringstream s;
+
+  SOOT::BasicType brettype = SOOT::GuessTypeFromProto(rettype.c_str());
+  if (brettype == SOOT::eTOBJECT) {
+    s << indent << outputvarstr << " = sv_2mortal( SOOT::RegisterObject(aTHX_ (TObject*)" << cvarname << ") );\n";
+    if (!fIsConstructor) {
+      // If we're not a constructor, we probably don't own the object
+      s << indent << "if (" << outputvarstr << " != &PL_sv_undef)\n"
+        << indent << "  SOOT::PreventDestruction(aTHX_ (TObject*)" << cvarname << ");\n";
+    }
+  }
+  else if (brettype == SOOT::eSTRING) {
+    s << indent << outputvarstr << " = sv_newmortal();\n"
+      << indent << "sv_setpv((SV*)" << outputvarstr << "), " << cvarname << ");\n";
+  }
+  else if (brettype == SOOT::eINTEGER) {
+    if (rettype.substr(0,1) == "U"
+        || (rettype.length() >= 8 && rettype.substr(0, 8) == "unsigned")) {
+      s << indent << outputvarstr << " = sv_newmortal();\n"
+        << indent << "sv_setuv((SV*)" << outputvarstr << "), " << cvarname << ");\n";
+    }
+    else {
+      s << indent << outputvarstr << " = sv_newmortal();\n"
+        << indent << "sv_setiv((SV*)" << outputvarstr << "), " << cvarname << ");\n";
+    }
+  }
+  else if (brettype == SOOT::eFLOAT) {
+    s << indent << outputvarstr << " = sv_newmortal();\n"
+      << indent << "sv_setnv((SV*)" << outputvarstr << "), " << cvarname << ");\n";
+  }
+  else {
+    cout << "WEEEH UNHANDLED TYPE IN GetOutputTypemapStringFor()!" << endl;
+    s << "WEEEH UNHANDLED TYPE IN GetOutputTypemapStringFor()!" << endl;
   }
 
   return s.str();
@@ -98,6 +216,14 @@ SOOTMethod::GenerateUnambiguousXSUB()
   ostringstream preInit;
   ostringstream ppCode;
 
+  bool returnsReference = false;
+  string effectiveReturnType = fReturnType;
+  size_t pos;
+  if (-1 != (pos = effectiveReturnType.rfind('&', 0))) {
+    effectiveReturnType.replace(pos, 1, "*", 1);
+    returnsReference = true;
+  }
+
   string indent(4, ' ');
 
   const unsigned int nArgsFixed = GetNRequiredArgs();
@@ -136,7 +262,8 @@ SOOTMethod::GenerateUnambiguousXSUB()
   }
 
   // declare retval
-  preInit << "    " << fReturnType << " retval;\n";
+  if (fReturnType != string("void"))
+    preInit << "    " << effectiveReturnType << " retval;\n";
 
   // Generate input type mapping
   // invocant first
@@ -180,7 +307,12 @@ SOOTMethod::GenerateUnambiguousXSUB()
   {
     string indent(8, ' ');
     // FIXME needs if()else for static/instance
-    ppCode << indent << "retval = arg0->" << fName << "(" << S_MakeArgumentNameList(argNames) << ");\n";
+    ppCode << indent;
+    if (fReturnType != string("void"))
+      ppCode << "retval = ";
+    if (returnsReference)
+      ppCode << "&";
+    ppCode << "arg0->" << fName << "(" << S_MakeArgumentNameList(argNames) << ");\n";
   }
 
   // FIXME free memory on exception?
@@ -194,7 +326,15 @@ SOOTMethod::GenerateUnambiguousXSUB()
 
   // FIXME free memory?
 
+  if (fReturnType == string("void")) {
+    ppCode << indent << "XS_RETURN_EMPTY;\n";
+  }
+  else {
+    ppCode << GetOutputTypemapStringFor(fReturnType, "retval", "ST(0)", indent, returnsReference)
+           << indent << "XS_RETURN(1);\n";
+  }
 
+  // FIXME free memory?
 
   // Assemble sections
   s << "  PREINIT:\n" << preInit.str();
