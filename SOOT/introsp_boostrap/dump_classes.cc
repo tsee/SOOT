@@ -24,6 +24,8 @@
 #include <SOOTMethod.h>
 #include <SOOTClass.h>
 
+#include <SOOTTypesEarly.h>
+
 const unsigned int SOOTbootstrapDebug =
 #ifdef DEBUG3
 3;
@@ -76,23 +78,6 @@ void
 SOOTMethodDisambiguator::Dump()
   const
 {
-  // FIXME inlined to avoid having to compile ../src
-  const char* basicTypeStrings[13] = {
-    "UNDEF",
-    "INTEGER",
-    "FLOAT",
-    "STRING",
-    "INTEGER_ARRAY",
-    "FLOAT_ARRAY",
-    "STRING_ARRAY",
-    "INVALID_ARRAY",
-    "HASH",
-    "CODE",
-    "REF",
-    "TOBJECT",
-    "INVALID",
-  };
-
   cout << "  Class:  " << fClass->fName << " Method: " << fMethodName << endl;
   for (unsigned int i = 0; i < fMethodsByNArgsActual.size(); ++i) {
     const vector<SOOTMethod*>& methods = fMethodsByNArgsActual[i];
@@ -119,7 +104,7 @@ SOOTMethodDisambiguator::Dump()
         set<SOOT::BasicType>::iterator it;
         cout << " [";
         for (it = btypes.begin(); it != btypes.end(); it++) {
-          cout << basicTypeStrings[*it];// FIXME
+          cout << SOOT::gBasicTypeStrings[*it];
           cout << "|";
         }
         cout << "]\n";
