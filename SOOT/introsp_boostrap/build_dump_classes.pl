@@ -53,8 +53,14 @@ my $builder = ExtUtils::CBuilder->new;
 my @objects = map $builder->compile(
     source => $_,
     'C++' => 1,
-    extra_compiler_flags => $opts{extra_compiler_flags} . ' -I. -I.. -I../src',
+    extra_compiler_flags => $opts{extra_compiler_flags} . ' -I. -I.. -I../src_early -I../src',
   ), @ccfiles;
+
+if (not -r "../src_early/SOOTTypesEarly.o") {
+  die "Need objects from src_early subfolder!";
+}
+
+push @objects, glob('../src_early/*.o');
 
 $builder->link_executable(
   objects => \@objects,
