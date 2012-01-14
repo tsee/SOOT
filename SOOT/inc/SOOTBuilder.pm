@@ -66,6 +66,7 @@ sub ACTION_build_dictionaries {
     and die "Failed to run '@cmd'. Exit value: " . ($?>>8);
 }
 
+# The object files that will be included by the introspection-based bootstrap
 sub ACTION_build_early_objects {
   my $self = shift;
   $self->depends_on($_) for qw(gen_constants gen_xsp_include build_dictionaries merge_typemaps);
@@ -77,6 +78,7 @@ sub ACTION_build_early_objects {
   }
 }
 
+# All object files not built by build_early_objects
 sub ACTION_build_objects {
   my $self = shift;
   $self->depends_on($_) for qw(build_early_objects);
@@ -91,7 +93,10 @@ sub ACTION_build_objects {
 sub ACTION_build_soot {
   my $self = shift;
 
-  $self->depends_on('build_early_objects');
+  #$self->depends_on('build_early_objects');
+
+  # TODO build/generate/compile the XS from introsp_bootstrap here
+
   $self->depends_on('build_objects');
 
   #my $p = $self->{properties};
