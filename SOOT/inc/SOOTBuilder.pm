@@ -66,12 +66,33 @@ sub ACTION_build_dictionaries {
     and die "Failed to run '@cmd'. Exit value: " . ($?>>8);
 }
 
+sub ACTION_build_early_objects {
+  my $self = shift;
+  $self->depends_on($_) for qw(gen_constants gen_xsp_include build_dictionaries merge_typemaps);
+
+  my $objects = $self->{SOOT_Objects} ||= [];
+  my $cfiles_early = $self->_find_file_by_type('cc', 'src_early');
+  foreach my $cfile (keys %$cfiles_early) {
+    push(@$objects, $self->compile_c($cfile));
+  }
+}
+
+sub ACTION_build_objects {
+  my $self = shift;
+  $self->depends_on($_) for qw(build_early_objects);
+
+  my $objects = $self->{SOOT_Objects} ||= [];
+  my $cfiles = $self->_find_file_by_type('cc', 'src');
+  foreach my $cfile (keys %$cfiles) {
+    push(@$objects, $self->compile_c($cfile));
+  }
+}
+
 sub ACTION_build_soot {
   my $self = shift;
-  $self->depends_on('gen_constants');
-  $self->depends_on('gen_xsp_include');
-  $self->depends_on('build_dictionaries');
-  $self->depends_on('merge_typemaps');
+
+  $self->depends_on('build_early_objects');
+  $self->depends_on('build_objects');
 
   #my $p = $self->{properties};
   #local $p->{extra_compiler_flags} = [
@@ -80,12 +101,6 @@ sub ACTION_build_soot {
   #  '-Itools/puic/perl',
   #];
 
-
-  my @objects;
-  my $files = $self->_find_file_by_type('cc', 'src');
-  foreach my $file (keys %$files) {
-    push(@objects, $self->compile_c($file));
-  }
 
   #my $script_dir = File::Spec->catdir($self->blib, 'script');
   #File::Path::mkpath( $script_dir );

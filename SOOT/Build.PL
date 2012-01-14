@@ -32,6 +32,7 @@ push(@flags,
   '-Wall',
 #  '-xc++',
   '-I.',
+  '-Isrc_early',
   '-Isrc',
   ($guess->is_gcc ? ('-Wno-unused') : ()),
 );
@@ -103,7 +104,7 @@ my %build_args = (
   #create_makefile_pl    => 'passthrough',
 
   # Location of our special C and XS source files
-  c_source => ['src', 'RunTimeXS'],
+  c_source => ['src_early', 'src', 'RunTimeXS'],
   xs_files => {
     'SOOT.xs' => 'lib/SOOT.xs'
   },
@@ -149,7 +150,7 @@ my %build_args = (
     },
     no_index => {
       directory => [
-        qw(buildtools src t ROOT_XSP xt XS inc examples)
+        qw(buildtools src_early src introsp_boostrap t ROOT_XSP xt XS inc examples)
       ],
     },
   },

@@ -11,6 +11,9 @@
 #include <Class.h>
 #include <TVirtualPad.h>
 
+// This has more SOOTTypes related stuff that doesn't need perl
+#include <SOOTTypesEarly.h>
+
 #include <vector>
 #include <string>
 
@@ -28,33 +31,12 @@ extern "C" {
 #endif
 
 namespace SOOT {
-  /** The various types of variables that matter to the ROOT
-   * prototype guessing.
-   */
-  enum BasicType {
-    eUNDEF = 0,
-    eINTEGER,
-    eFLOAT,
-    eSTRING,
-    eARRAY_INTEGER,
-    eARRAY_FLOAT,
-    eARRAY_STRING,
-    eARRAY_INVALID,
-    eHASH,
-    eCODE,
-    eREF,
-    eTOBJECT,
-    eINVALID,
-  };
-  extern const char* gBasicTypeStrings[13];
 
   /// Is the given SV a SOOT object?
   bool IsTObject(pTHX_ SV* sv);
 
   /// Determine and return the BasicType of the given parameter
   BasicType GuessType(pTHX_ SV* const sv);
-  /// Determine and return the BasicType of the given c-type
-  BasicType GuessTypeFromProto(const char* proto);
 
   /// _GuessCompositeType assumes it's known to be an RV-to-AV (this is called by GuessType)
   BasicType _GuessCompositeType(pTHX_ SV* const sv);
@@ -72,8 +54,6 @@ namespace SOOT {
    */
   unsigned int CProtoAndTypesFromAV(pTHX_ AV* av, std::vector<BasicType>& avtypes,
                                     std::vector<std::string>& cproto, const unsigned int nSkip = 0);
-  /// Given a vector of strings, concatenates them to a single C string. Skips the first one by default.
-  char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip = 1);
 
   /// Map any int* types to float*'s
   bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
