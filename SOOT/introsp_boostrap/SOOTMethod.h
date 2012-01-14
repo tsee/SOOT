@@ -36,7 +36,12 @@ namespace SOOTbootstrap {
     // parameters
     // TMethod* fROOTMethod ?
 
-    std::string GenerateUnambiguousXSUB() const;
+    std::string GenerateUnambiguousXSUB();
+    std::string FullyQualifiedPerlName() const;
+    std::string GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarname,
+                                         const std::string& inputvarstr, const std::string& indent) const;
+    std::string GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarname,
+                                         const unsigned int stackargno, const std::string& indent) const;
   };
 } // end namespace SOOTbootstrap
 

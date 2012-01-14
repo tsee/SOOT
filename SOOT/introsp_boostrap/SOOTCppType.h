@@ -31,7 +31,7 @@ namespace SOOTbootstrap {
     std::string ToString() const;
     std::string ToStringForTypemap() const;
 
-  private:
+    // Will (re-)generate fSOOTTypes
     void IntuitSOOTBasicTypes();
   };
 

@@ -12,9 +12,14 @@ use constant MAXDEBUGLEVEL => 3;
 GetOptions(
   'debug|d:i' => \(my $debuglevel),
   'gdb' => \(my $gdb),
+  'valgrind' => \(my $valgrind),
 );
 $debuglevel = 1 if defined $debuglevel and $debuglevel < 1;
 $debuglevel = 3 if defined $debuglevel and $debuglevel > 3;
+
+if ($valgrind && $gdb) {
+  die "Can't use both valgrind and gdb";
+}
 
 my $root = Alien::ROOT->new;
 $root->installed or die "No ROOT found...";
@@ -60,6 +65,9 @@ my @args = (File::Spec->catdir(cwd(), 'dump_classes'), @libs);
 if ($gdb) {
   #splice @args, 1, 0, '--args';
   unshift @args, 'gdb', '--args';
+}
+elsif ($valgrind) {
+  unshift @args, 'valgrind', '-v', '--';
 }
 
 print "Running: @args\n";

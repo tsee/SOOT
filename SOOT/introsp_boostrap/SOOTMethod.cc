@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <cmath>
 
 #include <SOOTClass.h>
@@ -13,39 +14,60 @@
 using namespace std;
 using namespace SOOTbootstrap;
 
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-bool
-SOOTMethod::cmp(const SOOTMethod& l, const SOOTMethod& r)
+std::string
+SOOTMethod::FullyQualifiedPerlName()
+  const
 {
-  // returns true if l is less than r, that is, return true if
-  // l is preferred over r
+  return fClass->PerlName() + "::" + fName;
+}
 
-  // Note that we're always sorting methods that are valid for a
-  // given number of input parameters.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+std::string
+SOOTMethod::GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarname,
+                                     const std::string& inputvarstr, const std::string& indent)
+  const
+{
+  ostringstream s;
 
-  // The method with the highest number of required parameters is
-  // preferred. FIXME think about this some more
-  if (l.GetNRequiredArgs() > r.GetNRequiredArgs())
-    return true;
+  if (type.fSOOTTypes.count(SOOT::eTOBJECT) > 0) {
+    s << indent << "if( sv_isobject(" << inputvarstr << ") && (SvTYPE(SvRV(" << inputvarstr << ")) == SVt_PVMG) )\n"
+      << indent << "  " << cvarname << " = (" << type.ToStringForTypemap() << ")SvIV((SV*)SvRV( " << inputvarstr << " ));\n"
+      << indent << "else {\n"
+      << indent << "  warn( \"" << FullyQualifiedPerlName() << "() -- " << cvarname << " is not a blessed SV reference\" );\n"
+      << indent << "  XSRETURN_UNDEF;\n"
+      << indent << "}\n";
+  }
+  else {
+    cout << "WEEEH UNHANDLED TYPE IN GetInputTypemapStringFor()!" << endl;
+    s << "WEEEH UNHANDLED TYPE IN GetInputTypemapStringFor()!" << endl;
+  }
 
-  // Then, we prefer the method that has the least no. of total
-  // parameters. FIXME think about this some more
-  if (l.fNArgsTotal < r.fNArgsTotal)
-    return true;
+  return s.str();
+}
 
-  // FIXME this will probably go away again, it's a dead-end
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+std::string
+SOOTMethod::GetInputTypemapStringFor(SOOTCppType& type, const std::string& cvarname,
+                                     const unsigned int stackargno, const std::string& indent)
+  const
+{
+  ostringstream s;
+  s << "ST(" << stackargno << ")";
+  return GetInputTypemapStringFor(type, cvarname, s.str(), indent);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 static string
-S_MakeArgumentNameList(vector< pair< SOOTMethodArg, string > >& args, bool withType = false)
+S_MakeArgumentNameList(vector< pair< SOOTMethodArg*, string > >& args, bool withType = false)
 {
   ostringstream s;
   const unsigned int n = args.size();
   for (unsigned int i = 0; i < n; ++i) {
-    pair< SOOTMethodArg, string>& arg = args[i];
+    pair< SOOTMethodArg*, string>& arg = args[i];
     if (withType)
-      s << arg.first.fType.ToStringForTypemap() << " ";
+      s << arg.first->fType.ToStringForTypemap() << " ";
     s << arg.second;
     if (i < n-1)
       s << ", ";
@@ -56,10 +78,9 @@ S_MakeArgumentNameList(vector< pair< SOOTMethodArg, string > >& args, bool withT
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 std::string
 SOOTMethod::GenerateUnambiguousXSUB()
-  const
 {
   string className = fClass->fName;
-  string fullFuncName = fClass->PerlName() + "::" + fName;
+  const string fullFuncName = FullyQualifiedPerlName();
 
   ostringstream s;
   s << "void\n" << fullFuncName << "(invocant, ...)\n";
@@ -74,11 +95,11 @@ SOOTMethod::GenerateUnambiguousXSUB()
   ostringstream ppCode;
 
   const unsigned int nArgsFixed = GetNRequiredArgs();
-  vector< pair< SOOTMethodArg, string > > argNames;
+  vector< pair< SOOTMethodArg*, string > > argNames;
   for (unsigned int iarg = 0; iarg < fNArgsTotal; ++iarg) {
     ostringstream argNS;
     argNS << "arg" << iarg+1;
-    argNames.push_back( pair<SOOTMethodArg, string>(fMethodArgs[iarg], argNS.str()) );
+    argNames.push_back( pair<SOOTMethodArg*, string>(&(fMethodArgs[iarg]), argNS.str()) );
   }
 
   // generate code to check the number of parameters
@@ -95,12 +116,50 @@ SOOTMethod::GenerateUnambiguousXSUB()
 
   // Generate parameter declarations
   for (unsigned int ip = 0; ip < fNArgsTotal; ++ip) {
-    pair<SOOTMethodArg, string>& argN = argNames[ip];
-    preInit << "    " << argN.first.fType.ToStringForTypemap() << " " << argN.second;
-    if (argN.first.fDefaultValue != "")
-      preInit << " = " << argN.first.fDefaultValue;
+    pair<SOOTMethodArg*, string>& argN = argNames[ip];
+    preInit << "    " << argN.first->fType.ToStringForTypemap() << " " << argN.second;
+    if (argN.first->fDefaultValue != "")
+      preInit << " = " << argN.first->fDefaultValue;
     preInit << ";\n";
   }
+
+  // Generate input type mapping
+  // invocant first
+  string indent = string(6, ' ');
+  SOOTCppType classType = fClass->MakeType();
+  ppCode << GetInputTypemapStringFor( classType, string("arg0"), (unsigned int)0, indent );
+  // ordinary req parameters later
+  for (unsigned int ip = 0; ip < nArgsFixed; ++ip) {
+    pair<SOOTMethodArg*, string>& argN = argNames[ip];
+
+    ppCode << GetInputTypemapStringFor( argN.first->fType, argN.second, ip+1, indent );
+  }
+
+  // optional params
+  if (fNArgsTotal != 0) {
+
+    if (fNArgsOpt != 0)
+      ppCode << indent << "switch (items) {\n";
+
+    string subindent = string(10, ' ');
+    for (unsigned int ip = fNArgsTotal; ip > nArgsFixed; --ip) {
+      pair<SOOTMethodArg*, string>& argN = argNames[ip-1];
+
+      ppCode << indent << "case " << ip+1 << ": {\n" // +1 for the invocant
+             << GetInputTypemapStringFor( argN.first->fType, argN.second, ip, subindent )
+             << indent << "  }\n";
+    }
+
+    if (fNArgsOpt != 0) {
+      ppCode << indent << "case " << nArgsFixed+1 << ":\n"
+             << indent << "  break;\n"
+             << indent << "default:\n"
+             << indent << "  croak(\"This should never happen! SOOT bug!\");\n"
+             << indent << "  break;\n"
+             << indent << "}\n";
+    }
+  } // end if any parameters
+
 
   // Assemble sections
   s << "  PREINIT:\n" << preInit.str();

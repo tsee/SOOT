@@ -6,6 +6,7 @@
 #include <string>
 
 #include <SOOTMethod.h>
+#include <SOOTCppType.h>
 
 namespace SOOTbootstrap {
   class SOOTClass {
@@ -18,6 +19,8 @@ namespace SOOTbootstrap {
     // list<SOOTClass*> fInheritingClasses;
     std::map<std::string, std::vector<SOOTMethod> > fMethods;
     // TClass* fROOTClass ?
+
+    SOOTCppType MakeType(const bool isPtr = true, const bool isConst = true) const;
   };
 } // end namespace SOOTbootstrap
 

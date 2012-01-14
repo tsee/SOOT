@@ -23,7 +23,6 @@ namespace SOOTbootstrap {
   static TPRegexp gStringType("^(?:char|U?(?:Byte|Char)_t|Option_t)$"); // FIXME TString?
   static TPRegexp gROOTIntegerType("^(?:Bool_t|U?(?:Short|Int|Long64|Long|Char|Seek|Byte|Font|Style|Marker|Width|Color|SCoord|SSiz|Version)_t)$");
   static TPRegexp gFloatType("^(?:double|float|(?:(?:Float|Double)(?:16|32|64)?|Real|Axis|Stat|Coord|Angle|Size)_t)$"); // FIXME Size_t a float, really? According to Rtypes.h, yes.
-
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
