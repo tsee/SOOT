@@ -143,7 +143,7 @@ SOOTMethod::GetOutputTypemapStringFor(const std::string& rettype, const std::str
 {
   ostringstream s;
 
-  SOOT::BasicType brettype = SOOT::GuessTypeFromProto(rettype.c_str());
+  SOOT::BasicType brettype = SOOT::GuessTypeFromProtoForCodeGen(rettype);
   if (brettype == SOOT::eTOBJECT) {
     s << indent << outputvarstr << " = sv_2mortal( SOOT::RegisterObject(aTHX_ (TObject*)" << cvarname << ") );\n";
     if (!fIsConstructor) {
