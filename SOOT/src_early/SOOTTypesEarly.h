@@ -31,6 +31,8 @@ namespace SOOT {
   /// Determine and return the BasicType of the given c-type
   BasicType GuessTypeFromProto(const char* proto);
 
+  BasicType GuessTypeFromProtoForCodeGen(const std::string& proto);
+
   /// Given a vector of strings, concatenates them to a single C string. Skips the first one by default.
   char* JoinCProto(const std::vector<std::string>& cproto, const unsigned int nSkip = 1);
 } // end namespace SOOT
