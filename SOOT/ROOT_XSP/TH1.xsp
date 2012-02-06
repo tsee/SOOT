@@ -9,12 +9,12 @@ Int_t
 Fill(self, ...)
     TH1* self
   ALIAS:
-    TH1C::Fill = 1;
-    TH1D::Fill = 1;
-    TH1F::Fill = 1;
-    TH1I::Fill = 1;
-    TH1K::Fill = 1;
-    TH1S::Fill = 1;
+    TH1C::Fill = 1
+    TH1D::Fill = 2
+    TH1F::Fill = 3
+    TH1I::Fill = 4
+    TH1K::Fill = 5
+    TH1S::Fill = 6
   CODE:
     /* On the aliases. Yes. I know. *sigh* */
     /* This is all done for optimization only */
