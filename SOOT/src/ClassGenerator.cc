@@ -17,6 +17,11 @@ namespace SOOT {
   GenerateClassStubs(pTHX)
   {
     vector<const char*> classes;
+    gROOT->LoadClass("TTree", kTRUE);
+    gROOT->LoadClass("TMinuit", kTRUE);
+    gROOT->LoadClass("TH1D", kTRUE);
+    gROOT->LoadClass("TMatrix", kTRUE);
+    gROOT->LoadClass("TSpectrumTransform", kTRUE);
 
     ClassIterator iter;
     const char* className;
