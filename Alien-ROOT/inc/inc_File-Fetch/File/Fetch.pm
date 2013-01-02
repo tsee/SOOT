@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.24';
+$VERSION        = '0.36';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -36,8 +36,8 @@ $WARN           = 1;
 
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
-    http    => [ qw|lwp wget curl lftp lynx iosock| ],
-    ftp     => [ qw|lwp netftp wget curl lftp ncftp ftp| ],
+    http    => [ qw|lwp httptiny wget curl lftp fetch httplite lynx iosock| ],
+    ftp     => [ qw|lwp netftp wget curl lftp fetch ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ]
 };
@@ -50,11 +50,11 @@ local $Module::Load::Conditional::VERBOSE   = 0;
 
 ### see what OS we are on, important for file:// uris ###
 use constant ON_WIN     => ($^O eq 'MSWin32');
-use constant ON_VMS     => ($^O eq 'VMS');                                
+use constant ON_VMS     => ($^O eq 'VMS');
 use constant ON_UNIX    => (!ON_WIN);
 use constant HAS_VOL    => (ON_WIN);
 use constant HAS_SHARE  => (ON_WIN);
-
+use constant HAS_FETCH  => ( $^O =~ m!^(freebsd|netbsd|dragonfly)$! );
 
 =pod
 
@@ -107,7 +107,7 @@ The scheme from the uri (like 'file', 'http', etc)
 
 =item $ff->host
 
-The hostname in the uri.  Will be empty if host was originally 
+The hostname in the uri.  Will be empty if host was originally
 'localhost' for a 'file://' url.
 
 =item $ff->vol
@@ -117,8 +117,8 @@ of a file:// is considered to the be volume specification for the file.
 Thus on Win32 this routine returns the volume, on other operating
 systems this returns nothing.
 
-On Windows this value may be empty if the uri is to a network share, in 
-which case the 'share' property will be defined. Additionally, volume 
+On Windows this value may be empty if the uri is to a network share, in
+which case the 'share' property will be defined. Additionally, volume
 specifications that use '|' as ':' will be converted on read to use ':'.
 
 On VMS, which has a volume concept, this field will be empty because VMS
@@ -127,7 +127,7 @@ information is transparently included.
 
 =item $ff->share
 
-On systems with the concept of a network share (currently only Windows) returns 
+On systems with the concept of a network share (currently only Windows) returns
 the sharename from a file://// url.  On other operating systems returns empty.
 
 =item $ff->path
@@ -137,7 +137,14 @@ The path from the uri, will be at least a single '/'.
 =item $ff->file
 
 The name of the remote file. For the local file name, the
-result of $ff->output_file will be used. 
+result of $ff->output_file will be used.
+
+=item $ff->file_default
+
+The name of the default local file, that $ff->output_file falls back to if
+it would otherwise return no filename. For example when fetching a URI like
+http://www.abc.net.au/ the contents retrieved may be from a remote file called
+'index.html'. The default value of this attribute is literally 'file_default'.
 
 =cut
 
@@ -156,10 +163,11 @@ result of $ff->output_file will be used.
         uri             => { required => 1 },
         vol             => { default => '' }, # windows for file:// uris
         share           => { default => '' }, # windows for file:// uris
+        file_default    => { default => 'file_default' },
         _error_msg      => { no_override => 1 },
         _error_msg_long => { no_override => 1 },
     };
-    
+
     for my $method ( keys %$Tmpl ) {
         no strict 'refs';
         *$method = sub {
@@ -168,28 +176,28 @@ result of $ff->output_file will be used.
                         return $self->{$method};
                     }
     }
-    
+
     sub _create {
         my $class = shift;
         my %hash  = @_;
-        
+
         my $args = check( $Tmpl, \%hash ) or return;
-        
+
         bless $args, $class;
-    
+
         if( lc($args->scheme) ne 'file' and not $args->host ) {
             return $class->_error(loc(
                 "Hostname required when fetching from '%1'",$args->scheme));
         }
-        
-        for (qw[path file]) {
+
+        for (qw[path]) {
             unless( $args->$_() ) { # 5.5.x needs the ()
                 return $class->_error(loc("No '%1' specified",$_));
             }
         }
-        
+
         return $args;
-    }    
+    }
 }
 
 =item $ff->output_file
@@ -199,7 +207,7 @@ but any query parameters are stripped off. For example:
 
     http://example.com/index.html?x=y
 
-would make the output file be C<index.html> rather than 
+would make the output file be C<index.html> rather than
 C<index.html?x=y>.
 
 =back
@@ -209,47 +217,49 @@ C<index.html?x=y>.
 sub output_file {
     my $self = shift;
     my $file = $self->file;
-    
+
     $file =~ s/\?.*$//g;
-    
+
+    $file ||= $self->file_default;
+
     return $file;
 }
 
 ### XXX do this or just point to URI::Escape?
 # =head2 $esc_uri = $ff->escaped_uri
-# 
+#
 # =cut
-# 
+#
 # ### most of this is stolen straight from URI::escape
 # {   ### Build a char->hex map
 #     my %escapes = map { chr($_) => sprintf("%%%02X", $_) } 0..255;
-# 
+#
 #     sub escaped_uri {
 #         my $self = shift;
 #         my $uri  = $self->uri;
-# 
+#
 #         ### Default unsafe characters.  RFC 2732 ^(uric - reserved)
 #         $uri =~ s/([^A-Za-z0-9\-_.!~*'()])/
 #                     $escapes{$1} || $self->_fail_hi($1)/ge;
-# 
+#
 #         return $uri;
 #     }
-# 
+#
 #     sub _fail_hi {
 #         my $self = shift;
 #         my $char = shift;
-#         
+#
 #         $self->_error(loc(
-#             "Can't escape '%1', try using the '%2' module instead", 
+#             "Can't escape '%1', try using the '%2' module instead",
 #             sprintf("\\x{%04X}", ord($char)), 'URI::Escape'
-#         ));            
+#         ));
 #     }
-# 
+#
 #     sub output_file {
-#     
+#
 #     }
-#     
-#     
+#
+#
 # }
 
 =head1 METHODS
@@ -267,15 +277,18 @@ sub new {
     my $class = shift;
     my %hash  = @_;
 
-    my ($uri);
+    my ($uri, $file_default);
     my $tmpl = {
-        uri => { required => 1, store => \$uri },
+        uri          => { required => 1, store => \$uri },
+        file_default => { required => 0, store => \$file_default },
     };
 
     check( $tmpl, \%hash ) or return;
 
     ### parse the uri to usable parts ###
     my $href    = $class->_parse_uri( $uri ) or return;
+
+    $href->{file_default} = $file_default if $file_default;
 
     ### make it into a FFI object ###
     my $ff      = $class->_create( %$href ) or return;
@@ -300,22 +313,22 @@ sub new {
 ###
 ### In the case of file:// urls there maybe be additional fields
 ###
-### For systems with volume specifications such as Win32 there will be 
+### For systems with volume specifications such as Win32 there will be
 ### a volume specifier provided in the 'vol' field.
 ###
 ###   'vol' => 'volumename'
 ###
 ### For windows file shares there may be a 'share' key specified
 ###
-###   'share' => 'sharename' 
+###   'share' => 'sharename'
 ###
-### Note that the rules of what a file:// url means vary by the operating system 
+### Note that the rules of what a file:// url means vary by the operating system
 ### of the host being addressed. Thus file:///d|/foo/bar.txt means the obvious
-### 'D:\foo\bar.txt' on windows, but on unix it means '/d|/foo/bar.txt' and 
+### 'D:\foo\bar.txt' on windows, but on unix it means '/d|/foo/bar.txt' and
 ### not '/foo/bar.txt'
 ###
-### Similarly if the host interpreting the url is VMS then 
-### file:///disk$user/my/notes/note12345.txt' means 
+### Similarly if the host interpreting the url is VMS then
+### file:///disk$user/my/notes/note12345.txt' means
 ### 'DISK$USER:[MY.NOTES]NOTE123456.TXT' but will be returned the same as
 ### if it is unix where it means /disk$user/my/notes/note12345.txt'.
 ### Except for some cases in the File::Spec methods, Perl on VMS will generally
@@ -341,7 +354,7 @@ sub _parse_uri {
     ### And wikipedia for more on windows file:// urls
     ### http://en.wikipedia.org/wiki/File://
     if( $href->{scheme} eq 'file' ) {
-        
+
         my @parts = split '/',$uri;
 
         ### file://hostname/...
@@ -350,36 +363,36 @@ sub _parse_uri {
         $href->{host} = $parts[0] || '';
 
         ### index in @parts where the path components begin;
-        my $index = 1;  
+        my $index = 1;
 
-        ### file:////hostname/sharename/blah.txt        
+        ### file:////hostname/sharename/blah.txt
         if ( HAS_SHARE and not length $parts[0] and not length $parts[1] ) {
-            
+
             $href->{host}   = $parts[2] || '';  # avoid warnings
-            $href->{share}  = $parts[3] || '';  # avoid warnings        
+            $href->{share}  = $parts[3] || '';  # avoid warnings
 
             $index          = 4         # index after the share
 
         ### file:///D|/blah.txt
         ### file:///D:/blah.txt
         } elsif (HAS_VOL) {
-        
+
             ### this code comes from dmq's patch, but:
             ### XXX if volume is empty, wouldn't that be an error? --kane
-            ### if so, our file://localhost test needs to be fixed as wel            
+            ### if so, our file://localhost test needs to be fixed as wel
             $href->{vol}    = $parts[1] || '';
 
             ### correct D| style colume descriptors
             $href->{vol}    =~ s/\A([A-Z])\|\z/$1:/i if ON_WIN;
 
             $index          = 2;        # index after the volume
-        } 
+        }
 
         ### rebuild the path from the leftover parts;
         $href->{path} = join '/', '', splice( @parts, $index, $#parts );
 
     } else {
-        ### using anything but qw() in hash slices may produce warnings 
+        ### using anything but qw() in hash slices may produce warnings
         ### in older perls :-(
         @{$href}{ qw(host path) } = $uri =~ m|([^/]*)(/.*)$|s;
     }
@@ -390,7 +403,7 @@ sub _parse_uri {
         $href->{file} = $parts[2];
     }
 
-    ### host will be empty if the target was 'localhost' and the 
+    ### host will be empty if the target was 'localhost' and the
     ### scheme was 'file'
     $href->{host} = '' if   ($href->{host}      eq 'localhost') and
                             ($href->{scheme}    eq 'file');
@@ -402,7 +415,7 @@ sub _parse_uri {
 
 Fetches the file you requested and returns the full path to the file.
 
-By default it writes to C<cwd()>, but you can override that by specifying 
+By default it writes to C<cwd()>, but you can override that by specifying
 the C<to> argument:
 
     ### file fetch to /tmp, full path to the file in $where
@@ -443,7 +456,7 @@ sub fetch {
         ### create the path if it doesn't exist yet ###
         unless( -d $to ) {
             eval { mkpath( $to ) };
-    
+
             return $self->_error(loc("Could not create path '%1'",$to)) if $@;
         }
     }
@@ -453,9 +466,9 @@ sub fetch {
 
     ### we dont use catfile on win32 because if we are using a cygwin tool
     ### under cmd.exe they wont understand windows style separators.
-    my $out_to = ON_WIN ? $to.'/'.$self->output_file 
+    my $out_to = ON_WIN ? $to.'/'.$self->output_file
                         : File::Spec->catfile( $to, $self->output_file );
-    
+
     for my $method ( @{ $METHODS->{$self->scheme} } ) {
         my $sub =  '_'.$method.'_fetch';
 
@@ -473,13 +486,13 @@ sub fetch {
 
         ### there's serious issues with IPC::Run and quoting of command
         ### line arguments. using quotes in the wrong place breaks things,
-        ### and in the case of say, 
+        ### and in the case of say,
         ### C:\cygwin\bin\wget.EXE --quiet --passive-ftp --output-document
         ### "index.html" "http://www.cpan.org/index.html?q=1&y=2"
         ### it doesn't matter how you quote, it always fails.
         local $IPC::Cmd::USE_IPC_RUN = 0;
-        
-        if( my $file = $self->$sub( 
+
+        if( my $file = $self->$sub(
                         to => $out_to
         )){
 
@@ -496,18 +509,18 @@ sub fetch {
 
                 ### slurp mode?
                 if( ref $target and UNIVERSAL::isa( $target, 'SCALAR' ) ) {
-                    
+
                     ### open the file
-                    open my $fh, $file or do {
+                    open my $fh, "<$file" or do {
                         $self->_error(
                             loc("Could not open '%1': %2", $file, $!));
-                        return;                            
+                        return;
                     };
-                    
+
                     ### slurp
                     $$target = do { local $/; <$fh> };
-                
-                } 
+
+                }
 
                 my $abs = File::Spec->rel2abs( $file );
                 return $abs;
@@ -584,6 +597,123 @@ sub _lwp_fetch {
     }
 }
 
+### HTTP::Tiny fetching ###
+sub _httptiny_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    my $use_list = {
+        'HTTP::Tiny'    => '0.008',
+
+    };
+
+    if( can_load(modules => $use_list) ) {
+
+        my $uri = $self->uri;
+
+        my $http = HTTP::Tiny->new( ( $TIMEOUT ? ( timeout => $TIMEOUT ) : () ) );
+
+        my $rc = $http->mirror( $uri, $to );
+
+        unless ( $rc->{success} ) {
+
+            return $self->_error(loc( "Fetch failed! HTTP response: %1 [%2]",
+                        $rc->{status}, $rc->{reason} ) );
+
+        }
+
+        return $to;
+
+    }
+    else {
+        $METHOD_FAIL->{'httptiny'} = 1;
+        return;
+    }
+}
+
+### HTTP::Lite fetching ###
+sub _httplite_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    ### modules required to download with lwp ###
+    my $use_list = {
+        'HTTP::Lite'    => '2.2',
+
+    };
+
+    if( can_load(modules => $use_list) ) {
+
+        my $uri = $self->uri;
+        my $retries = 0;
+
+        RETRIES: while ( $retries++ < 5 ) {
+
+          my $http = HTTP::Lite->new();
+          # Naughty naughty but there isn't any accessor/setter
+          $http->{timeout} = $TIMEOUT if $TIMEOUT;
+          $http->http11_mode(1);
+
+          my $fh = FileHandle->new;
+
+          unless ( $fh->open($to,'>') ) {
+            return $self->_error(loc(
+                 "Could not open '%1' for writing: %2",$to,$!));
+          }
+
+          $fh->autoflush(1);
+
+          binmode $fh;
+
+          my $rc = $http->request( $uri, sub { my ($self,$dref,$cbargs) = @_; local $\; print {$cbargs} $$dref }, $fh );
+
+          close $fh;
+
+          if ( $rc == 301 || $rc == 302 ) {
+              my $loc;
+              HEADERS: for ($http->headers_array) {
+                /Location: (\S+)/ and $loc = $1, last HEADERS;
+              }
+              #$loc or last; # Think we should squeal here.
+              if ($loc =~ m!^/!) {
+                $uri =~ s{^(\w+?://[^/]+)/.*$}{$1};
+                $uri .= $loc;
+              }
+              else {
+                $uri = $loc;
+              }
+              next RETRIES;
+          }
+          elsif ( $rc == 200 ) {
+              return $to;
+          }
+          else {
+            return $self->_error(loc("Fetch failed! HTTP response: %1 [%2]",
+                        $rc, $http->status_message));
+          }
+
+        } # Loop for 5 retries.
+
+        return $self->_error("Fetch failed! Gave up after 5 tries");
+
+    } else {
+        $METHOD_FAIL->{'httplite'} = 1;
+        return;
+    }
+}
+
 ### Simple IO::Socket::INET fetching ###
 sub _iosock_fetch {
     my $self = shift;
@@ -601,7 +731,7 @@ sub _iosock_fetch {
     };
 
     if( can_load(modules => $use_list) ) {
-        my $sock = IO::Socket::INET->new( 
+        my $sock = IO::Socket::INET->new(
             PeerHost => $self->host,
             ( $self->host =~ /:/ ? () : ( PeerPort => 80 ) ),
         );
@@ -618,6 +748,9 @@ sub _iosock_fetch {
             return $self->_error(loc(
                  "Could not open '%1' for writing: %2",$to,$!));
         }
+
+        $fh->autoflush(1);
+        binmode $fh;
 
         my $path = File::Spec::Unix->catfile( $self->path, $self->file );
         my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
@@ -641,7 +774,7 @@ sub _iosock_fetch {
         }
 
         # Check the "response"
-        # Strip preceeding blank lines apparently they are allowed (RFC 2616 4.1)
+        # Strip preceding blank lines apparently they are allowed (RFC 2616 4.1)
         $resp =~ s/^(\x0d?\x0a)+//;
         # Check it is an HTTP response
         unless ( $resp =~ m!^HTTP/(\d+)\.(\d+)!i ) {
@@ -654,7 +787,10 @@ sub _iosock_fetch {
             return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
         }
 
-        print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        {
+          local $\;
+          print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        }
         close $fh;
         return $to;
 
@@ -696,7 +832,7 @@ sub _netftp_fetch {
         ### set binary mode, just in case ###
         $ftp->binary;
 
-        ### create the remote path 
+        ### create the remote path
         ### remember remote paths are unix paths! [#11483]
         my $remote = File::Spec::Unix->catfile( $self->path, $self->file );
 
@@ -753,14 +889,14 @@ sub _wget_fetch {
 
         ### shell out ###
         my $captured;
-        unless(run( command => $cmd, 
-                    buffer  => \$captured, 
-                    verbose => $DEBUG  
+        unless(run( command => $cmd,
+                    buffer  => \$captured,
+                    verbose => $DEBUG
         )) {
             ### wget creates the output document always, even if the fetch
             ### fails.. so unlink it in that case
             1 while unlink $to;
-            
+
             return $self->_error(loc( "Command failed: %1", $captured || '' ));
         }
 
@@ -790,9 +926,9 @@ sub _lftp_fetch {
         my $cmd = [ $lftp, '-f' ];
 
         my $fh = File::Temp->new;
-        
+
         my $str;
-        
+
         ### if a timeout is set, add it ###
         $str .= "set net:timeout $TIMEOUT;\n" if $TIMEOUT;
 
@@ -808,7 +944,7 @@ sub _lftp_fetch {
         if( $DEBUG ) {
             my $pp_str = join ' ', split $/, $str;
             print "# lftp command: $pp_str\n";
-        }              
+        }
 
         ### write straight to the file.
         $fh->autoflush(1);
@@ -906,10 +1042,10 @@ sub _lynx_fetch {
         unless( IPC::Cmd->can_capture_buffer ) {
             $METHOD_FAIL->{'lynx'} = 1;
 
-            return $self->_error(loc( 
+            return $self->_error(loc(
                 "Can not capture buffers. Can not use '%1' to fetch files",
                 'lynx' ));
-        }            
+        }
 
         ### check if the HTTP resource exists ###
         if ($self->uri =~ /^https?:\/\//i) {
@@ -954,7 +1090,7 @@ sub _lynx_fetch {
 
         ### DO NOT quote things for IPC::Run, it breaks stuff.
         push @$cmd, $self->uri;
-        
+
         ### with IPC::Cmd > 0.41, this is fixed in teh library,
         ### and there's no need for special casing any more.
         ### DO NOT quote things for IPC::Run, it breaks stuff.
@@ -1002,7 +1138,7 @@ sub _ncftp_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### we can only set passive mode in interactive sesssions, so bail out
+    ### we can only set passive mode in interactive sessions, so bail out
     ### if $FTP_PASSIVE is set
     return if $FTP_PASSIVE;
 
@@ -1019,9 +1155,9 @@ sub _ncftp_fetch {
             ### DO NOT quote things for IPC::Run, it breaks stuff.
             $IPC::Cmd::USE_IPC_RUN
                         ? File::Spec::Unix->catdir( $self->path, $self->file )
-                        : QUOTE. File::Spec::Unix->catdir( 
+                        : QUOTE. File::Spec::Unix->catdir(
                                         $self->path, $self->file ) .QUOTE
-            
+
         ];
 
         ### shell out ###
@@ -1095,13 +1231,67 @@ sub _curl_fetch {
     }
 }
 
+### /usr/bin/fetch fetch! ###
+sub _fetch_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    ### see if we have a wget binary ###
+    if( HAS_FETCH and my $fetch = can_run('fetch') ) {
+
+        ### no verboseness, thanks ###
+        my $cmd = [ $fetch, '-q' ];
+
+        ### if a timeout is set, add it ###
+        push(@$cmd, '-T', $TIMEOUT) if $TIMEOUT;
+
+        ### run passive if specified ###
+        #push @$cmd, '-p' if $FTP_PASSIVE;
+        local $ENV{'FTP_PASSIVE_MODE'} = 1 if $FTP_PASSIVE;
+
+        ### set the output document, add the uri ###
+        push @$cmd, '-o', $to, $self->uri;
+
+        ### with IPC::Cmd > 0.41, this is fixed in teh library,
+        ### and there's no need for special casing any more.
+        ### DO NOT quote things for IPC::Run, it breaks stuff.
+        # $IPC::Cmd::USE_IPC_RUN
+        #    ? ($to, $self->uri)
+        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+
+        ### shell out ###
+        my $captured;
+        unless(run( command => $cmd,
+                    buffer  => \$captured,
+                    verbose => $DEBUG
+        )) {
+            ### wget creates the output document always, even if the fetch
+            ### fails.. so unlink it in that case
+            1 while unlink $to;
+
+            return $self->_error(loc( "Command failed: %1", $captured || '' ));
+        }
+
+        return $to;
+
+    } else {
+        $METHOD_FAIL->{'wget'} = 1;
+        return;
+    }
+}
 
 ### use File::Copy for fetching file:// urls ###
 ###
 ### See section 3.10 of RFC 1738 (http://www.faqs.org/rfcs/rfc1738.html)
 ### Also see wikipedia on file:// (http://en.wikipedia.org/wiki/File://)
 ###
-    
+
 sub _file_fetch {
     my $self = shift;
     my %hash = @_;
@@ -1112,33 +1302,33 @@ sub _file_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    
-    
+
+
     ### prefix a / on unix systems with a file uri, since it would
     ### look somewhat like this:
     ###     file:///home/kane/file
-    ### wheras windows file uris for 'c:\some\dir\file' might look like:
+    ### whereas windows file uris for 'c:\some\dir\file' might look like:
     ###     file:///C:/some/dir/file
     ###     file:///C|/some/dir/file
     ### or for a network share '\\host\share\some\dir\file':
     ###     file:////host/share/some/dir/file
-    ###    
+    ###
     ### VMS file uri's for 'DISK$USER:[MY.NOTES]NOTE123456.TXT' might look like:
     ###     file://vms.host.edu/disk$user/my/notes/note12345.txt
     ###
-    
+
     my $path    = $self->path;
     my $vol     = $self->vol;
     my $share   = $self->share;
 
     my $remote;
     if (!$share and $self->host) {
-        return $self->_error(loc( 
+        return $self->_error(loc(
             "Currently %1 cannot handle hosts in %2 urls",
             'File::Fetch', 'file://'
-        ));            
+        ));
     }
-    
+
     if( $vol ) {
         $path   = File::Spec->catdir( split /\//, $path );
         $remote = File::Spec->catpath( $vol, $path, $self->file);
@@ -1205,7 +1395,7 @@ sub _rsync_fetch {
                     verbose => $DEBUG )
         ) {
 
-            return $self->_error(loc("Command %1 failed: %2", 
+            return $self->_error(loc("Command %1 failed: %2",
                 "@$cmd" || '', $captured || ''));
         }
 
@@ -1236,10 +1426,10 @@ Pass it a true value to get the C<Carp::longmess()> output instead.
 sub _error {
     my $self    = shift;
     my $error   = shift;
-    
+
     $self->_error_msg( $error );
     $self->_error_msg_long( Carp::longmess($error) );
-    
+
     if( $WARN ) {
         carp $DEBUG ? $self->_error_msg_long : $self->_error_msg;
     }
@@ -1266,8 +1456,8 @@ Below is a mapping of what utilities will be used in what order
 for what schemes, if available:
 
     file    => LWP, lftp, file
-    http    => LWP, wget, curl, lftp, lynx, iosock
-    ftp     => LWP, Net::FTP, wget, curl, lftp, ncftp, ftp
+    http    => LWP, HTTP::Lite, wget, curl, lftp, fetch, lynx, iosock
+    ftp     => LWP, Net::FTP, wget, curl, lftp, fetch, ncftp, ftp
     rsync   => rsync
 
 If you'd like to disable the use of one or more of these utilities
@@ -1277,6 +1467,10 @@ If a utility or module isn't available, it will be marked in a cache
 (see the C<$METHOD_FAIL> variable further down), so it will not be
 tried again. The C<fetch> method will only fail when all options are
 exhausted, and it was not able to retrieve the file.
+
+The C<fetch> utility is available on FreeBSD. NetBSD and Dragonfly BSD
+may also have it from C<pkgsrc>. We only check for C<fetch> on those
+three platforms.
 
 C<iosock> is a very limited L<IO::Socket::INET> based mechanism for
 retrieving C<http> schemed urls. It doesn't follow redirects for instance.
@@ -1379,6 +1573,8 @@ Here's a quick mapping for the utilities/modules, and their names for
 the $BLACKLIST, $METHOD_FAIL and other internal functions.
 
     LWP         => lwp
+    HTTP::Lite  => httplite
+    HTTP::Tiny  => httptiny
     Net::FTP    => netftp
     wget        => wget
     lynx        => lynx
@@ -1387,6 +1583,7 @@ the $BLACKLIST, $METHOD_FAIL and other internal functions.
     curl        => curl
     rsync       => rsync
     lftp        => lftp
+    fetch       => fetch
     IO::Socket  => iosock
 
 =head1 FREQUENTLY ASKED QUESTIONS
@@ -1409,21 +1606,21 @@ which we in turn capture. If that content is a 'custom' error file
 
 Sadly, C<lynx> doesn't support any options to return a different exit
 code on non-C<200 OK> status, giving us no way to tell the difference
-between a 'successfull' fetch and a custom error page.
+between a 'successful' fetch and a custom error page.
 
-Therefor, we recommend to only use C<lynx> as a last resort. This is 
+Therefor, we recommend to only use C<lynx> as a last resort. This is
 why it is at the back of our list of methods to try as well.
 
 =head2 Files I'm trying to fetch have reserved characters or non-ASCII characters in them. What do I do?
 
-C<File::Fetch> is relatively smart about things. When trying to write 
-a file to disk, it removes the C<query parameters> (see the 
+C<File::Fetch> is relatively smart about things. When trying to write
+a file to disk, it removes the C<query parameters> (see the
 C<output_file> method for details) from the file name before creating
 it. In most cases this suffices.
 
-If you have any other characters you need to escape, please install 
+If you have any other characters you need to escape, please install
 the C<URI::Escape> module from CPAN, and pre-encode your URI before
-passing it to C<File::Fetch>. You can read about the details of URIs 
+passing it to C<File::Fetch>. You can read about the details of URIs
 and URI encoding here:
 
   http://www.faqs.org/rfcs/rfc2396.html
@@ -1448,7 +1645,7 @@ This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This library is free software; you may redistribute and/or modify it 
+This library is free software; you may redistribute and/or modify it
 under the same terms as Perl itself.
 
 
