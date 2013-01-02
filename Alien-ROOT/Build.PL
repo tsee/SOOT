@@ -13,15 +13,15 @@ use Getopt::Long qw/GetOptions/;
 Getopt::Long::Configure('pass_through', 'permute', 'no_require_order');
 
 our $USER_CONFIG = {
-  archive => 'root_v5.32.00.source.tar.gz',
-  parallel_processes => 1,
-  force_recompile => 0,
+  archive             => 'root_v5.34.03.source.tar.gz',
+  parallel_processes  => 1,
+  force_recompile     => 0,
 };
 
 GetOptions(
-  'j|parallel=i' => \($USER_CONFIG->{parallel_processes}),
-  'archive=s' => \($USER_CONFIG->{archive}),
-  'recompile' => \($USER_CONFIG->{force_recompile}),
+  'j|parallel=i'  => \($USER_CONFIG->{parallel_processes}),
+  'archive=s'     => \($USER_CONFIG->{archive}),
+  'recompile'     => \($USER_CONFIG->{force_recompile}),
 );
 
 
