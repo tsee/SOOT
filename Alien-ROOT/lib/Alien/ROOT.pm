@@ -10,7 +10,7 @@ Alien::ROOT - Utility package to install and locate CERN's ROOT library
 
 =cut
 
-our $VERSION = '5.34.3.1';
+our $VERSION = '5.34.36.1';
 $VERSION = eval $VERSION;
 
 =head1 SYNOPSIS

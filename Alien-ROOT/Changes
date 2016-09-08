@@ -1,5 +1,10 @@
 Revision history for Perl extension Alien-ROOT.
 
+5.34.36.1  Thu Sep  8 18:00 2016
+  - New ROOT 5.34 release.
+  - New code location (old Alien::ROOT modules are
+    now partially broken because releases moved).
+
 5.34.3.1  Sun Dec 30 18:00 2012
   - Use ROOT 5.34.03
   - Upgraded toolchain modules
