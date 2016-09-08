@@ -13,7 +13,7 @@ use Getopt::Long qw/GetOptions/;
 Getopt::Long::Configure('pass_through', 'permute', 'no_require_order');
 
 our $USER_CONFIG = {
-  archive             => 'root_v5.34.03.source.tar.gz',
+  archive             => 'root_v5.34.36.source.tar.gz',
   parallel_processes  => 1,
   force_recompile     => 0,
 };
@@ -70,7 +70,8 @@ my $builder = Alien::ROOT::Builder->new(
 );
 
 my $build_data = {%$USER_CONFIG};
-$build_data->{url} = 'ftp://root.cern.ch/root/' . $build_data->{archive};
+
+$build_data->{url} = 'https://root.cern.ch/download/' . $build_data->{archive};
 $build_data->{directory} = 'root'; # this is pretty retarded :(
 
 $builder->notes('build_data' => $build_data);
